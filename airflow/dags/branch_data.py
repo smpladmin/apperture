@@ -177,7 +177,7 @@ def create_dag(datasource_id: str, created_date: datetime):
         description=f"Branch daily refresh for {datasource_id}",
         schedule="0 12 * * *",
         start_date=pendulum.instance(
-            created_date - timedelta(days=100),
+            created_date - timedelta(days=BRANCH_DATA_FETCH_DAYS_OFFSET),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         params={
@@ -223,7 +223,7 @@ def create_dag(datasource_id: str, created_date: datetime):
         description=f"Branch summary data daily ingestion for {datasource_id}",
         schedule="0 12 * * *",
         start_date=pendulum.instance(
-            created_date - timedelta(days=100),
+            created_date - timedelta(days=1),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         params={
