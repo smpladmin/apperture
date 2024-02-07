@@ -59,7 +59,7 @@ class CDCService:
         snapshot_override_tables = (
             set()
             if not snapshot_override_str
-            else set(snapshot_override_str.split(","))
+            else set(map(str.strip, snapshot_override_str.split(",")))
         )
 
         for table in tables:
