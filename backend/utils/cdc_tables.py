@@ -31,6 +31,8 @@ WIOM_CDC_TABLES_WITH_TIME_COLUMN = {
     "t_wiom_lead_installation": "created_at",
     "t_customer_ticket_audit": "modified_time",
     "t_wiom_lead_audit": "modified_time",
+    "booking_logs": "added_time",
+    "task_logs": "added_time",
 }
 
 
