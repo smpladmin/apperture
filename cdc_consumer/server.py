@@ -20,8 +20,12 @@ KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").spl
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 
-def get_id_from_mac_id(mac_id: str):
-    return hash(mac_id) & ((1 << 64) - 1)
+def get_id_from_mac_id(mac_id):
+    result = 0
+    for char in mac_id:
+        result = result * 256 + ord(char)
+
+    return result & ((1 << 256) - 1)
 
 
 async def process_kafka_messages() -> None:
@@ -74,9 +78,9 @@ async def process_kafka_messages() -> None:
                 # such cases in a cleaner and sustainable way.
                 if ch_table == "t_device":
                     if after:
-                        after["id"] = get_id_from_mac_id(after.get("device_id"))
+                        after["id"] = get_id_from_mac_id(after.get("mac"))
                     elif before:
-                        before["id"] = get_id_from_mac_id(before.get("device_id"))
+                        before["id"] = get_id_from_mac_id(before.get("mac"))
 
                 if after:
                     after["is_deleted"] = 0
