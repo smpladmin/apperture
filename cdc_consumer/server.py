@@ -69,14 +69,14 @@ async def process_kafka_messages() -> None:
                 ch_table = app.cdc_integrations.cdc_buckets[record.topic]["ch_table"]
 
                 # Temporary workaround for the 't_device' table: Due to a specific issue,
-                # manually assign an ID to each record based on the 'mac' field as it was the need of the hour.
+                # manually assign an ID to each record based on the 'device_id' field as it was the need of the hour.
                 # TODO: Implement a more robust solution and introduce a flag to handle
                 # such cases in a cleaner and sustainable way.
                 if ch_table == "t_device":
                     if after:
-                        after["id"] = get_id_from_mac_id(after.get("mac"))
+                        after["id"] = get_id_from_mac_id(after.get("device_id"))
                     elif before:
-                        before["id"] = get_id_from_mac_id(before.get("mac"))
+                        before["id"] = get_id_from_mac_id(before.get("device_id"))
 
                 if after:
                     after["is_deleted"] = 0
