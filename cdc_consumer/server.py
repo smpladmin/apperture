@@ -20,6 +20,10 @@ KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").spl
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 
+def get_id_from_mac_id(mac_id: str):
+    return hash(mac_id) & ((1 << 64) - 1)
+
+
 async def process_kafka_messages() -> None:
     """Processes Kafka messages and inserts them into ClickHouse.."""
     app.cdc_integrations.get_cdc_integrations()
@@ -62,6 +66,18 @@ async def process_kafka_messages() -> None:
                 after = values["payload"].get("after")
                 before = values["payload"].get("before")
                 shard = app.cdc_integrations.cdc_buckets[record.topic]["shard"]
+                ch_table = app.cdc_integrations.cdc_buckets[record.topic]["ch_table"]
+
+                # Temporary workaround for the 't_device' table: Due to a specific issue,
+                # manually assign an ID to each record based on the 'mac' field as it was the need of the hour.
+                # TODO: Implement a more robust solution and introduce a flag to handle
+                # such cases in a cleaner and sustainable way.
+                if ch_table == "t_device":
+                    if after:
+                        after["id"] = get_id_from_mac_id(after.get("mac"))
+                    elif before:
+                        before["id"] = get_id_from_mac_id(before.get("mac"))
+
                 if after:
                     after["is_deleted"] = 0
                     after["shard"] = shard
