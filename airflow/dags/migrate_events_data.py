@@ -84,7 +84,7 @@ def save_datatframe(
 
     saver.save(
         event_data=df,
-        table_name="prod_events_dup_2",
+        table_name="prod_events",
         database_name=database_details.database_credentials.databasename,
     )
 
