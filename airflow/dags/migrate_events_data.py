@@ -126,5 +126,5 @@ def create_dag(datasource_id: str):
 # This was used for migrating data for wiom prod events from booking_logs and tasklogs
 # Any migration ahead of similar type can be refered from this
 
-datasource_id = "65b1f642f3213a617bbedf8f"
-create_dag(datasource_id=datasource_id)
+# datasource_id = "65b1f642f3213a617bbedf8f"
+# create_dag(datasource_id=datasource_id)
