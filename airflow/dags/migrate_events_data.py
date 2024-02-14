@@ -53,7 +53,7 @@ def get_app_database(
 @task
 def create_and_process_dataframe() -> pd.DataFrame:
     df = pd.read_csv(
-        "https://cdn.apperture.io/query_result_2024-02-02T13_54_54.309487Z.csv"
+        "https://cdn.apperture.io/query_result_2024-02-14T14_10_53.759469Z.csv"
     )
     df["event_name"] = df["event_name"].astype("string")
     df["added_time"] = pd.to_datetime(df["added_time"], errors="coerce")
@@ -64,6 +64,7 @@ def create_and_process_dataframe() -> pd.DataFrame:
     df["key"] = df["key"].astype("string")
     df["datasource_id"] = df["datasource_id"].astype("string")
     df["data"] = df["data"].apply(json.loads)
+    df["source_flag"] = "bulk_insert_14_Feb"
 
     return df
 
@@ -83,7 +84,7 @@ def save_datatframe(
 
     saver.save(
         event_data=df,
-        table_name="prod_events",
+        table_name="prod_events_dup_2",
         database_name=database_details.database_credentials.databasename,
     )
 
@@ -125,5 +126,5 @@ def create_dag(datasource_id: str):
 # This was used for migrating data for wiom prod events from booking_logs and tasklogs
 # Any migration ahead of similar type can be refered from this
 
-# datasource_id = "65b1f642f3213a617bbedf8f"
-# create_dag(datasource_id=datasource_id)
+datasource_id = "65b1f642f3213a617bbedf8f"
+create_dag(datasource_id=datasource_id)
