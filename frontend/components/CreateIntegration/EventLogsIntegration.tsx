@@ -413,7 +413,13 @@ const EventLogsIntegration = ({
                 navigateBack={() => router.back()}
                 handleNextClick={() => (edit ? onUpdate() : onSubmit())}
                 disabled={isButtonDisbaled}
-                nextButtonName={add ? 'Add Data Source' : 'Create Application'}
+                nextButtonName={
+                  edit
+                    ? 'Update Credentials'
+                    : add
+                    ? 'Add Data Source'
+                    : 'Create Application'
+                }
               />
             </Box>
           </Flex>
