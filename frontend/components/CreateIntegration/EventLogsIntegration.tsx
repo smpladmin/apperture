@@ -395,7 +395,7 @@ const EventLogsIntegration = ({
                     fontSize={'xs-12'}
                     lineHeight={'xs-12'}
                   >
-                    The JSON should strictly adhere to this{' '}
+                    The JSON should strictly adhere to
                     <a
                       href={SAMPLE_EVENT_CONFIG}
                       target="_blank"
