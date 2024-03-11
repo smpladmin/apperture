@@ -15,6 +15,7 @@ import mysqlLogo from '@assets/images/mysql-icon.png';
 import mssqlLogo from '@assets/images/mssql-icon.png';
 import csvLogo from '@assets/images/csvicon.png';
 import tataLogo from '@assets/images/tata.png';
+import EventLogsLogo from '@assets/images/event-logs-logo.png';
 import { useRouter } from 'next/router';
 import { GREY_500, GREY_600 } from '@theme/index';
 import {
@@ -109,6 +110,15 @@ const IconProvider = ({
       return (
         <Image style={style} src={tataLogo} alt="gaLogo" objectFit="cover" />
       );
+    case Provider.EVENT_LOGS:
+      return (
+        <Image
+          style={style}
+          src={EventLogsLogo}
+          alt="event_logo"
+          objectFit="cover"
+        />
+      );
     default:
       return (
         <Image
@@ -187,20 +197,12 @@ function DSList({
             <Flex
               gap={2}
               cursor={
-                [
-                  Provider.CSV,
-                  Provider.APPERTURE,
-                  Provider.EVENT_LOGS,
-                ].includes(datasource.provider)
+                [Provider.CSV, Provider.APPERTURE].includes(datasource.provider)
                   ? 'inherit'
                   : 'pointer'
               }
               onClick={() =>
-                [
-                  Provider.CSV,
-                  Provider.APPERTURE,
-                  Provider.EVENT_LOGS,
-                ].includes(datasource.provider)
+                [Provider.CSV, Provider.APPERTURE].includes(datasource.provider)
                   ? null
                   : handleEditDatasource(datasource)
               }
