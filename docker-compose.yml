@@ -79,6 +79,15 @@ services:
       - ./event_logs_consumer:/code
     depends_on:
       - kafka
+  events_config_consumer:
+    restart: on-failure
+    build:
+      context: ./events_config_consumer
+      target: dev
+    volumes:
+      - ./events_config_consumer:/code
+    depends_on:
+      - kafka
   cdc_consumer:
     restart: on-failure
     build:
@@ -125,6 +134,8 @@ services:
       - "27017-27019:27017-27019"
     volumes:
       - mongodata:/data/db
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   redis:
     image: redis:latest
     command: >
@@ -133,6 +144,8 @@ services:
       - "6379:6379"
     volumes:
       - "redisdata:/data/db"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   clickhouse:
     image: "clickhouse/clickhouse-server:23.3.1"
     container_name: clickhouse
@@ -142,6 +155,8 @@ services:
     volumes:
       - ch_data:/var/lib/clickhouse/
       - ch_logs:/var/log/clickhouse-server/
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   kafka:
     image: "bitnami/kafka:latest"
     container_name: kafka
