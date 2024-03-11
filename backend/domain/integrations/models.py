@@ -119,6 +119,11 @@ class CdcCredential(BaseModel):
         allow_population_by_field_name = True
 
 
+class EventsConfigCredential(BaseModel):
+    config: dict
+    config_file: str
+
+
 class Credential(BaseModel):
     type: CredentialType
     account_id: Optional[str]
@@ -134,6 +139,7 @@ class Credential(BaseModel):
     api_base_url: Optional[str]
     facebook_ads_credential: Optional[FacebookAdsCredential]
     tata_ivr_token: Optional[str]
+    events_config_credential: Optional[EventsConfigCredential]
 
     class Config:
         allow_population_by_field_name = True

@@ -44,3 +44,7 @@ def service_datasource_key_builder(
     prefix = FastAPICache.get_prefix()
     cache_key = f"{prefix}:{namespace}:{func.__name__}:{kwargs['args'][1]}"
     return cache_key
+
+
+async def clear_cache(cache_key):
+    await FastAPICache.clear(key=cache_key)

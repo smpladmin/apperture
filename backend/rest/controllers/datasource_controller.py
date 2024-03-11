@@ -9,6 +9,7 @@ from fastapi_cache.decorator import cache
 from cache.cache import (
     CACHE_EXPIRY_10_MINUTES,
     CACHE_EXPIRY_24_HOURS,
+    clear_cache,
     datasource_key_builder,
 )
 from data_processor_queue.service import DPQueueService
@@ -23,7 +24,7 @@ from domain.edge.models import Node, TrendType
 from domain.edge.service import EdgeService
 from domain.event_properties.service import EventPropertiesService
 from domain.events.service import EventsService
-from domain.integrations.models import Credential
+from domain.integrations.models import Credential, CredentialType
 from domain.integrations.service import IntegrationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
@@ -277,6 +278,10 @@ async def update_credentials(
 ):
     datasource = await ds_service.get_datasource(ds_id)
     await integration_service.update_credentials(datasource.integration_id, dto)
+
+    if dto.type == CredentialType.EVENT_LOGS:
+        # clear cache which is used to read config from integration credential
+        await clear_cache(cache_key=f"{ds_id}-event-config-cache")
 
     return {"success": "ok"}
 
