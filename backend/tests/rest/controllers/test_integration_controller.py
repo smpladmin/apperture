@@ -101,6 +101,7 @@ def test_add_database_integration(
             "branch_credential": None,
             "tata_ivr_token": None,
             "facebook_ads_credential": None,
+            "events_config_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
@@ -202,6 +203,7 @@ def test_add_csv_integration(
             "branch_credential": None,
             "facebook_ads_credential": None,
             "tata_ivr_token": None,
+            "events_config_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
@@ -348,6 +350,7 @@ def test_add_event_log_integration(
             "api_base_url": None,
             "facebook_ads_credential": None,
             "tata_ivr_token": None,
+            "events_config_credential": None,
         },
         "enabled": None,
         "datasource": None,

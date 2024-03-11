@@ -493,6 +493,7 @@ async def test_get_integration(
             "api_base_url": None,
             "facebook_ads_credential": None,
             "tata_ivr_token": None,
+            "events_config_credential": None,
         },
     }
     integration_service.get_integration.assert_called_with(

@@ -2631,6 +2631,7 @@ def integration_response():
             "branch_credential": None,
             "facebook_ads_credential": None,
             "tata_ivr_token": None,
+            "events_config_credential": None,
         },
         "datasource": {
             "_id": "636a1c61d715ca6baae65611",
