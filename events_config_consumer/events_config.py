@@ -1,0 +1,139 @@
+import logging
+from clickhouse.clickhouse import ClickHouse
+from pandas import DataFrame
+from fastapi_cache.decorator import cache
+
+from cache import CACHE_EXPIRY_10_MINUTES, event_config_cache
+
+from models.models import EventTablesBucket
+from apperture.backend_action import get
+
+
+clickhouse_to_pandas_type_map = {
+    "Int8": "int",
+    "Int16": "int",
+    "Int32": "int",
+    "Int64": "int",
+    "UInt8": "int",
+    "UInt16": "int",
+    "UInt32": "int",
+    "UInt64": "int",
+    "Float32": "float",
+    "Float64": "float",
+    "String": "string",
+    "DateTime": "datetime64[ns]",
+    "Array": "object",
+    "Object('json')": "object",
+    "Nullable(Int8)": "int",
+    "Nullable(Int16)": "int",
+    "Nullable(Int32)": "int",
+    "Nullable(Int64)": "int",
+    "Nullable(UInt8)": "int",
+    "Nullable(UInt16)": "int",
+    "Nullable(UInt32)": "int",
+    "Nullable(UInt64)": "int",
+    "Nullable(Float32)": "float",
+    "Nullable(Float64)": "float",
+    "Nullable(String)": "string",
+    "Nullable(DateTime)": "datetime64[ns]",
+    "Nullable(Object('json'))": "object",
+}
+
+
+class EventTablesConfig:
+    def __init__(self):
+        self.event_tables: dict[str, EventTablesBucket] = {}
+        self.topics = []
+        self.event_config = []
+        self.audit_config = []
+        self.clickhouse = ClickHouse()
+
+    @cache(expire=CACHE_EXPIRY_10_MINUTES, key_builder=event_config_cache)
+    async def get_config_for_integration(self, integration_id: str, datasource_id: str):
+        # datasource_id passed for creating key in above cache method
+        integration = get(f"/private/integrations/{integration_id}").json()
+        config_credential = integration["credentials"].get("eventsConfigCredential", {})
+        return config_credential.get("config", None)
+
+    def get_filtered_config_for_table(
+        self, table: str, event_source_destination_config
+    ):
+        filtered_config = [
+            item
+            for item in event_source_destination_config
+            if item["destination_table"] == table
+        ]
+        return filtered_config
+
+    def get_table_columns_with_type(self, table: str, database: str):
+        return self.clickhouse.get_table_columns_with_type(
+            table=table,
+            database=database,
+        )
+
+    def get_table_primary_key(self, table: str, database: str):
+        return self.clickhouse.get_table_primary_key(
+            table=table,
+            database=database,
+        )
+
+    def get_row_values(self, id: str, id_values: list, table: str, database: str):
+        return self.clickhouse.get_row_values(
+            table=table,
+            database=database,
+            id_values=id_values,
+            id=id,
+        )
+
+    def is_table_in_audit_config(self, table: str, audit_config):
+        for config in audit_config:
+            if config.get("table") == table and config.get("create_audit_table"):
+                return True
+        return False
+
+    async def get_topics_from_event_config(self):
+        event_logs_datasources = get(
+            path="/private/datasources?provider=event_logs"
+        ).json()
+
+        for datasource in event_logs_datasources:
+            config = await self.get_config_for_integration(
+                integration_id=datasource["integrationId"],
+                datasource_id=datasource["_id"],
+            )
+            if config:
+                event_source_destination_config = config[
+                    "event_source_destination_config"
+                ]
+                audit_config = config["audit_config"]
+                app = get(path=f"/private/apps/{datasource['appId']}").json()
+                for event in self.event_config:
+                    topic = (
+                        f"eventlogs_{datasource['_id']}_{event['destination_table']}"
+                    )
+                    if not topic in self.topics:
+                        self.topics.append(topic)
+                        column_type_list = self.get_table_columns_with_type(table=topic)
+                        column_to_type_map = {
+                            column: clickhouse_to_pandas_type_map[data_type]
+                            for column, data_type in column_type_list
+                        }
+                        cd_db = app["clickhouseCredential"]["databasename"]
+                        self.event_tables[topic] = EventTablesBucket(
+                            data=DataFrame(),
+                            ch_db=app["clickhouseCredential"]["databasename"],
+                            ch_table=event["destination_table"],
+                            ch_server_credential=app["remoteConnection"],
+                            app_id=datasource["appId"],
+                            table_config=self.get_filtered_config_for_table(
+                                table=topic,
+                                event_source_destination_config=event_source_destination_config,
+                            ),
+                            columns_with_types=column_to_type_map,
+                            primary_key=self.get_table_primary_key(
+                                table=topic, database=cd_db
+                            ),
+                            save_to_audit_table=self.is_table_in_audit_config(
+                                table=topic, audit_config=audit_config
+                            ),
+                        )
