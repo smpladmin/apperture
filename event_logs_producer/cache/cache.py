@@ -1,5 +1,4 @@
-from typing import Optional
-from fastapi import Request, Response
+import logging
 from fastapi_cache import FastAPICache
 from fastapi_cache.backends.redis import RedisBackend
 from redis import asyncio as aioredis
@@ -17,15 +16,13 @@ def init_cache(redis_host: str, redis_password: str):
     FastAPICache.init(RedisBackend(redis), prefix="apperture-cache")
 
 
-def api_key_builder(
-    func,
-    namespace: Optional[str] = "",
-    request: Request = None,
-    response: Response = None,
-    *args,
-    **kwargs,
-):
+def api_key_builder(*args, **kwargs):
     prefix = FastAPICache.get_prefix()
     api_key = kwargs["kwargs"]["api_key"]
     cache_key = f"{prefix}:{api_key}"
     return cache_key
+
+
+def event_config_cache(*args, **kwargs):
+    datasource_id = kwargs["kwargs"]["datasource_id"]
+    return f"{datasource_id}-event-config-cache"
