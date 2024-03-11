@@ -400,6 +400,7 @@ const EventLogsIntegration = ({
                       href={SAMPLE_EVENT_CONFIG}
                       target="_blank"
                       style={{ color: '#039dfc' }}
+                      rel="noopener noreferrer"
                     >
                       THIS FORMAT
                     </a>

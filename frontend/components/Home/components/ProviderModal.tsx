@@ -47,6 +47,7 @@ const ProviderModal = ({
         undefined,
         undefined,
         undefined,
+        undefined,
         { params: { create_datasource: true, trigger_data_processor: false } }
       );
       router.push({
