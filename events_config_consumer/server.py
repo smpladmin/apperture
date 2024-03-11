@@ -64,11 +64,11 @@ def create_sparse_dataframe(
     df: pd.DataFrame,
     values,
     columns_with_types: dict,
-    event_table: EventTablesBucket,
+    event_table_bucket: EventTablesBucket,
 ):
-    event_name = values["event_name"]
-    primary_key = event_table.primary_key
-    config = event_table.table_config
+    event_name = values.get("eventName", values.get("event_name"))
+    primary_key = event_table_bucket.primary_key
+    config = event_table_bucket.table_config
     result_dict = {}
     columns = list(columns_with_types.keys())
 
@@ -80,7 +80,10 @@ def create_sparse_dataframe(
 
             # Extracting id from id_path
             jsonpath_expr_id = parse(id_path)
-            id_value = [match.value for match in jsonpath_expr_id.find(values)][0]
+            value = [match.value for match in jsonpath_expr_id.find(values)]
+            id_value = value[0] if value else None
+
+            # TODO: add alert here if id value does not exist
 
             # Extracting value from source_path
             jsonpath_expr_value = parse(source_path)
@@ -132,7 +135,7 @@ def create_sparse_dataframe(
 
 
 def convert_clickhouse_result_to_dict(primary_key_column, clickhouse_data):
-    # Convert ClickHouse data arrayof dict into a dictionary with primary key as the key
+    # Convert ClickHouse data array of dict into a dictionary with primary key as the key
     clickhouse_dict = {entry[primary_key_column]: entry for entry in clickhouse_data}
     return clickhouse_dict
 
@@ -143,6 +146,8 @@ def enrich_sparse_dataframe(
     table: str,
     event_tables_config: EventTablesConfig,
     database: str,
+    ch_server_credential,
+    app_id: str,
 ) -> pd.DataFrame:
     # Find unique 'id' values with None values in any column in the DataFrame
     ids_to_enrich = (
@@ -157,6 +162,8 @@ def enrich_sparse_dataframe(
             id_values=ids_to_enrich,
             table=table,
             database=database,
+            ch_server_credential=ch_server_credential,
+            app_id=app_id,
         )
 
         clickhouse_dict = convert_clickhouse_result_to_dict(
@@ -190,13 +197,14 @@ def fetch_values_from_kafka_records(data, event_tables_config: EventTablesConfig
             logging.info(f"Bucket not found for topic: {topic}")
             continue
 
-        event_table = event_tables_config.event_tables.get(topic)
+        event_table_bucket = event_tables_config.event_tables.get(topic)
+        table = event_table_bucket.ch_table
 
         total_records += len(records)
-        columns_with_types = event_table.columns_with_types
+        columns_with_types = event_table_bucket.columns_with_types
         columns = list(columns_with_types.keys())
 
-        primary_key = event_table.primary_key
+        primary_key = event_table_bucket.primary_key
         df = pd.DataFrame(columns=columns)
 
         for record in records:
@@ -210,15 +218,17 @@ def fetch_values_from_kafka_records(data, event_tables_config: EventTablesConfig
                 df=df,
                 values=values,
                 columns_with_types=columns_with_types,
-                event_table=event_table,
+                event_table_bucket=event_table_bucket,
             )
 
         enrich_df = enrich_sparse_dataframe(
             df=df,
             primary_key_column=primary_key,
-            table=topic,
+            table=table,
             event_tables_config=event_tables_config,
-            database=event_tables_config.event_tables[topic].ch_db,
+            database=event_table_bucket.ch_db,
+            ch_server_credential=event_table_bucket.ch_server_credential,
+            app_id=event_table_bucket.app_id,
         )
 
         event_tables_config.event_tables[topic].data = enrich_df
@@ -234,10 +244,10 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
         table_data = bucket.data
         save_to_audit_table = bucket.save_to_audit_table
 
-        data = table_data.values.tolist()
-        columns = table_data.columns.tolist()
+        if not table_data.empty:
+            data = table_data.values.tolist()
+            columns = table_data.columns.tolist()
 
-        if len(data):
             logging.info(
                 f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
             )
@@ -253,7 +263,6 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
             if save_to_audit_table:
                 audit_table = f"{table}_audit"
                 logging.info(f"Saving audit data {data} in {database}.{audit_table}")
-
                 clickhouse.save_events(
                     events=data,
                     columns=columns,
@@ -262,8 +271,11 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
                     clickhouse_server_credential=bucket.ch_server_credential,
                     app_id=bucket.app_id,
                 )
-        event_tables_config.event_tables[topic].data = []
-        logging.info("Successfully saved data to clickhouse, Emptying the topic bucket")
+                # add a alert for audit table if it fails
+            event_tables_config.event_tables[topic].data = pd.DataFrame()
+            logging.info(
+                "Successfully saved data to clickhouse, Emptying the topic bucket"
+            )
 
 
 async def process_kafka_messages() -> None:
@@ -277,7 +289,6 @@ async def process_kafka_messages() -> None:
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
-        auto_offset_reset="earliest",
     )
 
     global total_records

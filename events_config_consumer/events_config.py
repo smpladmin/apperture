@@ -44,15 +44,15 @@ class EventTablesConfig:
     def __init__(self):
         self.event_tables: dict[str, EventTablesBucket] = {}
         self.topics = []
-        self.event_config = []
-        self.audit_config = []
         self.clickhouse = ClickHouse()
 
     @cache(expire=CACHE_EXPIRY_10_MINUTES, key_builder=event_config_cache)
     async def get_config_for_integration(self, integration_id: str, datasource_id: str):
         # datasource_id passed for creating key in above cache method
         integration = get(f"/private/integrations/{integration_id}").json()
-        config_credential = integration["credentials"].get("eventsConfigCredential", {})
+        config_credential = integration["credential"].get(
+            "events_config_credential", {}
+        )
         return config_credential.get("config", None)
 
     def get_filtered_config_for_table(
@@ -65,24 +65,42 @@ class EventTablesConfig:
         ]
         return filtered_config
 
-    def get_table_columns_with_type(self, table: str, database: str):
+    def get_table_columns_with_type(
+        self, table: str, database: str, ch_server_credential, app_id: str
+    ):
         return self.clickhouse.get_table_columns_with_type(
             table=table,
             database=database,
+            clickhouse_server_credential=ch_server_credential,
+            app_id=app_id,
         )
 
-    def get_table_primary_key(self, table: str, database: str):
+    def get_table_primary_key(
+        self, table: str, database: str, ch_server_credential, app_id: str
+    ):
         return self.clickhouse.get_table_primary_key(
             table=table,
             database=database,
+            clickhouse_server_credential=ch_server_credential,
+            app_id=app_id,
         )
 
-    def get_row_values(self, id: str, id_values: list, table: str, database: str):
+    def get_row_values(
+        self,
+        id: str,
+        id_values: list,
+        table: str,
+        database: str,
+        ch_server_credential,
+        app_id: str,
+    ):
         return self.clickhouse.get_row_values(
             table=table,
             database=database,
             id_values=id_values,
             id=id,
+            clickhouse_server_credential=ch_server_credential,
+            app_id=app_id,
         )
 
     def is_table_in_audit_config(self, table: str, audit_config):
@@ -107,33 +125,46 @@ class EventTablesConfig:
                 ]
                 audit_config = config["audit_config"]
                 app = get(path=f"/private/apps/{datasource['appId']}").json()
-                for event in self.event_config:
-                    topic = (
-                        f"eventlogs_{datasource['_id']}_{event['destination_table']}"
-                    )
+
+                for event in event_source_destination_config:
+                    table = event["destination_table"]
+                    topic = f"eventlogs_{datasource['_id']}_{table}"
+
                     if not topic in self.topics:
                         self.topics.append(topic)
-                        column_type_list = self.get_table_columns_with_type(table=topic)
+                        ch_db = app["clickhouseCredential"]["databasename"]
+                        ch_server_credential = app["remoteConnection"]
+                        app_id = datasource["appId"]
+
+                        column_type_list = self.get_table_columns_with_type(
+                            table=table,
+                            database=ch_db,
+                            ch_server_credential=ch_server_credential,
+                            app_id=app_id,
+                        )
                         column_to_type_map = {
                             column: clickhouse_to_pandas_type_map[data_type]
                             for column, data_type in column_type_list
                         }
-                        cd_db = app["clickhouseCredential"]["databasename"]
+
                         self.event_tables[topic] = EventTablesBucket(
                             data=DataFrame(),
-                            ch_db=app["clickhouseCredential"]["databasename"],
+                            ch_db=ch_db,
                             ch_table=event["destination_table"],
-                            ch_server_credential=app["remoteConnection"],
-                            app_id=datasource["appId"],
+                            ch_server_credential=ch_server_credential,
+                            app_id=app_id,
                             table_config=self.get_filtered_config_for_table(
-                                table=topic,
+                                table=table,
                                 event_source_destination_config=event_source_destination_config,
                             ),
                             columns_with_types=column_to_type_map,
                             primary_key=self.get_table_primary_key(
-                                table=topic, database=cd_db
+                                table=table,
+                                database=ch_db,
+                                ch_server_credential=ch_server_credential,
+                                app_id=app_id,
                             ),
                             save_to_audit_table=self.is_table_in_audit_config(
-                                table=topic, audit_config=audit_config
+                                table=table, audit_config=audit_config
                             ),
                         )

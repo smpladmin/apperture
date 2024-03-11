@@ -280,8 +280,9 @@ async def update_credentials(
     await integration_service.update_credentials(datasource.integration_id, dto)
 
     if dto.type == CredentialType.EVENT_LOGS:
+        key = f"{ds_id}-event-config-cache"
         # clear cache which is used to read config from integration credential
-        await clear_cache(cache_key=f"{ds_id}-event-config-cache")
+        await clear_cache(cache_key=key)
 
     return {"success": "ok"}
 

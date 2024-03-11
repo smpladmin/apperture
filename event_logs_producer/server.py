@@ -27,58 +27,6 @@ logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 producer = None
 
-config = [
-    {
-        "id_path": "data.id",
-        "event": "event_1",
-        "source_path": "data.name",
-        "destination_table": "vanilla1",
-        "destination_column": "name",
-    },
-    {
-        "id_path": "data.id",
-        "event": "event_1",
-        "source_path": "data.age",
-        "destination_table": "vanilla1",
-        "destination_column": "age",
-    },
-    {
-        "id_path": "data.id",
-        "event": "event_1",
-        "source_path": "data.status",
-        "destination_table": "vanilla1",
-        "destination_column": "status",
-    },
-    {
-        "id_path": "mobile",
-        "event": "event_1",
-        "source_path": "data.name",
-        "destination_table": "vanilla2",
-        "destination_column": "name",
-    },
-    {
-        "id_path": "mobile",
-        "event": "event_1",
-        "source_path": "data.age",
-        "destination_table": "vanilla2",
-        "destination_column": "age",
-    },
-    {
-        "id_path": "data.id",
-        "event": "event_2",
-        "source_path": "data.city",
-        "destination_table": "vanilla2",
-        "destination_column": "city",
-    },
-    {
-        "id_path": "mobile",
-        "event": "event_3",
-        "source_path": "data.city",
-        "destination_table": "vanilla3",
-        "destination_column": "city",
-    },
-]
-
 
 app = FastAPI()
 app.add_middleware(
@@ -154,7 +102,6 @@ async def capture_event_logs(
             logging.info(f"Sending event {event} to Kafka topic: {table_topic}")
             await producer.send_and_wait(table_topic, value=value.encode("utf-8"))
 
-    # Log and send to the default Kafka topic
     logging.info(f"Sending event {event} to default Kafka topic: {kafka_topic}")
     await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
     return {"status": "ok"}
