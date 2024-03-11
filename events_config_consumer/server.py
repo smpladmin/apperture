@@ -7,6 +7,7 @@ from clickhouse.clickhouse import ClickHouse
 import numpy as np
 
 import pandas as pd
+from domain.alerts.service import AlertService
 from models.models import EventTablesBucket
 from jsonpath_ng import parse
 
@@ -65,6 +66,7 @@ def create_sparse_dataframe(
     values,
     columns_with_types: dict,
     event_table_bucket: EventTablesBucket,
+    alert_service: AlertService,
 ):
     event_name = values.get("eventName", values.get("event_name"))
     primary_key = event_table_bucket.primary_key
@@ -79,11 +81,14 @@ def create_sparse_dataframe(
             destination_column = item["destination_column"]
 
             # Extracting id from id_path
-            jsonpath_expr_id = parse(id_path)
-            value = [match.value for match in jsonpath_expr_id.find(values)]
-            id_value = value[0] if value else None
-
-            # TODO: add alert here if id value does not exist
+            try:
+                jsonpath_expr_id = parse(id_path)
+                id_value = [match.value for match in jsonpath_expr_id.find(values)][0]
+            except:
+                error_message = f"Id at path {id_path} not found for event {values}."
+                alert_service.post_message_to_slack(
+                    message=error_message, alert_type="Invalid ID"
+                )
 
             # Extracting value from source_path
             jsonpath_expr_value = parse(source_path)
@@ -187,7 +192,9 @@ def enrich_sparse_dataframe(
         return df
 
 
-def fetch_values_from_kafka_records(data, event_tables_config: EventTablesConfig):
+def fetch_values_from_kafka_records(
+    data, event_tables_config: EventTablesConfig, alert_service: AlertService
+):
     global total_records
 
     for topic_partition, records in data.items():
@@ -219,6 +226,7 @@ def fetch_values_from_kafka_records(data, event_tables_config: EventTablesConfig
                 values=values,
                 columns_with_types=columns_with_types,
                 event_table_bucket=event_table_bucket,
+                alert_service=alert_service,
             )
 
         enrich_df = enrich_sparse_dataframe(
@@ -271,7 +279,6 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
                     clickhouse_server_credential=bucket.ch_server_credential,
                     app_id=bucket.app_id,
                 )
-                # add a alert for audit table if it fails
             event_tables_config.event_tables[topic].data = pd.DataFrame()
             logging.info(
                 "Successfully saved data to clickhouse, Emptying the topic bucket"
@@ -303,7 +310,9 @@ async def process_kafka_messages() -> None:
             continue
 
         fetch_values_from_kafka_records(
-            data=data, event_tables_config=app.event_tables_config
+            data=data,
+            event_tables_config=app.event_tables_config,
+            alert_service=app.alert_service,
         )
 
         if total_records > MAX_RECORDS:
@@ -333,6 +342,7 @@ async def startup_event() -> None:
     asyncio.create_task(process_kafka_messages())
     app.clickhouse = ClickHouse()
     app.event_tables_config = EventTablesConfig()
+    app.alert_service = AlertService()
 
 
 @app.on_event("shutdown")

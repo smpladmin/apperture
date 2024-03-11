@@ -12,6 +12,7 @@ class EventsSettings(BaseSettings):
     backend_base_url: str
     backend_api_key_name: str
     backend_api_key_secret: str
+    slack_url: str
 
     model_config = SettingsConfigDict(env_file=".env")
 

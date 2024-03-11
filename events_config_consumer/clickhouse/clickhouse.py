@@ -1,12 +1,16 @@
 import logging
 from typing import List, Union
 from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
+from domain.alerts.service import AlertService
 from models.models import ClickHouseCredentials
 
 from clickhouse_connect.driver.exceptions import DatabaseError
 
 
 class ClickHouse:
+    def __init__(self):
+        self.alert_service = AlertService()
+
     def save_events(
         self,
         events,
@@ -27,8 +31,13 @@ class ClickHouse:
                 app_id=app_id,
             )
         except DatabaseError as e:
-            logging.info(f"Exception saving events to ClickHouse: {e}")
+            error_message = f"Error while saving events to {database}.{table}: {e}"
+            logging.info(f"{error_message}")
             logging.info("Trying to save recursively")
+
+            self.alert_service.post_message_to_slack(
+                message=error_message, alert_type="Saving Events"
+            )
             self.rsave_events(
                 events=events,
                 columns=columns,
@@ -73,9 +82,12 @@ class ClickHouse:
                 app_id=app_id,
             )
         except Exception as e:
-            logging.info(f"Exception saving events to ClickHouse: {e}")
+            error_message = f"Error while saving events by splitting and saving to {database}.{table}: {e}"
+            logging.info(f"{error_message}")
             logging.info("Trying to split and save")
-
+            self.alert_service.post_message_to_slack(
+                message=error_message, alert_type="Saving Events"
+            )
             mid = len(events) // 2
             first_half = events[:mid]
             second_half = events[mid:]
@@ -109,14 +121,23 @@ class ClickHouse:
         clickhouse_client = ClickHouseClientFactory.get_client(
             app_id=app_id, clickhouse_server_credentials=clickhouse_server_credential
         )
-        clickhouse_client.connection.insert(
-            table=table,
-            data=events,
-            database=database,
-            column_names=columns,
-            settings={"insert_async": True, "wait_for_async_insert": False},
-        )
-        clickhouse_client.close()
+        try:
+            clickhouse_client.connection.insert(
+                table=table,
+                data=events,
+                database=database,
+                column_names=columns,
+                settings={"insert_async": True, "wait_for_async_insert": False},
+            )
+        except Exception as e:
+            error_message = f"Error while saving events to {database}.{table}: {e}"
+            logging.info(f"{error_message}")
+            self.alert_service.post_message_to_slack(
+                message=error_message, alert_type="Saving Events"
+            )
+
+            clickhouse_client.close()
+            raise Exception(f"Failed to save events: {e}")
 
     def get_table_columns_with_type(
         self,
@@ -149,6 +170,11 @@ class ClickHouse:
         result = clickhouse_client.query(query=query).result_set
         logging.info(f"Primary key for table {database}.{table}: {result}")
         clickhouse_client.close()
+        if not result:
+            error_message = f"Primary key for table {database}.{table} does not exist."
+            self.alert_service.post_message_to_slack(
+                message=error_message, alert_type="Primary Key Error"
+            )
         return result[0][0] if result else ""
 
     def get_row_values(
