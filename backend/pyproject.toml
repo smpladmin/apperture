@@ -48,6 +48,7 @@ fastapi-limiter = "^0.1.5"
 black = "^22.1.0"
 pytest = "^7.0.1"
 pytest-mock = "^3.7.0"
+packaging = "^21.3 || ^23.1"
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
