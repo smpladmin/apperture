@@ -58,7 +58,11 @@ def match_event_to_config(event, config):
     matched_tables = set()
 
     for config_item in config:
+
         event_name_match = config_item["event"] == event["eventName"]
+        logging.info(
+            f"{event['eventName']} ----- config event:{config_item['event']} || match: {event_name_match}"
+        )
         id_path_expr = parse(config_item["id_path"])
         id_path_values = [match.value for match in id_path_expr.find(event)]
 
@@ -66,7 +70,11 @@ def match_event_to_config(event, config):
             value is not None and value != "" for value in id_path_values
         )
         if event_name_match and values_present_and_not_empty:
+            logging.info(
+                f"{event['eventName']} ----- values:{id_path_values} || table: {config_item['destination_table']}"
+            )
             matched_tables.add(config_item["destination_table"])
+    logging.info(f"matched tables -----{list(matched_tables)}")
     return list(matched_tables)
 
 
