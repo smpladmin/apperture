@@ -41,6 +41,7 @@ class ClickHouseClientFactory:
         app_id: str,
         clickhouse_server_credentials: Union[ClickHouseCredentials, None],
     ) -> ClickHouseClient:
+        logging.info(f"ClickHouseClientFactory: {clickhouse_server_credentials}")
         if app_id not in ClickHouseClientFactory.__clients:
             ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(
                 app_id=app_id, connection_detail=clickhouse_server_credentials
