@@ -149,9 +149,6 @@ class ClickHouse:
         clickhouse_client = ClickHouseClientFactory.get_client(
             app_id=app_id, clickhouse_server_credentials=clickhouse_server_credential
         )
-        logging.info(
-            f"clickhouse client: {clickhouse_client} {clickhouse_server_credential}"
-        )
         query = f"Select name, type from system.columns where database = '{database}' AND table = '{table}' "
         result = clickhouse_client.query(query=query).result_set
 
