@@ -13,6 +13,7 @@ class EventsSettings(BaseSettings):
     backend_api_key_name: str
     backend_api_key_secret: str
     slack_url: str
+    auto_offset_reset: str = "latest"
 
     model_config = SettingsConfigDict(env_file=".env")
 
