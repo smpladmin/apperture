@@ -70,6 +70,7 @@ class EventTablesConfig:
     def get_table_columns_with_type(
         self, table: str, database: str, ch_server_credential, app_id: str
     ):
+        logging.info(f"get_table_columns_with_type ch creds -> {ch_server_credential}")
         return self.clickhouse.get_table_columns_with_type(
             table=table,
             database=database,
@@ -127,6 +128,8 @@ class EventTablesConfig:
                 ]
                 audit_config = config["audit_config"]
                 app = get(path=f"/private/apps/{datasource['appId']}").json()
+
+                logging.info(f"apppp -> {app} || datasource --> {datasource}")
 
                 for event in event_source_destination_config:
                     table = event["destination_table"]

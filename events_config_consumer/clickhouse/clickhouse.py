@@ -1,6 +1,6 @@
 import logging
 from typing import List, Union
-from clickhouse.clickhouse_client_factory import ClickHouseClientFactory
+from .clickhouse_client_factory import ClickHouseClientFactory
 from domain.alerts.service import AlertService
 from models.models import ClickHouseCredentials
 
@@ -149,6 +149,7 @@ class ClickHouse:
         clickhouse_client = ClickHouseClientFactory.get_client(
             app_id=app_id, clickhouse_server_credentials=clickhouse_server_credential
         )
+        logging.info(f"clickhouse client: {clickhouse_client}")
         query = f"Select name, type from system.columns where database = '{database}' AND table = '{table}' "
         result = clickhouse_client.query(query=query).result_set
 
