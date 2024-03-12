@@ -1,11 +1,12 @@
 import logging
+from typing import Union
 from clickhouse.clickhouse import ClickHouse
 from pandas import DataFrame
 from fastapi_cache.decorator import cache
 
 from cache import CACHE_EXPIRY_10_MINUTES, event_config_cache
 
-from models.models import EventTablesBucket
+from models.models import ClickHouseCredentials, EventTablesBucket
 from apperture.backend_action import get
 
 
@@ -68,7 +69,11 @@ class EventTablesConfig:
         return filtered_config
 
     def get_table_columns_with_type(
-        self, table: str, database: str, ch_server_credential, app_id: str
+        self,
+        table: str,
+        database: str,
+        ch_server_credential: Union[ClickHouseCredentials, None],
+        app_id: str,
     ):
         logging.info(f"get_table_columns_with_type ch creds -> {ch_server_credential}")
         return self.clickhouse.get_table_columns_with_type(
@@ -79,7 +84,11 @@ class EventTablesConfig:
         )
 
     def get_table_primary_key(
-        self, table: str, database: str, ch_server_credential, app_id: str
+        self,
+        table: str,
+        database: str,
+        ch_server_credential: Union[ClickHouseCredentials, None],
+        app_id: str,
     ):
         return self.clickhouse.get_table_primary_key(
             table=table,
@@ -94,7 +103,7 @@ class EventTablesConfig:
         id_values: list,
         table: str,
         database: str,
-        ch_server_credential,
+        ch_server_credential: Union[ClickHouseCredentials, None],
         app_id: str,
     ):
         return self.clickhouse.get_row_values(
