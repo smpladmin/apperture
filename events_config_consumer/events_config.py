@@ -137,8 +137,6 @@ class EventTablesConfig:
                 audit_config = config["audit_config"]
                 app = get(path=f"/private/apps/{datasource['appId']}").json()
 
-                logging.info(f"apppp -> {app} || datasource --> {datasource}")
-
                 for event in event_source_destination_config:
                     table = event["destination_table"]
                     topic = f"eventlogs_{datasource['_id']}_{table}"
@@ -146,8 +144,10 @@ class EventTablesConfig:
                     if not topic in self.topics:
                         self.topics.append(topic)
                         ch_db = app["clickhouseCredential"]["databasename"]
-                        ch_server_credential = ClickHouseCredentials(
-                            **app["remoteConnection"]
+                        ch_server_credential = (
+                            ClickHouseCredentials(**app["remoteConnection"])
+                            if app["remoteConnection"]
+                            else None
                         )
                         app_id = datasource["appId"]
 
