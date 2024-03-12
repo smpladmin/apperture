@@ -15,10 +15,10 @@ class ClickHouseClient:
         self.app_id = app_id
         self.connection_detail = connection_detail
         self.connection = clickhouse_connect.get_client(
-            host=connection_detail["host"] if connection_detail else "clickhouse",
-            port=connection_detail["port"] if connection_detail else 0,
-            username=connection_detail["username"] if connection_detail else None,
-            password=connection_detail["password"] if connection_detail else "",
+            host=connection_detail.host if connection_detail else "clickhouse",
+            port=connection_detail.port if connection_detail else 0,
+            username=connection_detail.username if connection_detail else None,
+            password=connection_detail.password if connection_detail else "",
             allow_experimental_object_type=1,
             query_limit=0,
             max_execution_time=120,
@@ -41,11 +41,7 @@ class ClickHouseClientFactory:
         app_id: str,
         clickhouse_server_credentials: Union[ClickHouseCredentials, None],
     ) -> ClickHouseClient:
-        logging.info(f"ClickHouseClientFactory: {clickhouse_server_credentials}")
         if app_id not in ClickHouseClientFactory.__clients:
-            logging.info(
-                f"INSIDE ClickHouseClientFactory---: {clickhouse_server_credentials}"
-            )
             ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(
                 app_id=app_id, connection_detail=clickhouse_server_credentials
             )

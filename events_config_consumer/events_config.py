@@ -75,7 +75,6 @@ class EventTablesConfig:
         ch_server_credential: Union[ClickHouseCredentials, None],
         app_id: str,
     ):
-        logging.info(f"get_table_columns_with_type ch creds -> {ch_server_credential}")
         return self.clickhouse.get_table_columns_with_type(
             table=table,
             database=database,
@@ -147,8 +146,9 @@ class EventTablesConfig:
                     if not topic in self.topics:
                         self.topics.append(topic)
                         ch_db = app["clickhouseCredential"]["databasename"]
-                        ch_server_credential = app["remoteConnection"]
-                        logging.info(f"ch_server_credential---: {ch_server_credential}")
+                        ch_server_credential = ClickHouseCredentials(
+                            **app["remoteConnection"]
+                        )
                         app_id = datasource["appId"]
 
                         column_type_list = self.get_table_columns_with_type(
