@@ -11,6 +11,7 @@ import mysqlLogo from '@assets/images/mysql-icon.png';
 import mssqlLogo from '@assets/images/mssql-icon.png';
 import BranchIntegration from '@components/CreateIntegration/BranchIntegration';
 import TataIVRIntegration from '@components/CreateIntegration/TataIVRIntegration';
+import EventLogsIntegration from '@components/CreateIntegration/EventLogsIntegration';
 
 const Edit = () => {
   const router = useRouter();
@@ -75,6 +76,8 @@ const Edit = () => {
       );
     case Provider.CSV:
       return <CSVIntegration add={add} handleClose={handleClose} />;
+    case Provider.EVENT_LOGS:
+      return <EventLogsIntegration add={add} handleClose={handleClose} edit={true} />;
     default:
       return <></>;
   }

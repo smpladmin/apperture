@@ -41,6 +41,7 @@ def format_date_string_to_desired_format(
         "%Y-%m-%d %H:%M:%S.%f",
         "%Y-%m-%d %H:%M:%S",
         "%d-%m-%Y %H:%M",
+        "%Y-%m-%d",
     ]
 
     for date_format in date_formats:
@@ -121,8 +122,10 @@ def save_topic_data_to_clickhouse(
             ]
             events = [
                 [
-                    data.get("event_name", ""),
-                    format_date_string_to_desired_format(data.get("added_time")),
+                    data.get("event_name", data.get("eventName", "")),
+                    format_date_string_to_desired_format(
+                        data.get("added_time", data.get("addedTime"))
+                    ),
                     data.get("table", ""),
                     data.get("mobile", ""),
                     data.get("task_id", ""),

@@ -170,6 +170,9 @@ async def create_integration(
     else:
         cdc_credential = None
 
+    if dto.provider == IntegrationProvider.EVENT_LOGS:
+        events_config_credential = dto.eventsConfigCredential
+
     app = await app_service.get_shared_or_owned_app(id=dto.appId, user=user)
     api_base_url = None
     if dto.provider is IntegrationProvider.CLEVERTAP:
@@ -189,6 +192,7 @@ async def create_integration(
         branch_credential,
         api_base_url=api_base_url,
         tata_ivr_token=dto.tataIvrAuthToken,
+        events_config_credential=dto.eventsConfigCredential,
     )
 
     if cdc_credential and app.clickhouse_credential:

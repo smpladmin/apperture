@@ -39,6 +39,8 @@ jobs:
               - 'event_logs_producer/**'
             event_logs_consumer:
               - 'event_logs_consumer/**'
+            events_config_consumer:
+              - 'events_config_consumer/**'
 
       - name: Set short commit-sha
         id: commit
@@ -186,6 +188,18 @@ jobs:
           IMAGE_TAG: latest
         run: |
           cd event_logs_consumer
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+
+      - name: Build and Push Event Config Consumer
+        if: steps.filter.outputs.events_config_consumer == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: events_config_consumer
+          IMAGE_TAG: latest
+        run: |
+          cd events_config_consumer
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags

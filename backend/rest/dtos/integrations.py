@@ -73,6 +73,11 @@ class BranchCredentialDto(BaseModel):
     branchSecret: str
 
 
+class EventsConfigCredentialDto(BaseModel):
+    config: dict
+    config_file: str
+
+
 class CreateIntegrationDto(BaseModel):
     appId: str
     provider: IntegrationProvider
@@ -87,6 +92,7 @@ class CreateIntegrationDto(BaseModel):
     branchCredential: Optional[BranchCredentialDto]
     cdcCredential: Optional[CdcCredentialDto]
     tataIvrAuthToken: Optional[str]
+    eventsConfigCredential: Optional[EventsConfigCredentialDto]
 
 
 class IntegrationWithDataSources(Integration, ModelResponse):

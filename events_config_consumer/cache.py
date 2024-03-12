@@ -13,14 +13,7 @@ def init_cache(redis_host: str, redis_password: str):
         encoding="utf8",
         decode_responses=True,
     )
-    FastAPICache.init(RedisBackend(redis), prefix="apperture-cache")
-
-
-def api_key_builder(*args, **kwargs):
-    prefix = FastAPICache.get_prefix()
-    api_key = kwargs["kwargs"]["api_key"]
-    cache_key = f"{prefix}:{api_key}"
-    return cache_key
+    FastAPICache.init(RedisBackend(redis))
 
 
 def event_config_cache(*args, **kwargs):

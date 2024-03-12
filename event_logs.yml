@@ -18,6 +18,24 @@ services:
         limits:
           cpus: '1.0'
           memory: 2048M
+  events_config_consumer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/events_config_consumer:latest
+    networks:
+     - apperture_net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-prod-eventlogs-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: event_config_consumer
+    deploy:
+      resources:
+        reservations:
+          cpus: '0.5'
+          memory: 512M
+        limits:
+          cpus: '1.0'
+          memory: 2048M
   event_logs_producer:
     image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/event_logs_producer:latest
     networks:

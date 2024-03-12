@@ -8,8 +8,11 @@ from redis import asyncio as aioredis
 CACHE_EXPIRY_24_HOURS = 60 * 60 * 24
 CACHE_EXPIRY_10_MINUTES = 60 * 10
 
+redis = None
+
 
 def init_cache(redis_host: str, redis_password: str):
+    global redis
     redis = aioredis.from_url(
         f"redis://:{redis_password}@{redis_host}",
         encoding="utf8",
@@ -44,3 +47,8 @@ def service_datasource_key_builder(
     prefix = FastAPICache.get_prefix()
     cache_key = f"{prefix}:{namespace}:{func.__name__}:{kwargs['args'][1]}"
     return cache_key
+
+
+async def clear_cache(cache_key):
+    global redis
+    await redis.delete(cache_key)

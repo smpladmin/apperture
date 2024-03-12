@@ -58,6 +58,7 @@ export enum CredentialType {
   CSV = 'CSV',
   BRANCH = 'BRANCH',
   TATA_IVR = 'TATA_IVR',
+  EVENT_LOGS = 'EVENT_LOGS',
 }
 
 export type MsSQLCredential = {
@@ -86,6 +87,11 @@ export type CSVCredential = {
   table_name: string;
 };
 
+export type EventsConfigCredential = {
+  config: Record<string, any>;
+  config_file: string;
+};
+
 export type Credential = {
   type: CredentialType;
   account_id?: string;
@@ -99,4 +105,5 @@ export type Credential = {
   api_base_url?: string;
   branch_credential?: BranchCredential;
   tata_ivr_token?: string;
+  events_config_credential?: EventsConfigCredential;
 };

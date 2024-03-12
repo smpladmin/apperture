@@ -30,6 +30,7 @@ from .models import (
     CredentialType,
     CSVCredential,
     DatabaseSSHCredential,
+    EventsConfigCredential,
     Integration,
     IntegrationProvider,
     MsSQLCredential,
@@ -118,6 +119,7 @@ class IntegrationService:
         branch_credential: Optional[BranchCredential],
         api_base_url: Optional[str] = None,
         tata_ivr_token: Optional[str] = None,
+        events_config_credential: Optional[EventsConfigCredential] = None,
     ):
         if mysql_credential:
             credential_type = CredentialType.MYSQL
@@ -152,6 +154,7 @@ class IntegrationService:
             branch_credential=branch_credential,
             api_base_url=api_base_url,
             tata_ivr_token=tata_ivr_token,
+            events_config_credential=events_config_credential,
         )
         integration = Integration(
             user_id=app.user_id,
