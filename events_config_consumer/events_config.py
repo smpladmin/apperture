@@ -148,6 +148,7 @@ class EventTablesConfig:
                         self.topics.append(topic)
                         ch_db = app["clickhouseCredential"]["databasename"]
                         ch_server_credential = app["remoteConnection"]
+                        logging.info(f"ch_server_credential---: {ch_server_credential}")
                         app_id = datasource["appId"]
 
                         column_type_list = self.get_table_columns_with_type(
