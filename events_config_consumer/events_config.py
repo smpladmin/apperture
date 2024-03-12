@@ -51,9 +51,11 @@ class EventTablesConfig:
         # datasource_id passed for creating key in above cache method
         integration = get(f"/private/integrations/{integration_id}").json()
         config_credential = integration["credential"].get(
-            "events_config_credential", {}
+            "events_config_credential", None
         )
-        return config_credential.get("config", None)
+        if config_credential:
+            return config_credential.get("config", None)
+        return None
 
     def get_filtered_config_for_table(
         self, table: str, event_source_destination_config
