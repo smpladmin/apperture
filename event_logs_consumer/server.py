@@ -35,6 +35,8 @@ KEYS_TYPECAST_TO_STRING = os.getenv("KEYS_TYPECAST_TO_STRING", ["lat", "lng"])
 def format_date_string_to_desired_format(
     date_str: str, output_date_format="%Y-%m-%d %H:%M:%S"
 ):
+    if not date_str:
+        return
     date_formats = [
         "%Y-%m-%dT%H:%M:%S.%fZ",
         "%Y-%m-%dT%H:%M:%S.%f",
@@ -135,6 +137,8 @@ def save_topic_data_to_clickhouse(
                     data.get("datasource_id", ""),
                 ]
                 for data in to_insert
+                if data.get("key")
+                != "string"  # Check added to skip some test data which was inserted erroneously
             ]
             logging.info(f"events: {events}")
             clickhouse.save_events(
