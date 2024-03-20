@@ -158,7 +158,7 @@ def enrich_sparse_dataframe(
 ) -> pd.DataFrame:
     # Find unique 'id' values with None values in any column in the DataFrame
     ids_to_enrich = (
-        df[df.isna().any(axis=1)]
+        df[df.isna().any(axis=1) | (df[primary_key_column] == "")]
         .dropna(subset=[primary_key_column])[primary_key_column]
         .unique()
     )
@@ -185,8 +185,8 @@ def enrich_sparse_dataframe(
                     # Skip primary key column
                     if column == primary_key_column:
                         continue
-                    # For only None column value, replace it with data from clickhouse result, otherwise keep it as it is
-                    if pd.isnull(row[column]):
+                    # For only None or empty string column valuecolumn value, replace it with data from clickhouse result, otherwise keep it as it is
+                    if pd.isnull(row[column]) or row[column] == "":
                         new_value = clickhouse_dict.get(id_value, {}).get(column, None)
                         df.at[index, column] = new_value
 
@@ -253,7 +253,6 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
         database = bucket.ch_db
         table_data = bucket.data
         save_to_audit_table = bucket.save_to_audit_table
-        logging.info(f"Table data: {table_data}")
 
         if table_data is not None and not table_data.empty:
             data = table_data.values.tolist()
@@ -263,33 +262,30 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
                 f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
             )
 
-            if len(data):
+            clickhouse.save_events(
+                events=data,
+                columns=columns,
+                table=table,
+                database=database,
+                clickhouse_server_credential=bucket.ch_server_credential,
+                app_id=bucket.app_id,
+            )
+
+            if save_to_audit_table:
+                audit_table = f"{table}_audit"
+                logging.info(f"Saving audit data {data} in {database}.{audit_table}")
                 clickhouse.save_events(
                     events=data,
                     columns=columns,
-                    table=table,
+                    table=audit_table,
                     database=database,
                     clickhouse_server_credential=bucket.ch_server_credential,
                     app_id=bucket.app_id,
                 )
-
-                if save_to_audit_table:
-                    audit_table = f"{table}_audit"
-                    logging.info(
-                        f"Saving audit data {data} in {database}.{audit_table}"
-                    )
-                    clickhouse.save_events(
-                        events=data,
-                        columns=columns,
-                        table=audit_table,
-                        database=database,
-                        clickhouse_server_credential=bucket.ch_server_credential,
-                        app_id=bucket.app_id,
-                    )
-                event_tables_config.event_tables[topic].data = pd.DataFrame()
-                logging.info(
-                    "Successfully saved data to clickhouse, Emptying the topic bucket"
-                )
+            event_tables_config.event_tables[topic].data = pd.DataFrame()
+            logging.info(
+                "Successfully saved data to clickhouse, Emptying the topic bucket"
+            )
 
 
 async def process_kafka_messages() -> None:
