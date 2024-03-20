@@ -255,13 +255,14 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
         save_to_audit_table = bucket.save_to_audit_table
         logging.info(f"Table data: {table_data}")
 
-        if table_data or not table_data.empty:
-            data = table_data.values.tolist()
-            columns = table_data.columns.tolist()
+        data = table_data.values.tolist()
+        columns = table_data.columns.tolist()
 
-            logging.info(
-                f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
-            )
+        logging.info(
+            f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
+        )
+
+        if len(data):
             clickhouse.save_events(
                 events=data,
                 columns=columns,
