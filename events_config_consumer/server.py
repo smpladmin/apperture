@@ -254,7 +254,7 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
         table_data = bucket.data
         save_to_audit_table = bucket.save_to_audit_table
 
-        if not table_data.empty:
+        if table_data or not table_data.empty:
             data = table_data.values.tolist()
             columns = table_data.columns.tolist()
 
