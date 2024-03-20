@@ -255,38 +255,41 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
         save_to_audit_table = bucket.save_to_audit_table
         logging.info(f"Table data: {table_data}")
 
-        data = table_data.values.tolist()
-        columns = table_data.columns.tolist()
+        if table_data is not None:
+            data = table_data.values.tolist()
+            columns = table_data.columns.tolist()
 
-        logging.info(
-            f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
-        )
-
-        if len(data):
-            clickhouse.save_events(
-                events=data,
-                columns=columns,
-                table=table,
-                database=database,
-                clickhouse_server_credential=bucket.ch_server_credential,
-                app_id=bucket.app_id,
+            logging.info(
+                f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
             )
 
-            if save_to_audit_table:
-                audit_table = f"{table}_audit"
-                logging.info(f"Saving audit data {data} in {database}.{audit_table}")
+            if len(data):
                 clickhouse.save_events(
                     events=data,
                     columns=columns,
-                    table=audit_table,
+                    table=table,
                     database=database,
                     clickhouse_server_credential=bucket.ch_server_credential,
                     app_id=bucket.app_id,
                 )
-            event_tables_config.event_tables[topic].data = pd.DataFrame()
-            logging.info(
-                "Successfully saved data to clickhouse, Emptying the topic bucket"
-            )
+
+                if save_to_audit_table:
+                    audit_table = f"{table}_audit"
+                    logging.info(
+                        f"Saving audit data {data} in {database}.{audit_table}"
+                    )
+                    clickhouse.save_events(
+                        events=data,
+                        columns=columns,
+                        table=audit_table,
+                        database=database,
+                        clickhouse_server_credential=bucket.ch_server_credential,
+                        app_id=bucket.app_id,
+                    )
+                event_tables_config.event_tables[topic].data = pd.DataFrame()
+                logging.info(
+                    "Successfully saved data to clickhouse, Emptying the topic bucket"
+                )
 
 
 async def process_kafka_messages() -> None:
