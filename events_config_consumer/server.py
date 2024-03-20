@@ -158,7 +158,7 @@ def enrich_sparse_dataframe(
 ) -> pd.DataFrame:
     # Find unique 'id' values with None values in any column in the DataFrame
     ids_to_enrich = (
-        df[df.isna().any(axis=1) | (df[primary_key_column] == "")]
+        df[df.isna().any(axis=1) | ((df == "").any(axis=1))]
         .dropna(subset=[primary_key_column])[primary_key_column]
         .unique()
     )
