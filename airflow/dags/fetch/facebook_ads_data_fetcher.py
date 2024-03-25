@@ -10,13 +10,13 @@ class FacebookAdsFetcher:
     def __init__(self, credential: FacebookAdsCredential, date: str):
         self.ads_params = {
             "fields": "id,name",
-            "limit": 25,
+            "limit": 100,
             "access_token": credential.access_token,
         }
         self.insights_params = {
             "fields": "account_id,account_name,campaign_id,campaign_name,adset_id,adset_name,impressions,clicks,spend,account_currency,cpm,cpc,ctr,cpp,reach",
             "breakdowns": "age,gender",
-            "limit": 25,
+            "limit": 100,
             "time_range": f"{{'since':'{date}','until':'{date}'}}",
             "access_token": credential.access_token,
         }
