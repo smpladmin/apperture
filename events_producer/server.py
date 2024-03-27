@@ -1,7 +1,7 @@
 import json
 import logging
 import os
-from typing import Union, Callable
+from typing import List, Union, Callable
 
 from fastapi import FastAPI, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
@@ -13,7 +13,7 @@ from starlette.types import Message
 from starlette.requests import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 import gzip
-from models import FlutterBatchData
+from models import FlutterBatchData, GupshupDeliveryReportEvent
 
 load_dotenv()
 logging.getLogger().setLevel(logging.INFO)
@@ -32,26 +32,6 @@ KAFKA_TOPIC = "clickstream"
 
 producer = None
 
-
-# class GZipedMiddleware(BaseHTTPMiddleware):
-#     async def set_body(self, request: Request):
-#         receive_ = await request._receive()
-#         if (
-#             "gzip" in request.headers.getlist("Content-Encoding")
-#             and "/events/capture/batch" in request.url.path
-#         ):
-#             data = gzip.decompress(receive_.get("body"))
-#             receive_["body"] = data
-
-#         async def receive() -> Message:
-#             return receive_
-
-#         request._receive = receive
-
-#     async def dispatch(self, request, call_next):
-#         await self.set_body(request)
-#         response = await call_next(request)
-#         return response
 
 class GzipRequest(Request):
     async def body(self) -> bytes:
@@ -100,8 +80,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# app.add_middleware(GZipedMiddleware)
-
 
 @app.on_event("startup")
 async def startup_event():
@@ -129,6 +107,18 @@ async def capture_event(
     await producer.send_and_wait(KAFKA_TOPIC, value=data.encode("utf-8"))
     return {"status": "ok"}
 
+@app.post("/events/deliveryreport")
+async def capture_delivery_report(
+    events: List[GupshupDeliveryReportEvent]
+) -> None :
+    """Capture gupshup delivery report events and send them to kafka.
+    Gupshup sends max 20 events at a time.
+    """
+    data = [e.dict() for e in events]
+    
+    await producer.send_and_wait("gupshup_delivery_report", value=json.dumps(data).encode("utf-8")) 
+    return {"status": "ok"}
+    
 
 @app.post("/events/capture/decide/")
 async def analyse_decide_call(

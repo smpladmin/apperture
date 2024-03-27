@@ -29,7 +29,7 @@ logging.getLogger().setLevel(LOG_LEVEL)
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
 logging.debug(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
-KAFKA_TOPICS = ["clickstream", "flutter_eventstream"]
+KAFKA_TOPICS = ["clickstream", "flutter_eventstream", "delivery_report"]
 DEFAULT_EVENTS = [
     "$autocapture",
     "$pageview",
@@ -72,6 +72,8 @@ def save_flutter_events(events):
     logging.info("Saved flutter events")
 
 
+
+
 def save_precision_events(events):
     """Saves events to Events table."""
     logging.debug(f"Saving {len(events)} precision events to events table")
@@ -87,6 +89,25 @@ def save_precision_events(events):
     ]
     app.clickhouse.save_precision_events(cs_events)
     logging.info("Saved precision events")
+
+
+
+def save_processed_reports(processed_reports):
+    """Saves processed reports to ClickHouse."""
+    try:
+        delivery_events = [
+            PrecisionEvent.build(
+                
+            
+            )
+            for report in processed_reports
+        ]
+
+        app.clickhouse.save_precision_events(delivery_events)
+        logging.info(f"Saved {len(processed_reports)} processed reports")
+    except Exception as e:
+        logging.error(f"Error saving processed reports: {e}")
+
 
 
 def to_object(value: str) -> Dict:
@@ -128,6 +149,18 @@ def generate_flutter_events_from_record(record) -> List:
 
     return value["batch"]
 
+async def process_delivery_reports(delivery_reports):
+    """Process delivery reports."""
+    processed_reports = []
+    for report in delivery_reports:
+        try:
+            report_data_str = json.dumps(report)
+            processed_reports.append(report_data_str)
+            logging.info(f"Processed delivery report: {report_data_str}")
+        except Exception as e:
+            logging.error(f"Error processing delivery report: {e}")
+    return processed_reports
+
 
 async def process_kafka_messages() -> None:
     """Processes Kafka messages and inserts them into ClickHouse.."""
@@ -145,6 +178,7 @@ async def process_kafka_messages() -> None:
     offsets = []
     cs_records = []
     flutter_records = []
+    delivery_report_events = []
     while True:
         # Get messages from Kafka
         data = await consumer.getmany(
@@ -158,6 +192,10 @@ async def process_kafka_messages() -> None:
         for topic_partition, records in data.items():
             if topic_partition.topic == "clickstream":
                 cs_records.extend(records)
+
+            elif topic_partition.topic == "delivery-report":  #for delivery-report
+                delivery_report_events.extend(records)
+
             else:
                 flutter_records.extend(records)
 
@@ -189,6 +227,13 @@ async def process_kafka_messages() -> None:
 
             flutter_records = []
             logging.debug(f"Collected {len(flutter_events)} flutter events")
+    
+        if delivery_report_events:
+            for record in delivery_report_events:
+                delivery_report_data = json.loads(record.value)
+                process_delivery_reports(delivery_report_data)
+            
+            delivery_reports = []  # Clear the list after processing
 
         # Save events to ClickHouse
         if (len(events) + len(flutter_events)) >= MAX_RECORDS:
@@ -221,6 +266,7 @@ async def process_kafka_messages() -> None:
                         precision_events=precision_events
                     )
 
+            
 
 app = FastAPI()
 
@@ -239,3 +285,4 @@ async def shutdown_event() -> None:
     """Shuts down the app."""
     logging.debug("Shutting down")
     app.clickhouse.disconnect()
+
