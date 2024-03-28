@@ -107,18 +107,19 @@ async def capture_event(
     await producer.send_and_wait(KAFKA_TOPIC, value=data.encode("utf-8"))
     return {"status": "ok"}
 
+
 @app.post("/events/deliveryreport")
-async def capture_delivery_report(
-    events: List[GupshupDeliveryReportEvent]
-) -> Dict[str , int | str] :
+async def capture_delivery_report(events: List[GupshupDeliveryReportEvent]):
     """Capture gupshup delivery report events and send them to kafka.
     Gupshup sends max 20 events at a time.
     """
     data = [e.dict() for e in events]
-    
-    await producer.send_and_wait("gupshup_delivery_report", value=json.dumps(data).encode("utf-8")) 
+
+    await producer.send_and_wait(
+        "gupshup_delivery_report", value=json.dumps(data).encode("utf-8")
+    )
     return {"status": "ok"}
-    
+
 
 @app.post("/events/capture/decide/")
 async def analyse_decide_call(
