@@ -33,7 +33,7 @@ logging.getLogger().setLevel(LOG_LEVEL)
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
 logging.debug(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
-KAFKA_TOPICS = ["clickstream", "flutter_eventstream", "gupshup_delivery_report"]
+KAFKA_TOPICS = os.getenv("KAFKA_TOPICS", "clickstream").split(",")
 DEFAULT_EVENTS = [
     "$autocapture",
     "$pageview",
