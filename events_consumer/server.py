@@ -1,5 +1,6 @@
 import asyncio
 import base64
+from datetime import datetime, timezone
 from functools import reduce
 import json
 import logging
@@ -10,16 +11,19 @@ from typing import Dict, List
 from fastapi import FastAPI
 from aiokafka import AIOKafkaConsumer
 
-from clickhouse import ClickHouse
 from dotenv import load_dotenv
+
+load_dotenv()
+
+from clickhouse import ClickHouse
 
 from event_properties_saver import EventPropertiesSaver
 from models.models import ClickStream, PrecisionEvent
 
-load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1000"))
+GUPSHUP_MAX_RECORDS = int(os.getenv("GUPSHUP_MAX_RECORDS", "1000"))
 LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
 
 
@@ -29,7 +33,7 @@ logging.getLogger().setLevel(LOG_LEVEL)
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
 logging.debug(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
-KAFKA_TOPICS = ["clickstream", "flutter_eventstream"]
+KAFKA_TOPICS = ["clickstream", "flutter_eventstream", "gupshup_delivery_report"]
 DEFAULT_EVENTS = [
     "$autocapture",
     "$pageview",
@@ -129,6 +133,25 @@ def generate_flutter_events_from_record(record) -> List:
     return value["batch"]
 
 
+def generate_gupshup_events_from_records(record):
+    """Process gupshup delivery reports."""
+    events = json.loads(record.value)
+    return [
+        (
+            e["externalId"],
+            e["eventType"],
+            datetime.fromtimestamp(e["eventTs"] / 1000, tz=timezone.utc),
+            e["destAddr"],
+            e["srcAddr"],
+            e["cause"],
+            e["errCode"],
+            e["channel"],
+            e["noOfFrags"],
+        )
+        for e in events
+    ]
+
+
 async def process_kafka_messages() -> None:
     """Processes Kafka messages and inserts them into ClickHouse.."""
     consumer = AIOKafkaConsumer(
@@ -145,6 +168,8 @@ async def process_kafka_messages() -> None:
     offsets = []
     cs_records = []
     flutter_records = []
+    gupshup_records = []
+    gupshup_events = []
     while True:
         # Get messages from Kafka
         data = await consumer.getmany(
@@ -158,7 +183,11 @@ async def process_kafka_messages() -> None:
         for topic_partition, records in data.items():
             if topic_partition.topic == "clickstream":
                 cs_records.extend(records)
-            else:
+
+            elif topic_partition.topic == "gupshup_delivery_report":
+                gupshup_records.extend(records)
+
+            elif topic_partition.topic == "flutter_eventstream":
                 flutter_records.extend(records)
 
         if cs_records:
@@ -189,6 +218,17 @@ async def process_kafka_messages() -> None:
 
             flutter_records = []
             logging.debug(f"Collected {len(flutter_events)} flutter events")
+
+        if gupshup_records:
+            for record in gupshup_records:
+                events = generate_gupshup_events_from_records(record)
+                gupshup_events.extend(events)
+            gupshup_records = []
+            logging.debug(f"Gupshup events: {gupshup_events}")
+
+        if len(gupshup_events) >= GUPSHUP_MAX_RECORDS:
+            app.clickhouse.save_gupshup_events(gupshup_events)
+            logging.debug(f"Saved gupshup events {gupshup_events}")
 
         # Save events to ClickHouse
         if (len(events) + len(flutter_events)) >= MAX_RECORDS:

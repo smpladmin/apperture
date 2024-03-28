@@ -1,4 +1,5 @@
 import logging
+import os
 import clickhouse_connect
 from clickhouse_connect.driver.exceptions import DatabaseError
 
@@ -7,12 +8,22 @@ CLICKHOUSE_HOST = "clickhouse"
 CLICKHOUSE_PORT = 8123
 CLICKHOUSE_DATABASE = "default"
 CLICKHOUSE_TABLE = "clickstream"
+GUPSHUP_CLICKHOUSE_HOST = os.getenv("GUPSHUP_CLICKHOUSE_HOST")
+GUPSHUP_CLICKHOUSE_TABLE = os.getenv("GUPSHUP_CLICKHOUSE_TABLE")
+GUPSHUP_CLICKHOUSE_USER = os.getenv("GUPSHUP_CLICKHOUSE_USER")
+GUPSHUP_CLICKHOUSE_PASSWORD = os.getenv("GUPSHUP_CLICKHOUSE_PASSWORD")
 
 
 class ClickHouse:
     def connect(self):
         self.client = clickhouse_connect.get_client(
             host="clickhouse",
+            query_limit=0,
+        )
+        self.gupshup_ch_client = clickhouse_connect.get_client(
+            host=GUPSHUP_CLICKHOUSE_HOST,
+            user=GUPSHUP_CLICKHOUSE_USER,
+            password=GUPSHUP_CLICKHOUSE_PASSWORD,
             query_limit=0,
         )
         logging.debug("Connected to ClickHouse")
@@ -95,3 +106,24 @@ class ClickHouse:
             for event in events:
                 self._save_precision_events([event])
             logging.info("Saved sequentially")
+
+    def save_gupshup_events(self, gupshup_events):
+        """Saves gupshup events to Wiom's ClickHouse."""
+        logging.info(f"Saved {len(gupshup_events)} gupshup events.")
+        self.gupshup_ch_client.insert(
+            table=GUPSHUP_CLICKHOUSE_TABLE,
+            data=gupshup_events,
+            column_names=[
+                "external_id",
+                "event_type",
+                "timestamp",
+                "dest_addr",
+                "src_addr",
+                "cause",
+                "err_code",
+                "channel",
+                "no_of_frags",
+            ],
+            settings={"insert_async": True, "wait_for_async_insert": False},
+        )
+        logging.info(f"Saved {len(gupshup_events)} gupshup events.")
