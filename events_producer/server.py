@@ -110,7 +110,7 @@ async def capture_event(
 @app.post("/events/deliveryreport")
 async def capture_delivery_report(
     events: List[GupshupDeliveryReportEvent]
-) -> None :
+) -> Dict[str , int | str] :
     """Capture gupshup delivery report events and send them to kafka.
     Gupshup sends max 20 events at a time.
     """
