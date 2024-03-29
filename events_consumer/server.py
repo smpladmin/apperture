@@ -229,6 +229,7 @@ async def process_kafka_messages() -> None:
         if len(gupshup_events) >= GUPSHUP_MAX_RECORDS:
             app.clickhouse.save_gupshup_events(gupshup_events)
             logging.debug(f"Saved gupshup events {gupshup_events}")
+            gupshup_events = []
 
         # Save events to ClickHouse
         if (len(events) + len(flutter_events)) >= MAX_RECORDS:
