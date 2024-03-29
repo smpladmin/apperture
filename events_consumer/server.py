@@ -46,6 +46,7 @@ DEFAULT_EVENTS = [
 def save_events(events):
     """Saves events to ClickHouse."""
     logging.debug(f"Saving {len(events)} events")
+    logging.info(f"DEBUGGING: {events}")
     cs_events = [
         ClickStream.build(
             datasource_id=event["properties"]["token"],
