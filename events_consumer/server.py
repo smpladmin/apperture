@@ -46,7 +46,6 @@ DEFAULT_EVENTS = [
 def save_events(events):
     """Saves events to ClickHouse."""
     logging.debug(f"Saving {len(events)} events")
-    logging.info(f"DEBUGGING: {events}")
     cs_events = [
         ClickStream.build(
             datasource_id=event["properties"]["token"],
@@ -222,8 +221,8 @@ async def process_kafka_messages() -> None:
 
         if gupshup_records:
             for record in gupshup_records:
-                events = generate_gupshup_events_from_records(record)
-                gupshup_events.extend(events)
+                gs_events = generate_gupshup_events_from_records(record)
+                gupshup_events.extend(gs_events)
             gupshup_records = []
             logging.debug(f"Gupshup events: {gupshup_events}")
 
