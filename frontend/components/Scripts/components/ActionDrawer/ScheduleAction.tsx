@@ -76,7 +76,7 @@ const ScheduleAction = ({ schedule, setSchedule }: ScheduleActionProps) => {
       </RadioGroup>
       {frequency && (
         <Flex alignItems={'center'} gap={'3'}>
-          {frequency !== ActionFrequency.HOURLY && (
+          {frequency !== ActionFrequency.HOURLY && frequency !== ActionFrequency.QUARTER_HOURLY && frequency !== ActionFrequency.HALF_HOURLY && (
             <>
               <Text
                 fontSize={'xs-12'}

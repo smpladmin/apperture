@@ -13,9 +13,9 @@ export const isValidMeta = (
 ): meta is APIMeta | GoogleSheetMeta => {
   return Boolean(
     ((meta as APIMeta)?.url && (meta as APIMeta)?.headers) ||
-      (meta as TableMeta)?.name ||
-      ((meta as GoogleSheetMeta)?.spreadsheet &&
-        (meta as GoogleSheetMeta)?.sheet)
+    (meta as TableMeta)?.name ||
+    ((meta as GoogleSheetMeta)?.spreadsheet &&
+      (meta as GoogleSheetMeta)?.sheet)
   );
 };
 
@@ -30,6 +30,10 @@ export const isValidSchedule = (schedule: Schedule): boolean => {
 
   switch (frequency) {
     case ActionFrequency.HOURLY:
+      return true;
+    case ActionFrequency.QUARTER_HOURLY:
+      return true;
+    case ActionFrequency.HALF_HOURLY:
       return true;
     case ActionFrequency.DAILY:
       return !!(time && period);

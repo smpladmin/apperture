@@ -57,6 +57,10 @@ def get_cron_expression(
 def calculate_schedule(schedule: Schedule) -> str:
     if schedule.frequency == Frequency.HOURLY:
         return "0 * * * *"
+    if schedule.frequency == Frequency.QUARTER_HOURLY:
+        return "*/15 * * * *"
+    if schedule.frequency == Frequency.HALF_HOURLY:
+        return "*/30 * * * *"
 
     return get_cron_expression(
         time_str=schedule.time,
