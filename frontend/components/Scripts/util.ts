@@ -13,9 +13,9 @@ export const isValidMeta = (
 ): meta is APIMeta | GoogleSheetMeta => {
   return Boolean(
     ((meta as APIMeta)?.url && (meta as APIMeta)?.headers) ||
-    (meta as TableMeta)?.name ||
-    ((meta as GoogleSheetMeta)?.spreadsheet &&
-      (meta as GoogleSheetMeta)?.sheet)
+      (meta as TableMeta)?.name ||
+      ((meta as GoogleSheetMeta)?.spreadsheet &&
+        (meta as GoogleSheetMeta)?.sheet)
   );
 };
 
@@ -62,6 +62,10 @@ export const describeSchedule = (schedule: Schedule) => {
   switch (frequency) {
     case ActionFrequency.HOURLY:
       return 'Every Hour';
+    case ActionFrequency.QUARTER_HOURLY:
+      return 'Every 15 minutes';
+    case ActionFrequency.HALF_HOURLY:
+      return 'Every 30 minutes';
     case ActionFrequency.DAILY:
       return `Daily on ${time} ${period}`;
     case ActionFrequency.WEEKLY:
