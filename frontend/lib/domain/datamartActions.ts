@@ -25,6 +25,8 @@ export type TableMeta = {
 export type ActionMeta = APIMeta | GoogleSheetMeta | TableMeta;
 
 export enum ActionFrequency {
+  QUARTER_HOURLY = 'quarter_hourly',
+  HALF_HOURLY = 'half_hourly',
   HOURLY = 'hourly',
   DAILY = 'daily',
   WEEKLY = 'weekly',

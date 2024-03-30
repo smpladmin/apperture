@@ -15,6 +15,8 @@ class ActionType(str, Enum):
 
 
 class Frequency(str, Enum):
+    QUARTER_HOURLY = "quarter_hourly"
+    HALF_HOURLY = "half_hourly"
     HOURLY = "hourly"
     DAILY = "daily"
     WEEKLY = "weekly"

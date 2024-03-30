@@ -31,6 +31,10 @@ export const isValidSchedule = (schedule: Schedule): boolean => {
   switch (frequency) {
     case ActionFrequency.HOURLY:
       return true;
+    case ActionFrequency.QUARTER_HOURLY:
+      return true;
+    case ActionFrequency.HALF_HOURLY:
+      return true;
     case ActionFrequency.DAILY:
       return !!(time && period);
     case ActionFrequency.WEEKLY:
@@ -58,6 +62,10 @@ export const describeSchedule = (schedule: Schedule) => {
   switch (frequency) {
     case ActionFrequency.HOURLY:
       return 'Every Hour';
+    case ActionFrequency.QUARTER_HOURLY:
+      return 'Every 15 minutes';
+    case ActionFrequency.HALF_HOURLY:
+      return 'Every 30 minutes';
     case ActionFrequency.DAILY:
       return `Daily on ${time} ${period}`;
     case ActionFrequency.WEEKLY:
