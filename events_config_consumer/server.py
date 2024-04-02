@@ -144,11 +144,12 @@ def create_sparse_dataframe(
             result_dict[primary_key] = id_value
             result_dict[destination_column] = column_value
 
-    # add "latest_added_time" column as it is not mentioned in config but it needs to be there treated as modified_time
+    # Add "latest_added_time" column to the result dictionary.
+    # Since "latest_added_time" is not explicitly mentioned in the configuration, it's treated as equivalent to "modified_time".
+    # Therefore, set "latest_added_time" to the same value as "added_time".
     result_dict["latest_added_time"] = result_dict["added_time"]
 
     df_row = pd.DataFrame([result_dict], columns=df.columns)
-
     existing_row = df[df[primary_key].astype(int) == int(result_dict[primary_key])]
 
     if event_table_bucket.save_to_audit_table:
@@ -266,6 +267,8 @@ def fetch_values_from_kafka_records(
                 continue
 
             values = json.loads(record.value)
+            logging.info(f"Values for topic {topic}:: {values}")
+
             df, audit_df = create_sparse_dataframe(
                 df=df,
                 audit_df=audit_df,
