@@ -33,20 +33,10 @@ class ClickHouse:
         except DatabaseError as e:
             error_message = f"Error while saving events to {database}.{table}: {e}"
             logging.info(f"{error_message}")
-            logging.info("Trying to save recursively")
 
             self.alert_service.post_message_to_slack(
                 message=error_message, alert_type="Saving Events"
             )
-            self.rsave_events(
-                events=events,
-                columns=columns,
-                table=table,
-                database=database,
-                clickhouse_server_credential=clickhouse_server_credential,
-                app_id=app_id,
-            )
-            logging.info("Saving recursively ends")
 
     def rsave_events(
         self,

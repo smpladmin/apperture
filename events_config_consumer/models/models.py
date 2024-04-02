@@ -12,6 +12,7 @@ class ClickHouseCredentials(BaseModel):
 
 class EventTablesBucket(BaseModel):
     data: DataFrame
+    audit_data: DataFrame
     ch_db: str
     ch_table: str
     ch_server_credential: Union[ClickHouseCredentials, None]
