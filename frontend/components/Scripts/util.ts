@@ -49,7 +49,7 @@ export const isValidSchedule = (schedule: Schedule): boolean => {
 export const getTableName = (name: string) => {
   let fileName = name.trim();
 
-  const punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^_`{|}~]/g;
+  const punctuationRegex = /[!"#$%&'()*+,-./:;<=>?@[\]^`{|}~]/g;
   const tableNameWithoutPunctuation = fileName.replace(punctuationRegex, '');
   const tableName = tableNameWithoutPunctuation.split(/\s+/).join('_');
 
