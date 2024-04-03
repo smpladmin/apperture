@@ -160,6 +160,26 @@ def create_sparse_dataframe(
     if not existing_row.empty:
         for column in columns:
             if result_dict.get(column) is not None:
+                if column == "added_time":
+                    # Update added_time with the minimum value between existing and result_dict value
+                    result_dict[column] = (
+                        min(
+                            existing_row[column].iloc[0],
+                            format_date_string_to_desired_format(result_dict[column]),
+                        )
+                        if existing_row[column] is not None
+                        else result_dict[column]
+                    )
+                elif column == "latest_added_time":
+                    # Update latest_added_time with the maximum value between existing and result_dict value
+                    result_dict[column] = (
+                        max(
+                            existing_row[column].iloc[0],
+                            format_date_string_to_desired_format(result_dict[column]),
+                        )
+                        if existing_row[column] is not None
+                        else result_dict[column]
+                    )
                 df.loc[
                     df[primary_key].astype(str) == str(result_dict[primary_key]), column
                 ] = result_dict[column]
