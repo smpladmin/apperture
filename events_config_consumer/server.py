@@ -63,14 +63,58 @@ def format_date_string_to_desired_format(
     return None
 
 
+def typecast_columns(df, audit_df, columns_with_types):
+    for column, column_type in columns_with_types.items():
+        if column_type == "datetime64[ns]":
+            df[column] = df[column].apply(
+                lambda date: (
+                    format_date_string_to_desired_format(str(date))
+                    if pd.notnull(date)
+                    else None
+                )
+            )
+            audit_df[column] = audit_df[column].apply(
+                lambda date: (
+                    format_date_string_to_desired_format(str(date))
+                    if pd.notnull(date)
+                    else None
+                )
+            )
+
+        elif column_type == "object":
+            df[column] = df[column].apply(
+                lambda value: (
+                    json.loads(value)
+                    if pd.notnull(value) and isinstance(value, str)
+                    else value
+                )
+            )
+            audit_df[column] = audit_df[column].apply(
+                lambda value: (
+                    json.loads(value)
+                    if pd.notnull(value) and isinstance(value, str)
+                    else value
+                )
+            )
+        else:
+            df[column] = df[column].astype(column_type, errors="ignore")
+            audit_df[column] = audit_df[column].astype(column_type, errors="ignore")
+    # replace NaN values with None
+    df.replace({np.nan: None}, inplace=True)
+    audit_df.replace({np.nan: None}, inplace=True)
+
+    return df, audit_df
+
+
 def create_sparse_dataframe(
     df: pd.DataFrame,
+    audit_df: pd.DataFrame,
     values,
     columns_with_types: dict,
     event_table_bucket: EventTablesBucket,
     alert_service: AlertService,
 ):
-    event_name = values.get("eventName", values.get("event_name"))
+    event_name = values.get("eventName", "")
     primary_key = event_table_bucket.primary_key
     config = event_table_bucket.table_config
     result_dict = {}
@@ -100,45 +144,53 @@ def create_sparse_dataframe(
             result_dict[primary_key] = id_value
             result_dict[destination_column] = column_value
 
-    df_row = pd.DataFrame([result_dict])
-    existing_row = df[df[primary_key] == result_dict[primary_key]]
+    # Add "latest_added_time" column to the result dictionary.
+    # Since "latest_added_time" is not explicitly mentioned in the configuration, it's treated as equivalent to "modified_time".
+    # Therefore, set "latest_added_time" to the same value as "added_time".
+    result_dict["latest_added_time"] = result_dict["added_time"]
+
+    df_row = pd.DataFrame([result_dict], columns=df.columns)
+    existing_row = df[df[primary_key].astype(int) == int(result_dict[primary_key])]
+
+    if event_table_bucket.save_to_audit_table:
+        logging.info(f"Adding row {df_row} to audit df {audit_df.to_string()}")
+        audit_df = pd.concat([audit_df, df_row], ignore_index=True)
 
     # If id already exists in the DataFrame, update the row; otherwise, append the row
     if not existing_row.empty:
-        for column in columns[1:]:
+        for column in columns:
             if result_dict.get(column) is not None:
-                df.loc[df[primary_key] == result_dict[primary_key], column] = (
-                    result_dict[column]
-                )
+                if column == "added_time":
+                    # Update added_time with the minimum value between existing and result_dict value
+                    result_dict[column] = (
+                        min(
+                            existing_row[column].iloc[0],
+                            format_date_string_to_desired_format(result_dict[column]),
+                        )
+                        if existing_row[column] is not None
+                        else result_dict[column]
+                    )
+                elif column == "latest_added_time":
+                    # Update latest_added_time with the maximum value between existing and result_dict value
+                    result_dict[column] = (
+                        max(
+                            existing_row[column].iloc[0],
+                            format_date_string_to_desired_format(result_dict[column]),
+                        )
+                        if existing_row[column] is not None
+                        else result_dict[column]
+                    )
+                df.loc[
+                    df[primary_key].astype(str) == str(result_dict[primary_key]), column
+                ] = result_dict[column]
     else:
         df = pd.concat([df, df_row], ignore_index=True)
 
-    # typecast columns
-    for column, dtype in columns_with_types.items():
-        if dtype == "datetime64[ns]":
-            df[column] = df[column].apply(
-                lambda date: (
-                    format_date_string_to_desired_format(str(date))
-                    if pd.notnull(date)
-                    else None
-                )
-            )
-        elif dtype == "object":
-            df[column] = df[column].apply(
-                lambda value: (
-                    json.loads(value)
-                    if pd.notnull(value) and isinstance(value, str)
-                    else value
-                )
-            )
-        else:
-            df[column] = df[column].astype(dtype, errors="ignore")
+    df, audit_df = typecast_columns(
+        df=df, audit_df=audit_df, columns_with_types=columns_with_types
+    )
 
-    # replace nan values with None
-    df.replace({np.nan: None}, inplace=True)
-    logging.info(f"Sparse dataframe: {df}")
-
-    return df
+    return df, audit_df
 
 
 def convert_clickhouse_result_to_dict(primary_key_column, clickhouse_data):
@@ -156,42 +208,52 @@ def enrich_sparse_dataframe(
     ch_server_credential,
     app_id: str,
 ) -> pd.DataFrame:
-    # Find unique 'id' values with None values in any column in the DataFrame
-    ids_to_enrich = (
-        df[df.isna().any(axis=1) | ((df == "").any(axis=1))]
-        .dropna(subset=[primary_key_column])[primary_key_column]
-        .unique()
+    # Find unique 'id' values for primary key column in the DataFrame
+    clickhouse_data = event_tables_config.get_row_values(
+        id=primary_key_column,
+        id_values=df[primary_key_column].unique(),
+        table=table,
+        database=database,
+        ch_server_credential=ch_server_credential,
+        app_id=app_id,
     )
 
-    if len(ids_to_enrich):
-        clickhouse_data = event_tables_config.get_row_values(
-            id=primary_key_column,
-            id_values=ids_to_enrich,
-            table=table,
-            database=database,
-            ch_server_credential=ch_server_credential,
-            app_id=app_id,
-        )
+    clickhouse_dict = convert_clickhouse_result_to_dict(
+        primary_key_column=primary_key_column, clickhouse_data=clickhouse_data
+    )
 
-        clickhouse_dict = convert_clickhouse_result_to_dict(
-            primary_key_column=primary_key_column, clickhouse_data=clickhouse_data
-        )
+    # Update the DataFrame with the enriched values
+    for index, row in df.iterrows():
+        id_value = row[primary_key_column]
+        for column in df.columns:
+            # Skip primary key column
+            if column == primary_key_column:
+                continue
+            # For only None or empty string column value, replace it with data from ClickHouse result, otherwise keep it as it is
+            if (
+                pd.isnull(row[column])
+                or row[column] == ""
+                or column in ["added_time", "latest_added_time"]
+            ):
+                new_value = clickhouse_dict.get(id_value, {}).get(column, None)
+                if column == "added_time":
+                    # Update added_time with minimum value between existing ClickHouse value and one in df
+                    new_value = (
+                        min(row["added_time"], new_value)
+                        if new_value is not None
+                        else row["added_time"]
+                    )
+                elif column == "latest_added_time":
+                    # Update latest_added_time with maximum value between existing ClickHouse value and one in df
+                    new_value = (
+                        max(row["latest_added_time"], new_value)
+                        if new_value is not None
+                        else row["latest_added_time"]
+                    )
+                df.at[index, column] = new_value
 
-        # Update the DataFrame with the enriched values
-        for index, row in df.iterrows():
-            id_value = row[primary_key_column]
-            if id_value in ids_to_enrich:
-                for column in df.columns:
-                    # Skip primary key column
-                    if column == primary_key_column:
-                        continue
-                    # For only None or empty string column valuecolumn value, replace it with data from clickhouse result, otherwise keep it as it is
-                    if pd.isnull(row[column]) or row[column] == "":
-                        new_value = clickhouse_dict.get(id_value, {}).get(column, None)
-                        df.at[index, column] = new_value
-
-        logging.info(f"Enriched dataframe: {df}")
-        return df
+    logging.info(f"Enriched dataframe: {df.to_string()}")
+    return df
 
 
 def fetch_values_from_kafka_records(
@@ -211,10 +273,12 @@ def fetch_values_from_kafka_records(
 
         total_records += len(records)
         columns_with_types = event_table_bucket.columns_with_types
-        columns = list(columns_with_types.keys())
 
         primary_key = event_table_bucket.primary_key
-        df = pd.DataFrame(columns=columns)
+
+        # initialize df with topic's df so we dont loose intermediate values at any point of time
+        df = event_tables_config.event_tables[topic].data
+        audit_df = event_tables_config.event_tables[topic].audit_data
 
         for record in records:
             topic = record.topic
@@ -223,13 +287,19 @@ def fetch_values_from_kafka_records(
                 continue
 
             values = json.loads(record.value)
-            df = create_sparse_dataframe(
+            logging.info(f"Values for topic {topic}:: {values}")
+
+            df, audit_df = create_sparse_dataframe(
                 df=df,
+                audit_df=audit_df,
                 values=values,
                 columns_with_types=columns_with_types,
                 event_table_bucket=event_table_bucket,
                 alert_service=alert_service,
             )
+
+        logging.info(f"Sparse dataframe: {df.to_string()}")
+        logging.info(f"Audit dataframe: {audit_df.to_string()}")
 
         enrich_df = enrich_sparse_dataframe(
             df=df,
@@ -242,6 +312,7 @@ def fetch_values_from_kafka_records(
         )
 
         event_tables_config.event_tables[topic].data = enrich_df
+        event_tables_config.event_tables[topic].audit_data = audit_df
 
 
 def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesConfig):
@@ -252,6 +323,7 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
         table = bucket.ch_table
         database = bucket.ch_db
         table_data = bucket.data
+        audit_table_data = bucket.audit_data
         save_to_audit_table = bucket.save_to_audit_table
 
         if table_data is not None and not table_data.empty:
@@ -261,6 +333,7 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
             logging.info(
                 f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
             )
+            logging.info(f"Saving table data {data} in {database}.{table}")
 
             clickhouse.save_events(
                 events=data,
@@ -270,22 +343,31 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
                 clickhouse_server_credential=bucket.ch_server_credential,
                 app_id=bucket.app_id,
             )
+            event_tables_config.event_tables[topic].data = pd.DataFrame(columns=columns)
 
-            if save_to_audit_table:
-                audit_table = f"{table}_audit"
-                logging.info(f"Saving audit data {data} in {database}.{audit_table}")
-                clickhouse.save_events(
-                    events=data,
-                    columns=columns,
-                    table=audit_table,
-                    database=database,
-                    clickhouse_server_credential=bucket.ch_server_credential,
-                    app_id=bucket.app_id,
-                )
-            event_tables_config.event_tables[topic].data = pd.DataFrame()
-            logging.info(
-                "Successfully saved data to clickhouse, Emptying the topic bucket"
+        # Check if the data needs to be saved in audit table is not null or empty
+        if (
+            save_to_audit_table
+            and audit_table_data is not None
+            and not audit_table_data.empty
+        ):
+            audit_table = f"{table}_audit"
+            audit_data = audit_table_data.values.tolist()
+            columns = audit_table_data.columns.tolist()
+            logging.info(f"Saving audit data {audit_data} in {database}.{audit_table}")
+            clickhouse.save_events(
+                events=audit_data,
+                columns=columns,
+                table=audit_table,
+                database=database,
+                clickhouse_server_credential=bucket.ch_server_credential,
+                app_id=bucket.app_id,
             )
+
+            event_tables_config.event_tables[topic].audit_data = pd.DataFrame(
+                columns=columns
+            )
+        logging.info("Successfully saved data to clickhouse, Emptying the topic bucket")
 
 
 async def process_kafka_messages() -> None:
@@ -319,7 +401,7 @@ async def process_kafka_messages() -> None:
             alert_service=app.alert_service,
         )
 
-        if total_records > MAX_RECORDS:
+        if total_records >= MAX_RECORDS:
             logging.info(
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )

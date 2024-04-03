@@ -28,16 +28,7 @@ class ClickHouse:
             )
         except DatabaseError as e:
             logging.info(f"Exception saving events to ClickHouse: {e}")
-            logging.info("Trying to save recursively")
-            self.rsave_events(
-                events=events,
-                columns=columns,
-                table=table,
-                database=database,
-                clickhouse_server_credential=clickhouse_server_credential,
-                app_id=app_id,
-            )
-            logging.info("Saving recursively ends")
+            raise
 
     def rsave_events(
         self,
