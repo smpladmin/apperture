@@ -95,10 +95,10 @@ async def capture_event_logs(
 
     config = await service.get_config_for_datasource(datasource_id=datasource_id)
     if config:
-        logging.info(f"event config:--- {config}")
         event_config = config.get("event_source_destination_config", [])
         # Match event to config and send to corresponding Kafka topics
         matched_tables = match_event_to_config(event=event, config=event_config)
+        logging.info(f"{event['eventName']} sent to {matched_tables}")
         for table in matched_tables:
             table_topic = f"eventlogs_{datasource_id}_{table}"
             logging.info(f"Sending event {event} to Kafka topic: {table_topic}")
