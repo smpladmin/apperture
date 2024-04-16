@@ -196,10 +196,13 @@ const EventLogsIntegration = ({
   const validateJSON = () => {
     const isValidJson = Boolean(
       parsedJson &&
-        parsedJson.hasOwnProperty('event_source_destination_config') &&
-        parsedJson.hasOwnProperty('audit_config') &&
-        Array.isArray(parsedJson['event_source_destination_config']) &&
-        Array.isArray(parsedJson['audit_config'])
+        parsedJson.hasOwnProperty('events_table_config') &&
+        Object.values(parsedJson.events_table_config).every(
+          (table: any) =>
+            table.hasOwnProperty('id_path') &&
+            Array.isArray(table['events']) &&
+            Array.isArray(table['column_mapping'])
+        )
     );
 
     setIsJSONValidated(isValidJson);
