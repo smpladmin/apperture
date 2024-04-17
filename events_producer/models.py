@@ -16,4 +16,3 @@ class GupshupDeliveryReportEvent(BaseModel):
     cause: str
     errorCode: str
     channel: str
-    noOfFrags: int

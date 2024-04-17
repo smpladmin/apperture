@@ -122,7 +122,6 @@ class ClickHouse:
                 "cause",
                 "err_code",
                 "channel",
-                "no_of_frags",
             ],
             settings={"insert_async": True, "wait_for_async_insert": False},
         )

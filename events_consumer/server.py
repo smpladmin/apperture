@@ -146,7 +146,6 @@ def generate_gupshup_events_from_records(record):
             e["cause"],
             e["errorCode"],
             e["channel"],
-            e["noOfFrags"],
         )
         for e in events
     ]
