@@ -39,7 +39,11 @@ const DataMartTable = ({ data, headers, loading }: DataMartTableProps) => {
           {
             header: key.name,
             cell: (info) => {
-              return info.getValue();
+              const value = info.getValue();
+
+              if (typeof value === 'object')
+                return JSON.stringify(info.getValue());
+              return value;
             },
           }
         )
