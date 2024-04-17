@@ -14,6 +14,6 @@ class GupshupDeliveryReportEvent(BaseModel):
     destAddr: str
     srcAddr: str
     cause: str
-    errCode: str
+    errorCode: str
     channel: str
     noOfFrags: int

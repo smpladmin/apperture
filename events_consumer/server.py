@@ -144,7 +144,7 @@ def generate_gupshup_events_from_records(record):
             e["destAddr"],
             e["srcAddr"],
             e["cause"],
-            e["errCode"],
+            e["errorCode"],
             e["channel"],
             e["noOfFrags"],
         )
