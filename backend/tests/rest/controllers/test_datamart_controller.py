@@ -114,6 +114,7 @@ def test_compute_transient_datamart(
             "client": DatabaseClient.CLICKHOUSE,
             "query_id": None,
             "app_id": PydanticObjectId("636a1c61d715ca6baae65611"),
+            "skip_query_limit": False,
         }
     )
 

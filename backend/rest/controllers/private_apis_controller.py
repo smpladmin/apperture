@@ -455,7 +455,7 @@ async def push_to_sheet(
             datasourceId=str(datamart.datasource_id), query=datamart.query, is_sql=True
         )
         result = await compute_query_action.compute_query(
-            app_id=str(datamart.app_id), dto=compute_query_dto
+            app_id=str(datamart.app_id), dto=compute_query_dto, skip_query_limit=True
         )
 
         if dto.type == ActionType.GOOGLE_SHEET:

@@ -84,11 +84,11 @@ class QueryParser:
             ).strip()
 
         # Ignoring if order by already present in query string. Need to fix later.
-        if not re.search(r"\bORDER\s+BY\b", query_string, re.IGNORECASE):
-            query_string = (
-                query_string
-                + f" ORDER BY {','.join([str(i) for i in range(1, num_cols + 1)])}"
-            )
+        # if not re.search(r"\bORDER\s+BY\b", query_string, re.IGNORECASE):
+        #     query_string = (
+        #         query_string
+        #         + f" ORDER BY {','.join([str(i) for i in range(1, num_cols + 1)])}"
+        #     )
 
         if database_client == DatabaseClient.MSSQL:
             pattern = r"(?i)\bTOP\s*\(\s*\d+\s*\)"
