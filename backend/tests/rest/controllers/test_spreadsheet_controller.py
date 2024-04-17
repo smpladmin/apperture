@@ -48,6 +48,7 @@ async def test_compute_transient_spreadsheets_with_credentials(
             "client": DatabaseClient.CLICKHOUSE,
             "query_id": None,
             "app_id": "636a1c61d715ca6baae65611",
+            "skip_query_limit": False,
         }
     )
     datasource_service.get_datasource.assert_called_with("23412414123123")
@@ -105,6 +106,7 @@ async def test_compute_transient_spreadsheets(
             "client": DatabaseClient.CLICKHOUSE,
             "query_id": None,
             "app_id": "636a1c61d715ca6baae65611",
+            "skip_query_limit": False,
         }
     )
     datasource_service.get_datasource.assert_called_with("23412414123123")

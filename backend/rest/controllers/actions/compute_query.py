@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union
+from typing import List, Optional, Union
 
 from clickhouse_connect.driver.exceptions import DatabaseError
 from fastapi import Depends, HTTPException
@@ -93,6 +93,7 @@ class ComputeQueryAction:
         credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
         client: DatabaseClient,
         query_id: Union[str, None] = None,
+        skip_query_limit: Optional[bool] = False,
     ) -> ComputedSpreadsheet:
         return await self.spreadsheets_service.get_transient_spreadsheets(
             app_id=app_id,
@@ -100,9 +101,15 @@ class ComputeQueryAction:
             credential=credential,
             query_id=query_id,
             client=client,
+            skip_query_limit=skip_query_limit,
         )
 
-    async def compute_query(self, app_id: str, dto: TransientSpreadsheetsDto):
+    async def compute_query(
+        self,
+        app_id: str,
+        dto: TransientSpreadsheetsDto,
+        skip_query_limit: Optional[bool] = False,
+    ):
         try:
             logging.info(f"Query: {dto.query}")
             credential = await self.get_credentials(
@@ -121,6 +128,7 @@ class ComputeQueryAction:
                     credential=credential,
                     client=client,
                     query_id=dto.query_id,
+                    skip_query_limit=skip_query_limit,
                 )
             return await self.get_transient_spreadsheets(
                 app_id=app_id,
@@ -128,6 +136,7 @@ class ComputeQueryAction:
                 credential=credential,
                 client=client,
                 query_id=dto.query_id,
+                skip_query_limit=skip_query_limit,
             )
         except BusinessError as e:
             raise HTTPException(

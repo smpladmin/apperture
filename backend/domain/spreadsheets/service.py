@@ -1,6 +1,6 @@
 import re
 from datetime import datetime
-from typing import List, Union
+from typing import List, Optional, Union
 
 from beanie import PydanticObjectId
 from fastapi import Depends, HTTPException
@@ -92,23 +92,27 @@ class SpreadsheetService:
         credential: Union[ClickHouseCredential, MySQLCredential, MsSQLCredential],
         query_id: Union[str, None] = None,
         client: DatabaseClient = DatabaseClient.CLICKHOUSE,
+        skip_query_limit: Optional[bool] = False,
     ) -> ComputedSpreadsheet:
         query = self.cleanse_query_string(query)
-        query = self.parser.assign_query_limit(
-            query_string=query, database_client=client
-        )
+        if not skip_query_limit:
+            query = self.parser.assign_query_limit(
+                query_string=query, database_client=client
+            )
         try:
             if client == DatabaseClient.CLICKHOUSE:
                 result = (
                     await self.spreadsheets.execute_query_for_app_restricted_clients(
                         app_id=app_id,
                         query=query,
-                        settings={
-                            "replace_running_query": 1,
-                            "query_id": query_id,
-                        }
-                        if query_id
-                        else None,
+                        settings=(
+                            {
+                                "replace_running_query": 1,
+                                "query_id": query_id,
+                            }
+                            if query_id
+                            else None
+                        ),
                         parameters={},
                     )
                 )

@@ -40,6 +40,7 @@ def test_compute_transient_result(
             "client": DatabaseClient.CLICKHOUSE,
             "query_id": None,
             "app_id": "635ba034807ab86d8a2aadd9",
+            "skip_query_limit": False,
         }
     )
 

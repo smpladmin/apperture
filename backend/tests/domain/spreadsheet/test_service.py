@@ -38,6 +38,7 @@ class TestSpreadsheetService:
         WHERE timestamp>=toDate(2023-02-11)"""
         self.cleaned_query = "SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11)"
         self.cleaned_query_with_limit = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11) ORDER BY 1 LIMIT 500"""
+        self.cleaned_query_with_limit_without_order = """SELECT  event_name          FROM  events         WHERE timestamp>=toDate(2023-02-11) LIMIT 500"""
         self.spreadsheet.get_transient_spreadsheet = MagicMock()
         self.column_names = ["event_name"]
         self.result_set = [
@@ -278,7 +279,7 @@ class TestSpreadsheetService:
         assert result == ComputedSpreadsheet(
             headers=self.column_names,
             data=self.result_set,
-            sql=self.cleaned_query_with_limit,
+            sql=self.cleaned_query_with_limit_without_order,
         )
 
     def test_build_workbook(self):
@@ -513,7 +514,7 @@ class TestSpreadsheetService:
 
         self.spreadsheet.get_vlookup.assert_called_once_with(
             app_id="test-app-id",
-            search_query="test search query ORDER BY  LIMIT 500",
+            search_query="test search query LIMIT 500",
             lookup_query="test lookup query",
             lookup_column="lookup_column",
             lookup_index_column="lookup_index_column",
