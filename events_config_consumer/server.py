@@ -159,9 +159,8 @@ def create_sparse_dataframe(
 
     # Add "latest_added_time" column to the result dictionary.
     # Since "latest_added_time" is not explicitly mentioned in the configuration, it's treated as equivalent to "modified_time".
-    # Therefore, set "latest_added_time" to the same value as "added_time".
+    # Therefore, intialize "latest_added_time" with "added_time" and later update it.
     result_dict["latest_added_time"] = result_dict["added_time"]
-
     result_dict = convert_lists_and_dicts_to_strings(result_dict, columns_with_types)
 
     df_row = pd.DataFrame([result_dict], columns=df.columns)
@@ -354,13 +353,13 @@ def fetch_values_from_kafka_records(
                 continue
 
             values = json.loads(record.value)
-            logging.info(f"Values for topic {topic}:: {values}")
+            logging.info(f"Values for topic {topic}::{values}")
             events_config = event_tables_config.events_config
             destination_tables = get_destination_tables_for_event(
                 event_name=values["eventName"], config=events_config
             )
             if not destination_tables:
-                logging.warning(f"No destination tables found for {event}.")
+                logging.info(f"No destination tables found for {values}.")
                 continue
 
             # Group events into distinct buckets depending on their destination tables in the configuration.
