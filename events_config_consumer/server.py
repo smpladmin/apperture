@@ -29,6 +29,7 @@ MAX_POLL_INTERVAL_MS = settings.max_poll_interval_ms
 logging.getLogger().setLevel(logging.INFO)
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 logging.info(f"AUTO_OFFSET_RESET: {AUTO_OFFSET_RESET}")
+logging.info(f"MAX_POLL_INTERVAL_MS: {MAX_POLL_INTERVAL_MS}")
 
 total_records = 0
 
@@ -403,7 +404,9 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
             logging.info(
                 f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
             )
-            logging.info(f"Saving table data {data} in {database}.{table}")
+            logging.info(
+                f"Saving table data {data} in {database}.{table} with columns {columns}"
+            )
 
             clickhouse.save_events(
                 events=data,
