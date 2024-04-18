@@ -1,6 +1,7 @@
 import asyncio
 from datetime import datetime
 import json
+import ast
 import logging
 from cache import init_cache
 from clickhouse.clickhouse import ClickHouse
@@ -37,6 +38,8 @@ def format_date_string_to_desired_format(
     date_formats = [
         "%Y-%m-%dT%H:%M:%S.%fZ",
         "%Y-%m-%dT%H:%M:%S.%f",
+        "%Y-%m-%dT%H:%M:%SZ",
+        "%Y-%m-%dT%H:%M:%S",
         "%Y-%m-%d %H:%M:%S.%f",
         "%Y-%m-%d %H:%M:%S",
         "%d-%m-%Y %H:%M",
@@ -63,6 +66,22 @@ def format_date_string_to_desired_format(
     return None
 
 
+def convert_string_value_to_object(value):
+    """
+    The string representation '["i1"]' can be successfully parsed by json.loads(),
+    but the string representation "['i1']" will fail due to the use of single quotes instead
+    of double quotes around strings, causing a JSONDecodeError. In such cases, ast.literal_eval()
+    can be used as a fallback to handle the conversion.
+    """
+    try:
+        return json.loads(value)
+    except (json.JSONDecodeError, TypeError, ValueError):
+        try:
+            return ast.literal_eval(value)
+        except (SyntaxError, ValueError):
+            return value
+
+
 def typecast_columns(df, audit_df, columns_with_types):
     for column, column_type in columns_with_types.items():
         if column_type == "datetime64[ns]":
@@ -82,23 +101,12 @@ def typecast_columns(df, audit_df, columns_with_types):
             )
 
         elif column_type == "object":
-            df[column] = df[column].apply(
-                lambda value: (
-                    json.loads(value)
-                    if pd.notnull(value) and isinstance(value, str)
-                    else value
-                )
-            )
-            audit_df[column] = audit_df[column].apply(
-                lambda value: (
-                    json.loads(value)
-                    if pd.notnull(value) and isinstance(value, str)
-                    else value
-                )
-            )
+            df[column] = df[column].apply(convert_string_value_to_object)
+            audit_df[column] = audit_df[column].apply(convert_string_value_to_object)
         else:
             df[column] = df[column].astype(column_type, errors="ignore")
             audit_df[column] = audit_df[column].astype(column_type, errors="ignore")
+
     # replace NaN values with None
     df.replace({np.nan: None}, inplace=True)
     audit_df.replace({np.nan: None}, inplace=True)
@@ -106,54 +114,60 @@ def typecast_columns(df, audit_df, columns_with_types):
     return df, audit_df
 
 
+def convert_lists_and_dicts_to_strings(dictionary, columns_with_types):
+    """
+    Convert any lists or dictionaries in the dictionary to their string representations
+    """
+    converted_dict = {}
+    for key, value in dictionary.items():
+        col_type = columns_with_types.get(key)
+        if isinstance(value, (list, dict)):
+            converted_dict[key] = str(value)
+        else:
+            converted_dict[key] = value
+    return converted_dict
+
+
 def create_sparse_dataframe(
     df: pd.DataFrame,
     audit_df: pd.DataFrame,
-    values,
+    event,
     columns_with_types: dict,
     event_table_bucket: EventTablesBucket,
-    alert_service: AlertService,
 ):
-    event_name = values.get("eventName", "")
     primary_key = event_table_bucket.primary_key
     config = event_table_bucket.table_config
     result_dict = {}
     columns = list(columns_with_types.keys())
 
-    for item in config:
-        if item["event"] == event_name:
-            id_path = item["id_path"]
-            source_path = item["source_path"]
-            destination_column = item["destination_column"]
+    id_path = config["id_path"]
+    column_mapping = config["column_mapping"]
 
-            # Extracting id from id_path
-            try:
-                jsonpath_expr_id = parse(id_path)
-                id_value = [match.value for match in jsonpath_expr_id.find(values)][0]
-            except:
-                error_message = f"Id at path {id_path} not found for event {values}."
-                alert_service.post_message_to_slack(
-                    message=error_message, alert_type="Invalid ID"
-                )
+    for column in column_mapping:
+        jsonpath_expr_id = parse(id_path)
+        id_value = [match.value for match in jsonpath_expr_id.find(event)][0]
 
-            # Extracting value from source_path
-            jsonpath_expr_value = parse(source_path)
-            value = [match.value for match in jsonpath_expr_value.find(values)]
-            column_value = value[0] if value else None
+        destination_column, source_path = list(column.items())[0]
 
-            result_dict[primary_key] = id_value
-            result_dict[destination_column] = column_value
+        # Extracting value from source_path
+        jsonpath_expr_value = parse(source_path)
+        value = [match.value for match in jsonpath_expr_value.find(event)]
+        column_value = value[0] if value else None
+
+        result_dict[primary_key] = id_value
+        result_dict[destination_column] = column_value
 
     # Add "latest_added_time" column to the result dictionary.
     # Since "latest_added_time" is not explicitly mentioned in the configuration, it's treated as equivalent to "modified_time".
-    # Therefore, set "latest_added_time" to the same value as "added_time".
+    # Therefore, intialize "latest_added_time" with "added_time" and later update it.
     result_dict["latest_added_time"] = result_dict["added_time"]
+    result_dict = convert_lists_and_dicts_to_strings(result_dict, columns_with_types)
 
     df_row = pd.DataFrame([result_dict], columns=df.columns)
-    existing_row = df[df[primary_key].astype(int) == int(result_dict[primary_key])]
+    existing_row = df[df[primary_key].astype(str) == str(result_dict[primary_key])]
 
     if event_table_bucket.save_to_audit_table:
-        logging.info(f"Adding row {df_row} to audit df {audit_df.to_string()}")
+        logging.info(f"Adding row {df_row.to_string()}.")
         audit_df = pd.concat([audit_df, df_row], ignore_index=True)
 
     # If id already exists in the DataFrame, update the row; otherwise, append the row
@@ -185,7 +199,6 @@ def create_sparse_dataframe(
                 ] = result_dict[column]
     else:
         df = pd.concat([df, df_row], ignore_index=True)
-
     df, audit_df = typecast_columns(
         df=df, audit_df=audit_df, columns_with_types=columns_with_types
     )
@@ -252,8 +265,78 @@ def enrich_sparse_dataframe(
                     )
                 df.at[index, column] = new_value
 
-    logging.info(f"Enriched dataframe: {df.to_string()}")
     return df
+
+
+def get_destination_tables_for_event(event_name, config):
+    table_names = []
+    for table_name, table_config in config.items():
+        if event_name in table_config.get("events", []):
+            table_names.append(table_name)
+    return table_names
+
+
+def process_event_buckets(
+    event_tables_config: EventTablesConfig, alert_service: AlertService
+):
+    """
+    Process event buckets stored in the event tables configuration.
+    """
+    for topic, bucket in event_tables_config.event_tables.items():
+        table = bucket.ch_table
+        events = bucket.events
+        columns_with_types = bucket.columns_with_types
+        primary_key = bucket.primary_key
+        table_config = bucket.table_config
+
+        # Initialize DataFrames with topic's data to avoid losing intermediate values
+        df = bucket.data
+        audit_df = bucket.audit_data
+
+        for event in events:
+            id_path = table_config["id_path"]
+            jsonpath_expr_id = parse(id_path)
+            value = [match.value for match in jsonpath_expr_id.find(event)]
+            id_value = value[0] if value else None
+
+            if not id_value:
+                error_message = f"Id at path {id_path} not found for event {event}."
+                logging.info(error_message)
+                alert_service.post_message_to_slack(
+                    message=error_message, alert_type="Invalid ID"
+                )
+                continue
+
+            df, audit_df = create_sparse_dataframe(
+                df=df,
+                audit_df=audit_df,
+                event=event,
+                columns_with_types=columns_with_types,
+                event_table_bucket=bucket,
+            )
+
+        logging.info(f"Sparse dataframe: {df.to_string()}")
+        logging.info(f"Audit dataframe: {audit_df.to_string()}")
+
+        if df.empty:
+            logging.info("Empty sparse dataframe. Skip enrichment.")
+            continue
+
+        enrich_df = enrich_sparse_dataframe(
+            df=df,
+            primary_key_column=primary_key,
+            table=table,
+            event_tables_config=event_tables_config,
+            database=bucket.ch_db,
+            ch_server_credential=bucket.ch_server_credential,
+            app_id=bucket.app_id,
+        )
+
+        logging.info(f"Enriched dataframe: {df.to_string()}")
+
+        bucket.data = enrich_df
+        bucket.audit_data = audit_df
+        bucket.events = []
 
 
 def fetch_values_from_kafka_records(
@@ -262,57 +345,31 @@ def fetch_values_from_kafka_records(
     global total_records
 
     for topic_partition, records in data.items():
-        topic = topic_partition.topic
-
-        if not event_tables_config.event_tables.get(topic):
-            logging.info(f"Bucket not found for topic: {topic}")
-            continue
-
-        event_table_bucket = event_tables_config.event_tables.get(topic)
-        table = event_table_bucket.ch_table
-
         total_records += len(records)
-        columns_with_types = event_table_bucket.columns_with_types
-
-        primary_key = event_table_bucket.primary_key
-
-        # initialize df with topic's df so we dont loose intermediate values at any point of time
-        df = event_tables_config.event_tables[topic].data
-        audit_df = event_tables_config.event_tables[topic].audit_data
 
         for record in records:
             topic = record.topic
-
             if not record.value:
                 continue
 
             values = json.loads(record.value)
-            logging.info(f"Values for topic {topic}:: {values}")
-
-            df, audit_df = create_sparse_dataframe(
-                df=df,
-                audit_df=audit_df,
-                values=values,
-                columns_with_types=columns_with_types,
-                event_table_bucket=event_table_bucket,
-                alert_service=alert_service,
+            logging.info(f"Values for topic {topic}::{values}")
+            events_config = event_tables_config.events_config
+            destination_tables = get_destination_tables_for_event(
+                event_name=values["eventName"], config=events_config
             )
+            if not destination_tables:
+                logging.info(f"No destination tables found for {values}.")
+                continue
 
-        logging.info(f"Sparse dataframe: {df.to_string()}")
-        logging.info(f"Audit dataframe: {audit_df.to_string()}")
+            # Group events into distinct buckets depending on their destination tables in the configuration.
+            for table in destination_tables:
+                table_topic = f"{topic}_{table}"
+                event_tables_config.event_tables[table_topic].events.append(values)
 
-        enrich_df = enrich_sparse_dataframe(
-            df=df,
-            primary_key_column=primary_key,
-            table=table,
-            event_tables_config=event_tables_config,
-            database=event_table_bucket.ch_db,
-            ch_server_credential=event_table_bucket.ch_server_credential,
-            app_id=event_table_bucket.app_id,
+        process_event_buckets(
+            event_tables_config=event_tables_config, alert_service=alert_service
         )
-
-        event_tables_config.event_tables[topic].data = enrich_df
-        event_tables_config.event_tables[topic].audit_data = audit_df
 
 
 def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesConfig):
@@ -376,7 +433,7 @@ async def process_kafka_messages() -> None:
     logging.info(f"Event Configs: {app.event_tables_config.event_tables}")
     consumer = AIOKafkaConsumer(
         *app.event_tables_config.topics,
-        group_id="event_logs",
+        group_id="events_config",
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,

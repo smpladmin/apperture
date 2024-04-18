@@ -13,7 +13,6 @@ from domain.event_logs.service import EventLogsService
 from rest.middlewares.validate_app_api_key import (
     validate_app_api_key,
 )
-from jsonpath_ng import parse
 
 load_dotenv()
 logging.getLogger().setLevel(logging.INFO)
@@ -54,23 +53,6 @@ async def shutdown_event():
     await producer.stop()
 
 
-def match_event_to_config(event, config):
-    matched_tables = set()
-
-    for config_item in config:
-
-        event_name_match = config_item["event"] == event["eventName"]
-        id_path_expr = parse(config_item["id_path"])
-        id_path_values = [match.value for match in id_path_expr.find(event)]
-
-        values_present_and_not_empty = bool(id_path_values) and all(
-            value is not None and value != "" for value in id_path_values
-        )
-        if event_name_match and values_present_and_not_empty:
-            matched_tables.add(config_item["destination_table"])
-    return list(matched_tables)
-
-
 @app.post(
     "/eventlogs",
     dependencies=[Depends(validate_app_api_key)],
@@ -78,7 +60,8 @@ def match_event_to_config(event, config):
 async def capture_event_logs(
     datasource_id: str, dto: EventLogsDto, service: EventLogsService = Depends()
 ):
-    kafka_topic = f"eventlogs_{datasource_id}"
+    log_kafka_topic = f"eventlogs_{datasource_id}"
+    config_kafka_topic = f"eventconfig_{datasource_id}"
     # update data with datasource_id to track apperture datasource associated with log stream
     event = {
         "eventName": dto.event.eventName,
@@ -93,17 +76,10 @@ async def capture_event_logs(
     }
     value = json.dumps(event)
 
-    config = await service.get_config_for_datasource(datasource_id=datasource_id)
-    if config:
-        event_config = config.get("event_source_destination_config", [])
-        # Match event to config and send to corresponding Kafka topics
-        matched_tables = match_event_to_config(event=event, config=event_config)
-        logging.info(f"{event['eventName']} sent to {matched_tables}")
-        for table in matched_tables:
-            table_topic = f"eventlogs_{datasource_id}_{table}"
-            logging.info(f"Sending event {event} to Kafka topic: {table_topic}")
-            await producer.send_and_wait(table_topic, value=value.encode("utf-8"))
+    await producer.send_and_wait(log_kafka_topic, value=value.encode("utf-8"))
+    logging.info(f"Sending event {event} to log kafka topic: {log_kafka_topic}")
 
-    logging.info(f"Sending event {event} to default Kafka topic: {kafka_topic}")
-    await producer.send_and_wait(kafka_topic, value=value.encode("utf-8"))
+    await producer.send_and_wait(config_kafka_topic, value=value.encode("utf-8"))
+    logging.info(f"Sending event {event} to config kafka topic: {config_kafka_topic}")
+
     return {"status": "ok"}

@@ -1,4 +1,4 @@
-from typing import Union
+from typing import List, Union
 from pandas import DataFrame
 from pydantic import BaseModel
 
@@ -11,13 +11,14 @@ class ClickHouseCredentials(BaseModel):
 
 
 class EventTablesBucket(BaseModel):
+    events: List[dict]
     data: DataFrame
     audit_data: DataFrame
     ch_db: str
     ch_table: str
     ch_server_credential: Union[ClickHouseCredentials, None]
     app_id: str
-    table_config: list
+    table_config: dict
     columns_with_types: dict
     primary_key: str
     save_to_audit_table: bool
