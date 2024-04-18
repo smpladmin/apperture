@@ -87,16 +87,24 @@ def typecast_columns(df, audit_df, columns_with_types):
         if column_type == "datetime64[ns]":
             df[column] = df[column].apply(
                 lambda date: (
-                    format_date_string_to_desired_format(str(date))
-                    if pd.notnull(date)
-                    else None
+                    date
+                    if isinstance(date, datetime)
+                    else (
+                        format_date_string_to_desired_format(str(date))
+                        if pd.notnull(date)
+                        else None
+                    )
                 )
             )
             audit_df[column] = audit_df[column].apply(
                 lambda date: (
-                    format_date_string_to_desired_format(str(date))
-                    if pd.notnull(date)
-                    else None
+                    date
+                    if isinstance(date, datetime)
+                    else (
+                        format_date_string_to_desired_format(str(date))
+                        if pd.notnull(date)
+                        else None
+                    )
                 )
             )
 
@@ -121,7 +129,11 @@ def convert_lists_and_dicts_to_strings(dictionary, columns_with_types):
     converted_dict = {}
     for key, value in dictionary.items():
         col_type = columns_with_types.get(key)
-        if isinstance(value, (list, dict)):
+        # If the column type is "string" and the value coming from upstream is not a string,
+        # convert the value to a string
+        if col_type == "string" and not isinstance(value, str):
+            converted_dict[key] = str(value)
+        elif isinstance(value, (list, dict)):
             converted_dict[key] = str(value)
         else:
             converted_dict[key] = value
