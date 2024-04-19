@@ -36,6 +36,7 @@ logging.info(f"MAX_POLL_INTERVAL_MS: {MAX_POLL_INTERVAL_MS}")
 logging.info(f"SESSION_TIMEOUT_MS: {SESSION_TIMEOUT_MS}")
 logging.info(f"HEARTBEAT_INTERVAL_MS: {HEARTBEAT_INTERVAL_MS}")
 logging.info(f"REQUEST_TIMEOUT_MS: {REQUEST_TIMEOUT_MS}")
+logging.info(f"TIMEOUT_MS: {TIMEOUT_MS}")
 
 total_records = 0
 
