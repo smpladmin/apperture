@@ -133,7 +133,7 @@ def convert_lists_and_dicts_to_strings(dictionary, columns_with_types):
         col_type = columns_with_types.get(key)
         # If the column type is "string" and the value coming from upstream is not a string,
         # convert the value to a string
-        if col_type == "string" and not isinstance(value, str):
+        if col_type == "string" and value is not None and not isinstance(value, str):
             converted_dict[key] = str(value)
         elif isinstance(value, (list, dict)):
             converted_dict[key] = str(value)
