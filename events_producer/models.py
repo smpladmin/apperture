@@ -17,3 +17,7 @@ class GupshupDeliveryReportEvent(BaseModel):
     errorCode: str
     channel: str
     noOfFrags: int = 0
+
+
+class GupshupDeliveryReportEventObject(BaseModel):
+    response: list[GupshupDeliveryReportEvent]

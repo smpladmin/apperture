@@ -3,7 +3,7 @@ import logging
 import os
 from typing import List, Union, Callable
 
-from fastapi import FastAPI, Form, Response
+from fastapi import FastAPI, Form, HTTPException, Response
 from fastapi.middleware.cors import CORSMiddleware
 from aiokafka import AIOKafkaProducer
 from dotenv import load_dotenv
@@ -13,7 +13,11 @@ from starlette.types import Message
 from starlette.requests import Request
 from starlette.middleware.base import BaseHTTPMiddleware
 import gzip
-from models import FlutterBatchData, GupshupDeliveryReportEvent
+from models import (
+    FlutterBatchData,
+    GupshupDeliveryReportEvent,
+    GupshupDeliveryReportEventObject,
+)
 
 load_dotenv()
 logging.getLogger().setLevel(logging.INFO)
@@ -109,10 +113,19 @@ async def capture_event(
 
 
 @app.post("/events/deliveryreport")
-async def capture_delivery_report(events: List[GupshupDeliveryReportEvent]):
+async def capture_delivery_report(
+    payload: Union[List[GupshupDeliveryReportEvent], GupshupDeliveryReportEventObject]
+):
     """Capture gupshup delivery report events and send them to kafka.
     Gupshup sends max 20 events at a time.
     """
+    if isinstance(payload, list):
+        events = payload
+    elif isinstance(payload, GupshupDeliveryReportEventObject):
+        events = payload.response
+    else:
+        raise HTTPException(status_code=400, detail="Invalid payload format")
+
     data = [e.dict() for e in events]
 
     await producer.send_and_wait(
