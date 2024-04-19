@@ -460,17 +460,17 @@ async def process_kafka_messages() -> None:
     logging.info(f"Event Configs: {app.event_tables_config.event_tables}")
     consumer = AIOKafkaConsumer(
         *app.event_tables_config.topics,
-        group_id="events_config",
+        group_id="event_logs",
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
         auto_offset_reset=AUTO_OFFSET_RESET,
+        max_poll_interval_ms=MAX_POLL_INTERVAL_MS,
+        heartbeat_interval_ms=HEARTBEAT_INTERVAL_MS,
+        session_timeout_ms=SESSION_TIMEOUT_MS,
+        request_timeout_ms=REQUEST_TIMEOUT_MS,
     )
-    # max_poll_interval_ms=MAX_POLL_INTERVAL_MS,
-    # heartbeat_interval_ms=HEARTBEAT_INTERVAL_MS,
-    # session_timeout_ms=SESSION_TIMEOUT_MS,
-    # request_timeout_ms=REQUEST_TIMEOUT_MS,
 
     global total_records
     await consumer.start()
