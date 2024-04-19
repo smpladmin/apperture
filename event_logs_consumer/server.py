@@ -19,9 +19,9 @@ load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1"))
-MAX_POLL_INTERVAL_MS = int(os.getenv("MAX_RECORDS", "300000"))
-SESSION_TIMEOUT_MS = int(os.getenv("MAX_RECORDS", "30000"))
-HEARTBEAT_INTERVAL_MS = int(os.getenv("MAX_RECORDS", "3000"))
+MAX_POLL_INTERVAL_MS = int(os.getenv("MAX_POLL_INTERVAL_MS", "300000"))
+SESSION_TIMEOUT_MS = int(os.getenv("SESSION_TIMEOUT_MS", "30000"))
+HEARTBEAT_INTERVAL_MS = int(os.getenv("HEARTBEAT_INTERVAL_MS", "3000"))
 
 
 logging.getLogger().setLevel(logging.INFO)
