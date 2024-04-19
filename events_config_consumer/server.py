@@ -27,13 +27,15 @@ AUTO_OFFSET_RESET = settings.auto_offset_reset
 MAX_POLL_INTERVAL_MS = settings.max_poll_interval_ms
 SESSION_TIMEOUT_MS = settings.session_timeout_ms
 HEARTBEAT_INTERVAL_MS = settings.heartbeat_interval_ms
+REQUEST_TIMEOUT_MS = settings.request_timeout_ms
 
 logging.getLogger().setLevel(logging.INFO)
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 logging.info(f"AUTO_OFFSET_RESET: {AUTO_OFFSET_RESET}")
 logging.info(f"MAX_POLL_INTERVAL_MS: {MAX_POLL_INTERVAL_MS}")
-logging.info(f"SESSION_TIMEOUT_MS: {MAX_POLL_INTERVAL_MS}")
+logging.info(f"SESSION_TIMEOUT_MS: {SESSION_TIMEOUT_MS}")
 logging.info(f"HEARTBEAT_INTERVAL_MS: {HEARTBEAT_INTERVAL_MS}")
+logging.info(f"REQUEST_TIMEOUT_MS: {REQUEST_TIMEOUT_MS}")
 
 total_records = 0
 
@@ -467,6 +469,7 @@ async def process_kafka_messages() -> None:
         max_poll_interval_ms=MAX_POLL_INTERVAL_MS,
         heartbeat_interval_ms=HEARTBEAT_INTERVAL_MS,
         session_timeout_ms=SESSION_TIMEOUT_MS,
+        request_timeout_ms=REQUEST_TIMEOUT_MS,
     )
 
     global total_records
