@@ -30,7 +30,7 @@ logging.getLogger().setLevel(logging.INFO)
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 logging.info(f"MAX_POLL_INTERVAL_MS: {MAX_POLL_INTERVAL_MS}")
-logging.info(f"SESSION_TIMEOUT_MS: {MAX_POLL_INTERVAL_MS}")
+logging.info(f"SESSION_TIMEOUT_MS: {SESSION_TIMEOUT_MS}")
 logging.info(f"HEARTBEAT_INTERVAL_MS: {HEARTBEAT_INTERVAL_MS}")
 
 total_records = 0
