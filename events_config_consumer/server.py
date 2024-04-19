@@ -279,6 +279,11 @@ def enrich_sparse_dataframe(
                     )
                 df.at[index, column] = new_value
 
+    # Replace '<NA>' with None
+    df.replace("<NA>", None, inplace=True)
+    df.replace(pd.NA, None, inplace=True)
+    df.replace({np.nan: None}, inplace=True)
+
     return df
 
 
