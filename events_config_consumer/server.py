@@ -24,6 +24,7 @@ TIMEOUT_MS = settings.timeout_ms
 MAX_RECORDS = settings.max_records
 KAFKA_BOOTSTRAP_SERVERS = settings.kafka_bootstrap_servers.split(",")
 AUTO_OFFSET_RESET = settings.auto_offset_reset
+MAX_POLL_RECORDS = settings.max_poll_records
 MAX_POLL_INTERVAL_MS = settings.max_poll_interval_ms
 SESSION_TIMEOUT_MS = settings.session_timeout_ms
 HEARTBEAT_INTERVAL_MS = settings.heartbeat_interval_ms
@@ -36,6 +37,7 @@ logging.info(f"MAX_POLL_INTERVAL_MS: {MAX_POLL_INTERVAL_MS}")
 logging.info(f"SESSION_TIMEOUT_MS: {SESSION_TIMEOUT_MS}")
 logging.info(f"HEARTBEAT_INTERVAL_MS: {HEARTBEAT_INTERVAL_MS}")
 logging.info(f"REQUEST_TIMEOUT_MS: {REQUEST_TIMEOUT_MS}")
+logging.info(f"MAX_POLL_RECORDS: {MAX_POLL_RECORDS}")
 logging.info(f"TIMEOUT_MS: {TIMEOUT_MS}")
 
 total_records = 0
@@ -466,6 +468,7 @@ async def process_kafka_messages() -> None:
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
+        max_poll_records=MAX_POLL_RECORDS,
         auto_offset_reset=AUTO_OFFSET_RESET,
         max_poll_interval_ms=MAX_POLL_INTERVAL_MS,
         heartbeat_interval_ms=HEARTBEAT_INTERVAL_MS,
