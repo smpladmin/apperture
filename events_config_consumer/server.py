@@ -461,7 +461,7 @@ async def process_kafka_messages() -> None:
     logging.info(f"Event Configs: {app.event_tables_config.event_tables}")
     consumer = AIOKafkaConsumer(
         *app.event_tables_config.topics,
-        group_id="events_config",
+        group_id="event_config",
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
