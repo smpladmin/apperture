@@ -13,6 +13,7 @@ class EventsSettings(BaseSettings):
     heartbeat_interval_ms: int = 3000
     session_timeout_ms: int = 10000
     request_timeout_ms: int = 40000
+    max_poll_records: int = 500
     backend_base_url: str
     backend_api_key_name: str
     backend_api_key_secret: str
