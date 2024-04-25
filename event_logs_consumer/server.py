@@ -206,7 +206,9 @@ async def process_kafka_messages() -> None:
 
 
 class App:
-    pass
+    def __init__(self) -> None:
+        self.clickhouse = ClickHouse()
+        self.event_logs_datasources = EventLogsDatasources()
 
 
 app = App()
@@ -216,8 +218,6 @@ async def startup_event() -> None:
     """Starts processing Kafka messages when the app starts."""
     try:
         process_kafka_messages_task = asyncio.create_task(process_kafka_messages())
-        app.clickhouse = ClickHouse()
-        app.event_logs_datasources = EventLogsDatasources()
         await process_kafka_messages_task
     except Exception:
         logging.exception(f"Following exception has occured in process_kafka_messages")
@@ -226,5 +226,5 @@ async def startup_event() -> None:
 
 
 if __name__ == "__main__":
-    logging.info("Starting Consumer Server")
+    logging.info("Starting Consumer Server: EventLogs")
     asyncio.run(startup_event())
