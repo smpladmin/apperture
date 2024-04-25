@@ -2,10 +2,10 @@ import os
 import json
 import asyncio
 import logging
+import sys
 
 from aiokafka import AIOKafkaConsumer
 from dotenv import load_dotenv
-from fastapi import FastAPI
 
 from cdc_integrations import CDCIntegrations
 from clickhouse import ClickHouse
@@ -41,6 +41,7 @@ async def process_kafka_messages() -> None:
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
     )
+    logging.info(f"Started consumer on kafka topics: {app.cdc_integrations.topics}")
 
     await consumer.start()
 
@@ -137,18 +138,26 @@ async def process_kafka_messages() -> None:
             app.cdc_integrations.get_cdc_integrations()
 
 
-app = FastAPI()
+class App:
+    pass
 
 
-@app.on_event("startup")
+app = App()
+
+
 async def startup_event() -> None:
     """Starts processing Kafka messages when the app starts."""
-    asyncio.create_task(process_kafka_messages())
-    app.clickhouse = ClickHouse()
-    app.cdc_integrations = CDCIntegrations()
+    try:
+        process_kafka_messages_task = asyncio.create_task(process_kafka_messages())
+        app.clickhouse = ClickHouse()
+        app.cdc_integrations = CDCIntegrations()
+        await process_kafka_messages_task
+    except Exception:
+        logging.exception(f"Following exception has occured in process_kafka_messages")
+        logging.info("Exception has occured. Shutting down consumer")
+        sys.exit(1)
 
 
-@app.on_event("shutdown")
-async def shutdown_event() -> None:
-    """Shuts down the app."""
-    logging.info("Shutting down")
+if __name__ == "__main__":
+    logging.info("Starting Consumer Server")
+    asyncio.run(startup_event())
