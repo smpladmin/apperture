@@ -179,7 +179,8 @@ class ClickHouse:
         clickhouse_client = ClickHouseClientFactory.get_client(
             app_id=app_id, clickhouse_server_credentials=clickhouse_server_credential
         )
-        values = ",".join(map(str, id_values))
+        quoted_values = [f"'{value}'" for value in id_values]
+        values = ",".join(quoted_values)
         query = f"SELECT * FROM {database}.{table} FINAL WHERE {id} IN ({values})"
         result = clickhouse_client.query(query=query)
 
