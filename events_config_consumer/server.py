@@ -454,6 +454,7 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
             event_tables_config.event_tables[topic].audit_data = pd.DataFrame(
                 columns=columns
             )
+        event_tables_config.event_tables[topic].events = []
         logging.info("Successfully saved data to clickhouse, Emptying the topic bucket")
 
 
@@ -504,7 +505,7 @@ async def process_kafka_messages() -> None:
 
             await consumer.commit()
             total_records = 0
-            await app.event_tables_config.get_topics_from_event_config()
+            # await app.event_tables_config.get_topics_from_event_config()
             logging.info(
                 "Committing, setting total records to 0 and refreshing buckets"
             )
