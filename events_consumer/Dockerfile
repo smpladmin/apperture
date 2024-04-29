@@ -30,7 +30,7 @@ ENV FASTAPI_ENV=development
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
-CMD uvicorn server:app --reload --host 0.0.0.0 --port 8002
+CMD ["python", "server.py"]
 
 FROM base as production
 WORKDIR /code
@@ -38,4 +38,4 @@ ENV FASTAPI_ENV=production
 COPY --from=deps /opt/venv /opt/venv
 ENV PATH="/opt/venv/bin:$PATH"
 COPY . .
-CMD gunicorn server:app --worker-class uvicorn.workers.UvicornWorker --workers=1 --bind=0.0.0.0:8002 --timeout=1800 --access-logfile - --error-logfile -
+CMD ["python", "server.py"]

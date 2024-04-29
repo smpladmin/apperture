@@ -32,6 +32,7 @@ class AlertService:
     ):
         self.mongo = mongo
         self.apperture_slack_url = os.environ.get("APPERTURE_SLACK_URL")
+        self.apperture_slack_warning_url = os.environ.get("APPERTURE_SLACK_WARNING_URL", "https://hooks.slack.com/services/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")
         self.apperture_slack_channel = "alerts"
 
     def build_alert_config(
@@ -159,6 +160,7 @@ class AlertService:
         log_events = json.loads(decompressed_data)["logEvents"]
         logs_by_integration_id = {}
         anonymous_logs = set()
+        anonymous_warning_logs = set()
 
         for log_event in log_events:
             integration_id = self.get_intergation_id_from_cdc_error_log(
@@ -170,7 +172,14 @@ class AlertService:
                     error_message
                 )
             else:
-                anonymous_logs.add(error_message)
+                if (
+                    "Failed fetch messages from" in error_message
+                    or "Heartbeat session expired - marking coordinator dead"
+                    in error_message
+                ):
+                    anonymous_warning_logs.add(error_message)
+                else:
+                    anonymous_logs.add(error_message)
 
         # Post anonymous errors to internal Slack channel
         self.dispatch_batch_of_error_logs(
@@ -181,6 +190,17 @@ class AlertService:
             ),
             alert_type=AlertType.CDC_ERROR,
             error_messages=list(anonymous_logs),
+        )
+        
+        # Post anonymous warning logs to internal Slack channel
+        self.dispatch_batch_of_error_logs(
+            channel=SlackChannel(
+                type=ChannelType.SLACK,
+                slack_url=self.apperture_slack_warning_url,
+                slack_channel=self.apperture_slack_channel,
+            ),
+            alert_type=AlertType.CDC_ERROR,
+            error_messages=list(anonymous_warning_logs),
         )
 
         return {k: list(v) for k, v in logs_by_integration_id.items()}

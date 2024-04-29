@@ -5,10 +5,10 @@ from functools import reduce
 import json
 import logging
 import os
+import sys
 import traceback
 from typing import Dict, List
 
-from fastapi import FastAPI
 from aiokafka import AIOKafkaConsumer
 
 from dotenv import load_dotenv
@@ -162,6 +162,7 @@ async def process_kafka_messages() -> None:
         fetch_max_bytes=7864320,
     )
     await consumer.start()
+    logging.info(f"Started consumer on kafka topics: {KAFKA_TOPICS}")
     events = []
     flutter_events = []
     offsets = []
@@ -262,20 +263,30 @@ async def process_kafka_messages() -> None:
                     )
 
 
-app = FastAPI()
+class App:
+    def __init__(self) -> None:
+        self.clickhouse = ClickHouse()
+        self.event_properties_saver = EventPropertiesSaver()
+
+    def connect(self) -> None:
+        self.clickhouse.connect()
 
 
-@app.on_event("startup")
+app = App()
+
+
 async def startup_event() -> None:
     """Starts processing Kafka messages when the app starts."""
-    asyncio.create_task(process_kafka_messages())
-    app.clickhouse = ClickHouse()
-    app.clickhouse.connect()
-    app.event_properties_saver = EventPropertiesSaver()
+    try:
+        app.connect()
+        process_kafka_messages_task = asyncio.create_task(process_kafka_messages())
+        await process_kafka_messages_task
+    except Exception:
+        logging.exception(f"Following exception has occured in process_kafka_messages")
+        logging.info("Exception has occured. Shutting down consumer")
+        sys.exit(1)
 
 
-@app.on_event("shutdown")
-async def shutdown_event() -> None:
-    """Shuts down the app."""
-    logging.debug("Shutting down")
-    app.clickhouse.disconnect()
+if __name__ == "__main__":
+    logging.info("Starting Consumer Server: Clickstream")
+    asyncio.run(startup_event())
