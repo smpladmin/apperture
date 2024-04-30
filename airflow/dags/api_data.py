@@ -81,7 +81,7 @@ def create_dag(datasource_id: str, num_days: int, created_date: datetime):
         description=f"API datasource daily refresh for {datasource_id}",
         schedule="0 7 * * *",
         start_date=pendulum.instance(
-            created_date - timedelta(days=DATA_FETCH_DAYS_OFFSET),
+            datetime.now(),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         catchup=(created_date > AIRFLOW_INIT_DATE),

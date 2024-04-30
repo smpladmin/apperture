@@ -121,7 +121,7 @@ def create_dag(datasource_id: str, created_date: datetime):
         description=f"Facebook ads daily refresh for {datasource_id}",
         schedule="0 8 * * *",
         start_date=pendulum.instance(
-            created_date - timedelta(days=FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET),
+            datetime.now(),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         params={
