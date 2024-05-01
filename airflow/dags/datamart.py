@@ -140,7 +140,8 @@ def get_datamart_action_dag_id(datamart_action: DatamartAction):
 
     if type == ActionType.GOOGLE_SHEET:
         sheet_name = meta.spreadsheet.name
-        return dag_id + f"{type}_{sheet_name}_{action_id}"
+        name = sheet_name.replace(" ", "_")
+        return dag_id + f"{type}_{name}_{action_id}"
 
     if type == ActionType.TABLE:
         table = meta.name
