@@ -131,6 +131,24 @@ def calculate_start_date(created_date: datetime, schedule: Schedule) -> datetime
     return created_date - delta
 
 
+def get_datamart_action_dag_id(datamart_action: DatamartAction):
+    type = datamart_action.type
+    meta = datamart_action.meta
+    action_id = datamart_action.id
+
+    dag_id = f"datamart_{datamart_action.datamart_id}_action_loader_"
+
+    if type == ActionType.GOOGLE_SHEET:
+        sheet_name = meta.spreadsheet.name
+        return dag_id + f"{type}_{sheet_name}_{action_id}"
+
+    if type == ActionType.TABLE:
+        table = meta.name
+        return dag_id + f"{type}_{table}_{action_id}"
+
+    return dag_id + f"{type}_{action_id}"
+
+
 def create_dag(
     datamart_action: DatamartAction, datasource_id: str, created_date: datetime
 ):
@@ -142,7 +160,7 @@ def create_dag(
     )
 
     @dag(
-        dag_id=f"datamart_action_loader_{datamart_action.type}_{datamart_action.id}",
+        dag_id=get_datamart_action_dag_id(datamart_action=datamart_action),
         description=f"Datamart datasource daily refresh for {datamart_action.type}_{datamart_action.id}",
         schedule=calculate_schedule(schedule=datamart_action.schedule),
         start_date=pendulum.instance(
