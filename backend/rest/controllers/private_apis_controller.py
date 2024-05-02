@@ -14,7 +14,7 @@ from authorisation.service import AuthService
 from rest.dtos.integrations import (
     IntergationResponseWithCredential,
 )
-from domain.alerts.models import AlertType, ChannelType
+from domain.alerts.models import AlertType, ChannelType, SlackChannel
 from rest.dtos.alerts import AlertResponse
 from domain.alerts.service import AlertService
 from domain.datamart_actions.service import DatamartActionService
@@ -678,6 +678,16 @@ async def process_incoming_alerts(
                 alert_service.dispatch_batch_of_error_logs(
                     channel=config.channel,
                     alert_type=config.type,
+                    error_messages=error_messages,
+                )
+                # Sending alerts to CDC_internal_channel
+                alert_service.dispatch_batch_of_error_logs(
+                    channel=SlackChannel(
+                        type=ChannelType.SLACK,
+                        slack_url=alert_service.apperture_slack_url,
+                        slack_channel=alert_service.apperture_slack_channel,
+                    ),
+                    alert_type=AlertType.CDC_ERROR,
                     error_messages=error_messages,
                 )
         except Exception as e:

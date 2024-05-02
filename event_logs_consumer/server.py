@@ -19,6 +19,10 @@ load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1"))
+MAX_POLL_INTERVAL_MS = int(os.getenv("MAX_POLL_INTERVAL_MS", 300000))
+SESSION_TIMEOUT_MS = int(os.getenv("SESSION_TIMEOUT_MS", 10000))
+HEARTBEAT_INTERVAL_MS = int(os.getenv("HEARTBEAT_INTERVAL_MS", 3000))
+REQUEST_TIMEOUT_MS = int(os.getenv("REQUEST_TIMEOUT_MS", 40 * 1000))
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -168,6 +172,10 @@ async def process_kafka_messages() -> None:
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
+        max_poll_interval_ms=MAX_POLL_INTERVAL_MS,
+        heartbeat_interval_ms=HEARTBEAT_INTERVAL_MS,
+        session_timeout_ms=SESSION_TIMEOUT_MS,
+        request_timeout_ms=REQUEST_TIMEOUT_MS,
     )
     logging.info(
         f"Started consumer on kafka topics: {app.event_logs_datasources.topics}"

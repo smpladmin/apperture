@@ -3,6 +3,7 @@ from datetime import datetime
 import json
 import ast
 import logging
+import sys
 from cache import init_cache
 from clickhouse.clickhouse import ClickHouse
 import numpy as np
@@ -511,20 +512,30 @@ async def process_kafka_messages() -> None:
             )
 
 
-app = FastAPI()
+class App:
+    def __init__(self) -> None:
+        self.clickhouse = ClickHouse()
+        self.event_tables_config = EventTablesConfig()
+        self.alert_service = AlertService()
 
 
-@app.on_event("startup")
+app = App()
+
+
 async def startup_event() -> None:
-    init_cache(redis_host=settings.redis_host, redis_password=settings.redis_password)
-    """Starts processing Kafka messages when the app starts."""
-    asyncio.create_task(process_kafka_messages())
-    app.clickhouse = ClickHouse()
-    app.event_tables_config = EventTablesConfig()
-    app.alert_service = AlertService()
+    try:
+        init_cache(
+            redis_host=settings.redis_host, redis_password=settings.redis_password
+        )
+        """Starts processing Kafka messages when the app starts."""
+        process_kafka_messages_task = asyncio.create_task(process_kafka_messages())
+        await process_kafka_messages_task
+    except Exception:
+        logging.exception(f"Following exception has occured in process_kafka_messages")
+        logging.info("Exception has occured. Shutting down consumer")
+        sys.exit(1)
 
 
-@app.on_event("shutdown")
-async def shutdown_event() -> None:
-    """Shuts down the app."""
-    logging.info("Shutting down")
+if __name__ == "__main__":
+    logging.info("Starting Consumer Server: EventLogs")
+    asyncio.run(startup_event())
