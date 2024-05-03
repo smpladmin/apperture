@@ -171,13 +171,14 @@ def create_dag(datasource_id: str, created_date: datetime):
     branch_task_retry_delay = int(
         Variable.get("branch_task_retry_delay", default_var=DAG_RETRY_DELAY)
     )
+    dag_start_date = Variable.get("dag_start_date", default_var="2024-05-01")
 
     @dag(
         dag_id=f"branch_data_loader_{datasource_id}",
         description=f"Branch daily refresh for {datasource_id}",
         schedule="0 12 * * *",
         start_date=pendulum.instance(
-            created_date - timedelta(days=BRANCH_DATA_FETCH_DAYS_OFFSET),
+            datetime.strptime(dag_start_date, "%Y-%m-%d"),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         params={
@@ -223,7 +224,7 @@ def create_dag(datasource_id: str, created_date: datetime):
         description=f"Branch summary data daily ingestion for {datasource_id}",
         schedule="0 12 * * *",
         start_date=pendulum.instance(
-            datetime.now(),
+            datetime.strptime(dag_start_date, "%Y-%m-%d"),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         params={

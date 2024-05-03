@@ -75,13 +75,14 @@ def create_dag(datasource_id: str, num_days: int, created_date: datetime):
     api_task_retry_delay = int(
         Variable.get("api_task_retry_delay", default_var=DAG_RETRY_DELAY)
     )
+    dag_start_date = Variable.get("dag_start_date", default_var="2024-05-01")
 
     @dag(
         dag_id=f"api_data_loader_{datasource_id}",
         description=f"API datasource daily refresh for {datasource_id}",
         schedule="0 7 * * *",
         start_date=pendulum.instance(
-            datetime.now(),
+            datetime.strptime(dag_start_date, "%Y-%m-%d"),
             tz=pendulum.timezone("Asia/Kolkata"),
         ),
         catchup=(created_date > AIRFLOW_INIT_DATE),
