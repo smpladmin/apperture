@@ -223,6 +223,7 @@ def create_sparse_dataframe(
                 ] = result_dict[column]
     else:
         df = pd.concat([df, df_row], ignore_index=True)
+
     df, audit_df = typecast_columns(
         df=df, audit_df=audit_df, columns_with_types=columns_with_types
     )
@@ -346,26 +347,30 @@ def process_event_buckets(
 
         logging.info(f"Sparse dataframe: {df.to_string()}")
         logging.info(f"Audit dataframe: {audit_df.to_string()}")
+        bucket.events = []
+        bucket.data = df
+        bucket.audit_data = audit_df
 
         if df.empty:
-            logging.info("Empty sparse dataframe. Skip enrichment.")
+            logging.info(
+                f"Empty sparse dataframe for topic : {topic}. Skip enrichment."
+            )
             continue
 
-        enrich_df = enrich_sparse_dataframe(
-            df=df,
-            primary_key_column=primary_key,
-            table=table,
-            event_tables_config=event_tables_config,
-            database=bucket.ch_db,
-            ch_server_credential=bucket.ch_server_credential,
-            app_id=bucket.app_id,
-        )
+        if total_records >= MAX_RECORDS:
+            enrich_df = enrich_sparse_dataframe(
+                df=df,
+                primary_key_column=primary_key,
+                table=table,
+                event_tables_config=event_tables_config,
+                database=bucket.ch_db,
+                ch_server_credential=bucket.ch_server_credential,
+                app_id=bucket.app_id,
+            )
 
-        logging.info(f"Enriched dataframe: {df.to_string()}")
-
-        bucket.data = enrich_df
-        bucket.audit_data = audit_df
-        bucket.events = []
+            logging.info(f"Enriched dataframe: {df.to_string()}")
+            # Assign bucket data with enriched df
+            bucket.data = enrich_df
 
 
 def fetch_values_from_kafka_records(
@@ -415,12 +420,8 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
         if table_data is not None and not table_data.empty:
             data = table_data.values.tolist()
             columns = table_data.columns.tolist()
-
             logging.info(
-                f"Data present in {topic} bucket {data}, Saving {len(data)} entires to {database}.{table}"
-            )
-            logging.info(
-                f"Saving table data {data} in {database}.{table} with columns {columns}"
+                f"Saving {len(data)} entries to table {database}.{table}  with columns {columns} with data {data}."
             )
 
             clickhouse.save_events(
@@ -442,7 +443,9 @@ def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesCo
             audit_table = f"{table}_audit"
             audit_data = audit_table_data.values.tolist()
             columns = audit_table_data.columns.tolist()
-            logging.info(f"Saving audit data {audit_data} in {database}.{audit_table}")
+            logging.info(
+                f"Saving {len(audit_data)} entries to table {database}.{audit_table} with audit data {audit_data}."
+            )
             clickhouse.save_events(
                 events=audit_data,
                 columns=columns,
