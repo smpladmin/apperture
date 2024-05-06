@@ -12,6 +12,7 @@ from store.facebook_ads_saver import FacebookAdsDataSaver
 from utils.utils import (
     FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET,
 )
+from utils.alerts import send_failure_alert_to_slack
 from domain.datasource.models import (
     AppDatabaseResponse,
     IntegrationProvider,
@@ -99,6 +100,9 @@ def create_dag(datasource_id: str):
         ),
         catchup=False,
         tags=[f"migration"],
+        default_args={
+            "on_failure_callback": [send_failure_alert_to_slack],
+        },
     )
     def facebook_ads_data_loader():
         datasource_with_credential = get_datasource_and_credential(

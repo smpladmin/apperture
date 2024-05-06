@@ -16,6 +16,7 @@ from airflow.decorators import task, dag
 
 from store.events_saver import EventsSaver
 from domain.datasource.service import DataSourceService
+from utils.alerts import send_failure_alert_to_slack
 
 from utils.utils import (
     BRANCH_DATA_FETCH_DAYS_OFFSET,
@@ -195,6 +196,7 @@ def create_dag(datasource_id: str, created_date: datetime):
             "retries": branch_task_retries,
             "retry_delay": timedelta(minutes=branch_task_retry_delay),
             "retry_exponential_backoff": True,
+            "on_failure_callback": [send_failure_alert_to_slack],
         },
     )
     def branch_data_sync():
@@ -242,6 +244,9 @@ def create_dag(datasource_id: str, created_date: datetime):
         #     "retry_delay": timedelta(minutes=branch_task_retry_delay),
         #     "retry_exponential_backoff": True,
         # },
+        default_args={
+            "on_failure_callback": [send_failure_alert_to_slack],
+        },
     )
     def branch_summary_data_ingestion():
         datasource_with_credential = get_datasource_and_credential(

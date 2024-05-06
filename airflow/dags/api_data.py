@@ -3,6 +3,7 @@ from typing import Dict, Union
 from datetime import timedelta, datetime
 from airflow.decorators import task, dag, task_group
 from airflow.models import Variable
+from utils.alerts import send_failure_alert_to_slack
 
 
 from store.api_data_saver import APIDataSaver
@@ -89,6 +90,7 @@ def create_dag(datasource_id: str, num_days: int, created_date: datetime):
         default_args={
             "retries": api_task_retries,
             "retry_delay": timedelta(minutes=api_task_retry_delay),
+            "on_failure_callback": [send_failure_alert_to_slack],
         },
     )
     def api_data_loader(datasource_id: str, num_days: int):

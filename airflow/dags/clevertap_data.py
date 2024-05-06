@@ -17,6 +17,7 @@ from utils.utils import (
     DATA_FETCH_DAYS_OFFSET,
     AIRFLOW_INIT_DATE,
 )
+from utils.alerts import send_failure_alert_to_slack
 from event_processors.clevertap_event_processor import ClevertapEventProcessor
 from domain.datasource.models import (
     IntegrationProvider,
@@ -154,6 +155,7 @@ def create_dag(datasource_id: str, created_date: datetime):
         default_args={
             "retries": clevertap_task_retries,
             "retry_delay": timedelta(minutes=clevertap_task_retry_delay),
+            "on_failure_callback": [send_failure_alert_to_slack],
         },
     )
     def clevertap_data_loader():

@@ -7,6 +7,7 @@ from datetime import datetime
 from airflow.decorators import task, dag
 
 from utils.utils import calculate_schedule
+from utils.alerts import send_failure_alert_to_slack
 from domain.datasource.models import (
     IntegrationProvider,
     ClickHouseRemoteConnectionCred,
@@ -97,6 +98,9 @@ def create_dag(datasource_id: str, alert: Alert, created_date: datetime):
         ),
         catchup=False,
         tags=[f"alert-{datasource_id}"],
+        default_args={
+            "on_failure_callback": [send_failure_alert_to_slack],
+        },
     )
     def compute_cdc_db_count_alert():
         creds = get_cdc_cred(datasource_id=datasource_id)
