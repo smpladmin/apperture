@@ -8,6 +8,7 @@ from utils.utils import (
     FREQUENCY_DELTAS,
     calculate_schedule,
 )
+from utils.alerts import send_failure_alert_to_slack
 from airflow.decorators import dag, task, task_group
 from airflow.models import Variable
 
@@ -176,6 +177,7 @@ def create_dag(
         default_args={
             "retries": datamart_action_task_retries,
             "retry_delay": timedelta(minutes=datamart_action_task_retry_delay),
+            "on_failure_callback": [send_failure_alert_to_slack],
         },
     )
     def datamart_loader():

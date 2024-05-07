@@ -17,6 +17,7 @@ from utils.utils import (
     DAG_RETRY_DELAY,
     FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET,
 )
+from utils.alerts import send_failure_alert_to_slack
 from domain.datasource.models import (
     AppDatabaseResponse,
     IntegrationProvider,
@@ -147,6 +148,7 @@ def create_dag(datasource_id: str, created_date: datetime):
             "retries": facebook_ads_task_retries,
             "retry_delay": timedelta(minutes=facebook_ads_task_retry_delay),
             "retry_exponential_backoff": True,
+            "on_failure_callback": [send_failure_alert_to_slack],
         },
     )
     def facebook_ads_data_loader():

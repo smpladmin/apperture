@@ -16,6 +16,7 @@ from utils.utils import (
     DATA_FETCH_DAYS_OFFSET,
     AIRFLOW_INIT_DATE,
 )
+from utils.alerts import send_failure_alert_to_slack
 from domain.datasource.models import (
     IntegrationProvider,
     Credential,
@@ -131,6 +132,7 @@ def create_dag(datasource_id: str, created_date: datetime):
         default_args={
             "retries": tata_ivr_task_retries,
             "retry_delay": timedelta(minutes=tata_ivr_task_retry_delay),
+            "on_failure_callback": [send_failure_alert_to_slack],
         },
     )
     def clevertap_data_loader():

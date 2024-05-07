@@ -2,6 +2,7 @@ import logging
 import os
 import pendulum
 from utils.utils import DAG_RETRIES, DAG_RETRY_DELAY
+from utils.alerts import send_failure_alert_to_slack
 
 from airflow.models import Variable
 
@@ -55,6 +56,7 @@ clickstream_backup_task_retry_delay = int(
     default_args={
         "retries": clickstream_backup_task_retries,
         "retry_delay": timedelta(minutes=clickstream_backup_task_retry_delay),
+        "on_failure_callback": [send_failure_alert_to_slack],
     },
 )
 def create_backup():
