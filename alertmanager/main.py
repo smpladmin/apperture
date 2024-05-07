@@ -12,6 +12,8 @@ logging.basicConfig(level=logging.INFO)
 
 # Slack endpoint
 SLACK_ENDPOINT = os.getenv("SLACK_ENDPOINT")
+SLACK_ENDPOINT_CDC_INTERNAL_ALERTS = os.getenv("SLACK_ENDPOINT_CDC_INTERNAL_ALERTS")
+SLACK_ENDPOINT_WIOM_CDC_ALERTS = os.getenv("SLACK_ENDPOINT_WIOM_CDC_ALERTS")
 
 # Set up the Swarmpit API endpoint
 SWARMPIT_ENDPOINT = os.getenv("SWARMPIT_ENDPOINT")
@@ -132,12 +134,41 @@ def get_active_nodes():
         return []
 
 
+def get_services() -> dict:
+    try:
+        # Make the API call to get all services
+        services = requests.get(
+            f"{SWARMPIT_API_ENDPOINT}/services",
+            headers={"Authorization": SWARMPIT_AUTH_TOKEN},
+        ).json()
+        logging.info(f"Got {len(services)} services from Swarmpit.")
+        services_map = {service["serviceName"]: service for service in services}
+
+        return services_map
+
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error gettin services from Swarmpit: {e}")
+        return {}
+
+
 def build_message_for_task(task):
     return f"Task <{SWARMPIT_ENDPOINT}/#/services/{task['serviceName']}|{task['taskName']}> has high CPU or Memory utilization ({task['stats']['cpuPercentage']:.4f}% CPU, {task['stats']['memoryPercentage']:.4f}% memory)."
 
 
 def build_message_for_node(node):
     return f"Node <{SWARMPIT_ENDPOINT}/#/nodes/{node['nodeName']}> has high CPU | Memory | Disk utilization ({node['stats']['cpu']['usedPercentage']:.4f}% CPU, {node['stats']['memory']['usedPercentage']:.4f}% memory, {node['stats']['disk']['usedPercentage']:.4f}% disk)."
+
+
+# Function to send a Slack alert message
+def send_slack_message(url, message):
+    try:
+        requests.post(
+            url,
+            json={"text": message},
+            headers={"Content-type": "application/json"},
+        )
+    except requests.exceptions.RequestException as e:
+        logging.error(f"Error sending Slack alert: {e}")
 
 
 # Define a function to send a Slack alert for a given task
@@ -149,14 +180,7 @@ def send_slack_alert(tasks=None, nodes=None):
     message = f":rotating_light: *ENV: {ENV}* \n{messages}"
     logging.info(f"Sending Slack alert: {message}")
 
-    try:
-        requests.post(
-            SLACK_ENDPOINT,
-            json={"text": message},
-            headers={"Content-type": "application/json"},
-        )
-    except requests.exceptions.RequestException as e:
-        logging.error(f"Error sending Slack alert: {e}")
+    send_slack_message(SLACK_ENDPOINT, message)
 
 
 # Loop indefinitely, calling the Swarmpit API every ITERATION_SECONDS seconds
@@ -164,6 +188,7 @@ while True:
     logging.info("Getting running tasks from Swarmpit...")
     running_tasks = get_running_tasks()
     active_nodes = get_active_nodes()
+    services = get_services()
 
     # Send Slack alerts for any running tasks with high CPU or memory utilization
     alert_tasks = [
@@ -183,6 +208,14 @@ while True:
         send_slack_alert(nodes=alert_nodes)
     else:
         logging.info("No node alerts")
+
+    # Checking if cdc_connect service is running
+    cdc_connect = services.get("cdc_connect")
+    if cdc_connect is None or cdc_connect["status"]["tasks"].get("running", 0) == 0:
+        for url in [SLACK_ENDPOINT_CDC_INTERNAL_ALERTS, SLACK_ENDPOINT_WIOM_CDC_ALERTS]:
+            send_slack_message(
+                url, f"*Alert - cdc_connect*\n\nCDC producer service may be down"
+            )
 
     logging.info(f"Sleeping for {ITERATION_SECONDS} seconds...")
 
