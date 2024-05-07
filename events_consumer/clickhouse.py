@@ -122,6 +122,7 @@ class ClickHouse:
                 "cause",
                 "err_code",
                 "channel",
+                "hsm_template_id",
             ],
             settings={"insert_async": True, "wait_for_async_insert": False},
         )

@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Union
 from pydantic import BaseModel
 
 
@@ -17,6 +17,7 @@ class GupshupDeliveryReportEvent(BaseModel):
     errorCode: str
     channel: str
     noOfFrags: int = 0
+    hsmTemplateId: Union[str, None] = None
 
 
 class GupshupDeliveryReportEventObject(BaseModel):
