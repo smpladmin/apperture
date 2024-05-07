@@ -211,7 +211,7 @@ while True:
 
     # Checking if cdc_connect service is running
     cdc_connect = services.get("cdc_connect")
-    if cdc_connect is None or cdc_connect["status"]["tasks"].get("running", 0) < 1:
+    if cdc_connect is None or cdc_connect["status"]["tasks"].get("running", 0) == 0:
         for url in [SLACK_ENDPOINT_CDC_INTERNAL_ALERTS, SLACK_ENDPOINT_WIOM_CDC_ALERTS]:
             send_slack_message(
                 url, f"*Alert - cdc_connect*\n\nCDC producer service may be down"
