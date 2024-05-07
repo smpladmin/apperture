@@ -1,18 +1,15 @@
+import os
 import logging
 import requests
+from dotenv import load_dotenv
 
-CDC_INTERNAL_ALERTS_URL = (
-    "https://hooks.slack.com/services/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"
-)
-WIOM_CDC_ALERTS_URL = (
-    "https://hooks.slack.com/services/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"
-)
-WARNING_ALERTS_URL = (
-    "https://hooks.slack.com/services/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"
-)
-AIRFLOW_ALERTS_URL = (
-    "https://hooks.slack.com/services/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"
-)
+# Load .env
+load_dotenv()
+
+CDC_INTERNAL_ALERTS_URL = os.getenv("SLACK_URL_CDC_INTERNAL_ALERTS")
+WIOM_CDC_ALERTS_URL = os.getenv("SLACK_URL_WIOM_CDC_ALERTS")
+WARNING_ALERTS_URL = os.getenv("SLACK_URL_WARNING_ALERTS")
+AIRFLOW_ALERTS_URL = os.getenv("SLACK_URL_AIRFLOW_ALERTS")
 
 # Configurable slack channel for each dag
 DAGS_SLACK_URLS = {
@@ -20,6 +17,8 @@ DAGS_SLACK_URLS = {
     "clickstream-data-backup": [AIRFLOW_ALERTS_URL],
     "clickstream-delete-backup": [AIRFLOW_ALERTS_URL],
 }
+# Default slack urls
+DEFAULT_SLACK_URLS = [AIRFLOW_ALERTS_URL]
 
 
 def send_failure_alert_to_slack(context):
@@ -51,7 +50,7 @@ def send_failure_alert_to_slack(context):
         }
 
         # Note: If list of urls is not available in DAGS_SLACK_URLS then by default sending the messages to AIRFLOW_ALERTS_URL.
-        for webhook_url in DAGS_SLACK_URLS.get(dag_id, [AIRFLOW_ALERTS_URL]):
+        for webhook_url in DAGS_SLACK_URLS.get(dag_id, DEFAULT_SLACK_URLS):
             response = requests.post(
                 webhook_url,
                 json=slack_msg,
