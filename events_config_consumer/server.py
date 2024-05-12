@@ -145,7 +145,7 @@ def convert_lists_and_dicts_to_strings(dictionary, columns_with_types):
     """
     Convert any lists or dictionaries in the dictionary to their string representations
     because while adding entires to df, a value can loose its original type according to column type
-    for ex: ['a'] in a column of str will be converted to 'a' aitomatically while adding to df
+    for ex: ['a'] in a column of str will be converted to 'a' automatically while adding to df
     """
     converted_dict = {}
     for key, value in dictionary.items():
