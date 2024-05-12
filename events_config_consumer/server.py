@@ -123,6 +123,13 @@ def typecast_columns(df, audit_df, columns_with_types):
         elif column_type == "object":
             df[column] = df[column].apply(convert_string_value_to_object)
             audit_df[column] = audit_df[column].apply(convert_string_value_to_object)
+        elif column_type == "str":
+            df[column] = df[column].apply(
+                lambda value: str(value) if value is not None else None
+            )
+            audit_df[column] = audit_df[column].apply(
+                lambda value: str(value) if value is not None else None
+            )
         else:
             df[column] = df[column].astype(column_type, errors="ignore")
             audit_df[column] = audit_df[column].astype(column_type, errors="ignore")
@@ -137,13 +144,15 @@ def typecast_columns(df, audit_df, columns_with_types):
 def convert_lists_and_dicts_to_strings(dictionary, columns_with_types):
     """
     Convert any lists or dictionaries in the dictionary to their string representations
+    because while adding entires to df, a value can loose its original type according to column type
+    for ex: ['a'] in a column of str will be converted to 'a' aitomatically while adding to df
     """
     converted_dict = {}
     for key, value in dictionary.items():
         col_type = columns_with_types.get(key)
         # If the column type is "string" and the value coming from upstream is not a string,
         # convert the value to a string
-        if col_type == "string" and value is not None and not isinstance(value, str):
+        if col_type == "str" and value is not None and not isinstance(value, str):
             converted_dict[key] = str(value)
         elif isinstance(value, (list, dict)):
             converted_dict[key] = str(value)
@@ -182,8 +191,7 @@ def create_sparse_dataframe(
         result_dict[destination_column] = column_value
 
     # Add "latest_added_time" column to the result dictionary.
-    # Since "latest_added_time" is not explicitly mentioned in the configuration, it's treated as equivalent to "modified_time".
-    # Therefore, intialize "latest_added_time" with "added_time" and later update it.
+    # Since "latest_added_time" is not explicitly mentioned in the configuration, it's treated as equivalent to "modified_time". Therefore, intialize "latest_added_time" with "added_time" and later update it.
     result_dict["latest_added_time"] = result_dict["added_time"]
     result_dict = convert_lists_and_dicts_to_strings(result_dict, columns_with_types)
 
@@ -199,34 +207,48 @@ def create_sparse_dataframe(
         for column in columns:
             if result_dict.get(column) is not None:
                 if column == "added_time":
+                    existing_date__column_value = existing_row[column].iloc[0]
+
+                    if isinstance(existing_date__column_value, str):
+                        formatted_date = format_date_string_to_desired_format(
+                            existing_row[column].iloc[0]
+                        )
+                        existing_date__column_value = formatted_date
+
                     # Update added_time with the minimum value between existing and result_dict value
                     result_dict[column] = (
                         min(
-                            existing_row[column].iloc[0],
+                            existing_date__column_value,
                             format_date_string_to_desired_format(result_dict[column]),
                         )
                         if existing_row[column] is not None
                         else result_dict[column]
                     )
                 elif column == "latest_added_time":
+                    existing_date__column_value = existing_row[column].iloc[0]
+
+                    if isinstance(existing_date__column_value, str):
+                        formatted_date = format_date_string_to_desired_format(
+                            existing_row[column].iloc[0]
+                        )
+                        existing_date__column_value = formatted_date
+
                     # Update latest_added_time with the maximum value between existing and result_dict value
                     result_dict[column] = (
                         max(
-                            existing_row[column].iloc[0],
+                            existing_date__column_value,
                             format_date_string_to_desired_format(result_dict[column]),
                         )
                         if existing_row[column] is not None
                         else result_dict[column]
                     )
+
                 df.loc[
                     df[primary_key].astype(str) == str(result_dict[primary_key]), column
                 ] = result_dict[column]
+
     else:
         df = pd.concat([df, df_row], ignore_index=True)
-
-    df, audit_df = typecast_columns(
-        df=df, audit_df=audit_df, columns_with_types=columns_with_types
-    )
 
     return df, audit_df
 
@@ -268,6 +290,7 @@ def enrich_sparse_dataframe(
             if column == primary_key_column:
                 continue
             # For only None or empty string column value, replace it with data from ClickHouse result, otherwise keep it as it is
+            # for date columns we need to maintain min and max w.r.t values coming from clickhouse db so add another transformation on top of it.
             if (
                 pd.isnull(row[column])
                 or row[column] == ""
@@ -345,8 +368,6 @@ def process_event_buckets(
                 event_table_bucket=bucket,
             )
 
-        logging.info(f"Sparse dataframe: {df.to_string()}")
-        logging.info(f"Audit dataframe: {audit_df.to_string()}")
         bucket.events = []
         bucket.data = df
         bucket.audit_data = audit_df
@@ -358,6 +379,12 @@ def process_event_buckets(
             continue
 
         if total_records >= MAX_RECORDS:
+            df, audit_df = typecast_columns(
+                df=df, audit_df=audit_df, columns_with_types=columns_with_types
+            )
+
+            logging.info(f"Sparse dataframe: {df.to_string()}")
+            logging.info(f"Audit dataframe: {audit_df.to_string()}")
             enrich_df = enrich_sparse_dataframe(
                 df=df,
                 primary_key_column=primary_key,
@@ -369,6 +396,7 @@ def process_event_buckets(
             )
 
             logging.info(f"Enriched dataframe: {df.to_string()}")
+
             # Assign bucket data with enriched df
             bucket.data = enrich_df
 
