@@ -43,6 +43,10 @@ clickhouse_to_pandas_type_map = {
     "Nullable(Object('json'))": "object",
 }
 
+INT_TYPES = ["Int64", "Int8", "Int16", "Int32", "INT128"]
+
+FLOAT_TYPES = ["Float64", "Float32"]
+
 
 class EventTablesConfig:
     def __init__(self):

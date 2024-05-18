@@ -16,7 +16,7 @@ from jsonpath_ng import parse
 from fastapi import FastAPI
 from aiokafka import AIOKafkaConsumer
 
-from events_config import EventTablesConfig
+from events_config import EventTablesConfig, INT_TYPES, FLOAT_TYPES
 from settings import events_settings
 
 settings = events_settings()
@@ -141,24 +141,42 @@ def typecast_columns(df, audit_df, columns_with_types):
     return df, audit_df
 
 
-def convert_lists_and_dicts_to_strings(dictionary, columns_with_types):
+def convert_to_numeric_types(value, numeric_type):
+    try:
+        if numeric_type == "int":
+            return int(value)
+
+        if numeric_type == "float":
+            return float(value)
+    except Exception as e:
+        return value
+
+
+def convert_values_to_desired_types(value, type):
+    if value is None:
+        return value
+
+    if type == "str" and not isinstance(value, str):
+        return str(value)
+
     """
     Convert any lists or dictionaries in the dictionary to their string representations
     because while adding entires to df, a value can loose its original type according to column type
-    for ex: ['a'] in a column of str will be converted to 'a' aitomatically while adding to df
+    for ex: ['a'] in a column of str will be converted to 'a' automatically while adding to df if column value is string
     """
-    converted_dict = {}
-    for key, value in dictionary.items():
-        col_type = columns_with_types.get(key)
-        # If the column type is "string" and the value coming from upstream is not a string,
-        # convert the value to a string
-        if col_type == "str" and value is not None and not isinstance(value, str):
-            converted_dict[key] = str(value)
-        elif isinstance(value, (list, dict)):
-            converted_dict[key] = str(value)
-        else:
-            converted_dict[key] = value
-    return converted_dict
+    if isinstance(value, (list, dict)):
+        return str(value)
+
+    if type in INT_TYPES and not isinstance(value, int):
+        return convert_to_numeric_types(value, "int")
+
+    if type in FLOAT_TYPES and not isinstance(value, float):
+        return convert_to_numeric_types(value, "float")
+
+    if type == "datetime64[ns]" and not isinstance(value, datetime):
+        return format_date_string_to_desired_format(str(value))
+
+    return value
 
 
 def create_sparse_dataframe(
@@ -187,13 +205,16 @@ def create_sparse_dataframe(
         value = [match.value for match in jsonpath_expr_value.find(event)]
         column_value = value[0] if value else None
 
+        column_type = columns_with_types.get(destination_column, "")
+
         result_dict[primary_key] = id_value
-        result_dict[destination_column] = column_value
+        result_dict[destination_column] = convert_values_to_desired_types(
+            value=column_value, type=column_type
+        )
 
     # Add "latest_added_time" column to the result dictionary.
     # Since "latest_added_time" is not explicitly mentioned in the configuration, it's treated as equivalent to "modified_time". Therefore, intialize "latest_added_time" with "added_time" and later update it.
     result_dict["latest_added_time"] = result_dict["added_time"]
-    result_dict = convert_lists_and_dicts_to_strings(result_dict, columns_with_types)
 
     df_row = pd.DataFrame([result_dict], columns=df.columns)
     existing_row = df[df[primary_key].astype(str) == str(result_dict[primary_key])]
@@ -219,7 +240,7 @@ def create_sparse_dataframe(
                     result_dict[column] = (
                         min(
                             existing_date__column_value,
-                            format_date_string_to_desired_format(result_dict[column]),
+                            result_dict[column],
                         )
                         if existing_row[column] is not None
                         else result_dict[column]
@@ -237,7 +258,7 @@ def create_sparse_dataframe(
                     result_dict[column] = (
                         max(
                             existing_date__column_value,
-                            format_date_string_to_desired_format(result_dict[column]),
+                            result_dict[column],
                         )
                         if existing_row[column] is not None
                         else result_dict[column]
