@@ -21,7 +21,7 @@ clickhouse_to_pandas_type_map = {
     "UInt64": "Int64",
     "Float32": "Float32",
     "Float64": "Float64",
-    "String": "string",
+    "String": "str",
     "DateTime": "datetime64[ns]",
     "Array": "object",
     "Array(String)": "object",
@@ -38,10 +38,14 @@ clickhouse_to_pandas_type_map = {
     "Nullable(UInt64)": "Int64",
     "Nullable(Float32)": "Float32",
     "Nullable(Float64)": "Float64",
-    "Nullable(String)": "string",
+    "Nullable(String)": "str",
     "Nullable(DateTime)": "datetime64[ns]",
     "Nullable(Object('json'))": "object",
 }
+
+INT_TYPES = ["Int64", "Int8", "Int16", "Int32", "INT128"]
+
+FLOAT_TYPES = ["Float64", "Float32"]
 
 
 class EventTablesConfig:
