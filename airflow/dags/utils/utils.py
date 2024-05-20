@@ -54,11 +54,27 @@ def get_cron_expression(
     return f"{minute} {hour_24} * * *"
 
 
-def calculate_schedule(schedule: Schedule) -> str:
+def calculate_schedule_datamart(schedule: Schedule) -> str:
     if schedule.frequency == Frequency.HOURLY:
         minuite = schedule.time
         minuite = 0 if minuite is None or minuite == "" else int(minuite[-2:])
         return f"{minuite} * * * *"
+    if schedule.frequency == Frequency.QUARTER_HOURLY:
+        return "*/15 * * * *"
+    if schedule.frequency == Frequency.HALF_HOURLY:
+        return "*/30 * * * *"
+
+    return get_cron_expression(
+        time_str=schedule.time,
+        period=schedule.period,
+        day=schedule.day if schedule.frequency == Frequency.WEEKLY else None,
+        date=schedule.date if schedule.frequency == Frequency.MONTHLY else None,
+    )
+
+
+def calculate_schedule(schedule: Schedule) -> str:
+    if schedule.frequency == Frequency.HOURLY:
+        return "0 * * * *"
     if schedule.frequency == Frequency.QUARTER_HOURLY:
         return "*/15 * * * *"
     if schedule.frequency == Frequency.HALF_HOURLY:

@@ -7,6 +7,7 @@ from utils.utils import (
     DAG_RETRY_DELAY,
     FREQUENCY_DELTAS,
     calculate_schedule,
+    calculate_schedule_datamart,
 )
 from utils.alerts import send_failure_alert_to_slack
 from airflow.decorators import dag, task, task_group
@@ -187,7 +188,7 @@ def create_dag(datamart_actions: List[DatamartAction]):
     @dag(
         dag_id=get_datamart_action_dag_id(datamart_action=datamart_action),
         description=f"Datamart datasource daily refresh for {datamart_action.type}_{datamart_action.id}",
-        schedule=calculate_schedule(schedule=datamart_action.schedule),
+        schedule=calculate_schedule_datamart(schedule=datamart_action.schedule),
         start_date=pendulum.instance(
             calculate_start_date(
                 created_date=created_date, schedule=datamart_action.schedule
@@ -218,18 +219,20 @@ def create_dag(datamart_actions: List[DatamartAction]):
 datamart_actions = datamart_action_service.get_datamart_actions()
 
 # Fetching dependent datamarts
+datamart_actions_filtered = []
 dependent_dags_map = {}
 for index, datamart_action in enumerate(datamart_actions):
     if datamart_action.schedule.frequency == Frequency.DATAMART:
         key = datamart_action.datasource_id + "$$" + datamart_action.schedule.datamartId
         if key in dependent_dags_map:
-            dependent_dags_map[key] = dependent_dags_map[key].append(
-                datamart_actions.pop(index)
-            )
+            dependent_dags_map[key] = dependent_dags_map[key].append(datamart_action)
         else:
-            dependent_dags_map[key] = [datamart_actions.pop(index)]
+            dependent_dags_map[key] = [datamart_action]
+    else:
+        datamart_actions_filtered.append(datamart_action)
 
-for datamart_action in datamart_actions:
+
+for datamart_action in datamart_actions_filtered:
     dependent_dags = []
     # Adding dependent datamarts in same dag as a supsequent taskgroup
     if datamart_action.type == ActionType.TABLE:
