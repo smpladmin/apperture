@@ -2034,6 +2034,7 @@ def datamart_action_response():
             "date": None,
             "day": None,
             "frequency": "hourly",
+            "datamartId": None,
         },
         "meta": {
             "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},
