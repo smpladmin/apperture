@@ -26,7 +26,7 @@ export const TypeNameMap = {
 };
 
 export const isValidSchedule = (schedule: Schedule): boolean => {
-  const { frequency, time, period, day, date } = schedule || {};
+  const { frequency, time, period, day, date, datamartId } = schedule || {};
 
   switch (frequency) {
     case ActionFrequency.HOURLY:
@@ -41,6 +41,8 @@ export const isValidSchedule = (schedule: Schedule): boolean => {
       return !!(time && period && day);
     case ActionFrequency.MONTHLY:
       return !!(time && period && date);
+    case ActionFrequency.DATAMART:
+      return !!(datamartId);
     default:
       return false;
   }
@@ -74,6 +76,8 @@ export const describeSchedule = (schedule: Schedule) => {
       const splitDate = date ? date.split('-') : [];
       const dayOfMonth = splitDate.length === 3 ? splitDate[2] : '';
       return `Monthly on ${time} ${period} every ${dayOfMonth}th`;
+    case ActionFrequency.DATAMART:
+      return 'After Table';
     default:
       return 'Invalid Schedule';
   }

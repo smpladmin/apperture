@@ -37,11 +37,11 @@ export const updateDatamartAction = async (
 };
 
 export const _getSavedDatamartAction = async (
+  id: string,
   token: string,
-  dataMartId: string
 ) => {
   const res = await ApperturePrivateGet(
-    `/datamart_actions/${dataMartId}`,
+    `/datamart_actions/${id}`,
     token
   );
   return res.data;

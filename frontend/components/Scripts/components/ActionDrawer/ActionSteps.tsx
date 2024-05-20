@@ -28,6 +28,7 @@ import {
 } from '@lib/domain/datamartActions';
 import { isValidMeta, isValidSchedule } from '@components/Scripts/util';
 import { useRouter } from 'next/router';
+import { DataMartObj } from '@lib/domain/datamart';
 
 type ActionStepsProps = {
   datamartId: string;
@@ -41,6 +42,7 @@ type ActionStepsProps = {
   onClose: () => void;
   setDatartActions: React.Dispatch<React.SetStateAction<DatamartAction[]>>;
   isAuthenticated?: boolean;
+  savedDataMarts: DataMartObj[]
 };
 
 const ActionSteps = ({
@@ -55,6 +57,7 @@ const ActionSteps = ({
   setDatartActions,
   setIsActionBeingCreated,
   isAuthenticated,
+  savedDataMarts
 }: ActionStepsProps) => {
   const steps = [
     { title: 'Action' },
@@ -195,6 +198,8 @@ const ActionSteps = ({
                     <ScheduleAction
                       schedule={schedule}
                       setSchedule={setSchedule}
+                      savedDataMarts={savedDataMarts}
+                      selectedAction={selectedAction}
                     />
                   )
                 )}

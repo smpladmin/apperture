@@ -1,6 +1,6 @@
 import logging
 import pendulum
-from typing import Dict, Union
+from typing import Dict, Union, List
 from datetime import datetime, timedelta
 from utils.utils import (
     DAG_RETRIES,
@@ -151,9 +151,32 @@ def get_datamart_action_dag_id(datamart_action: DatamartAction):
     return dag_id + f"{type}_{action_id}"
 
 
-def create_dag(
-    datamart_action: DatamartAction, datasource_id: str, created_date: datetime
-):
+@task_group
+def datamart_refresh_group(datasource_id, datamart_action):
+    datasource_with_credential = get_datasource_and_credential(
+        datasource_id=datasource_id
+    )
+    datasource = datasource_with_credential["datasource"]
+    credential = datasource_with_credential["credential"]
+    database_client = get_database_client(datasource=datasource)
+    database_credentials = get_database_credentials(
+        datasource=datasource,
+        credential=credential,
+    )
+
+    refresh_datamart_action(
+        datamart_action=datamart_action,
+        database_client=database_client,
+        database_credential=database_credentials,
+    )
+
+
+def create_dag(datamart_actions: List[DatamartAction]):
+    # Extract vars
+    datamart_action = datamart_actions[0]
+    datasource_id = datamart_action.datasource_id
+    created_date = datamart_action.created_at
+
     datamart_action_task_retries = int(
         Variable.get("datamart_action_task_retries", default_var=DAG_RETRIES)
     )
@@ -181,31 +204,36 @@ def create_dag(
         },
     )
     def datamart_loader():
-        datasource_with_credential = get_datasource_and_credential(
-            datasource_id=datasource_id
-        )
-        datasource = datasource_with_credential["datasource"]
-        credential = datasource_with_credential["credential"]
-        database_client = get_database_client(datasource=datasource)
-        database_credentials = get_database_credentials(
-            datasource=datasource,
-            credential=credential,
-        )
-
-        refresh_datamart_action(
-            datamart_action=datamart_action,
-            database_client=database_client,
-            database_credential=database_credentials,
-        )
+        previous_task = None
+        for datamart_action in datamart_actions:
+            current_task = datamart_refresh_group(datasource_id, datamart_action)
+            # Adding dependent datamarts in same dag as a supsequent taskgroup
+            if previous_task:
+                previous_task >> current_task
+            previous_task = current_task
 
     datamart_loader()
 
 
 datamart_actions = datamart_action_service.get_datamart_actions()
 
+# Fetching dependent datamarts
+dependent_dags_map = {}
+for index, datamart_action in enumerate(datamart_actions):
+    if datamart_action.schedule.frequency == Frequency.DATAMART:
+        key = datamart_action.datasource_id + "$$" + datamart_action.schedule.datamartId
+        if key in dependent_dags_map:
+            dependent_dags_map[key] = dependent_dags_map[key].append(
+                datamart_actions.pop(index)
+            )
+        else:
+            dependent_dags_map[key] = [datamart_actions.pop(index)]
+
 for datamart_action in datamart_actions:
-    create_dag(
-        datamart_action=datamart_action,
-        datasource_id=datamart_action.datasource_id,
-        created_date=datamart_action.created_at,
-    )
+    dependent_dags = []
+    # Adding dependent datamarts in same dag as a supsequent taskgroup
+    if datamart_action.type == ActionType.TABLE:
+        dependent_dags = dependent_dags_map.get(
+            datamart_action.datasource_id + "$$" + datamart_action.datamart_id, []
+        )
+    create_dag([datamart_action] + dependent_dags)

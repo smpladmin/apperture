@@ -5,7 +5,7 @@ import { DataMartObj } from '@lib/domain/datamart';
 import { DatamartAction } from '@lib/domain/datamartActions';
 import { AppertureUser } from '@lib/domain/user';
 import { _getAppsWithIntegrations } from '@lib/services/appService';
-import { _getSavedDataMart } from '@lib/services/dataMartService';
+import { _getSavedDataMart, _getSavedDataMartsForDatasourceId } from '@lib/services/dataMartService';
 import { _getSavedDatamartActionsForDatamartId } from '@lib/services/datamartActionService';
 import { _getNodes } from '@lib/services/datasourceService';
 import { _getAppertureUserInfo } from '@lib/services/userService';
@@ -53,8 +53,16 @@ export const getServerSideProps: GetServerSideProps = async ({
     };
   }
 
+  // Fetching saved datamarts to display in drop down
+  const datasourceId = query.dsId;
+  let savedDataMarts = (await _getSavedDataMartsForDatasourceId(datasourceId as string, token)) || [];
+  
+  // Removing current datamart from drop down (savedDataMarts list) 
+  const currentDataMartId = query.dataMartId;
+  savedDataMarts = savedDataMarts.filter((dataMart: DataMartObj) => dataMart._id !== currentDataMartId);
+
   return {
-    props: { apps, savedDataMart, savedDatamartActions, user },
+    props: { apps, savedDataMart, savedDatamartActions, user, savedDataMarts },
   };
 };
 
@@ -62,10 +70,12 @@ const EditDataMart = ({
   savedDataMart,
   savedDatamartActions,
   user,
+  savedDataMarts,
 }: {
   savedDataMart: DataMartObj;
   savedDatamartActions: DatamartAction[];
   user: AppertureUser;
+  savedDataMarts: DataMartObj[];
 }) => {
   const isUserAuthenticatedWithGoogleSheet = !!user.sheetToken;
 
@@ -74,6 +84,7 @@ const EditDataMart = ({
       savedDatamart={savedDataMart}
       savedDatamartActions={savedDatamartActions}
       isAuthenticated={isUserAuthenticatedWithGoogleSheet}
+      savedDataMarts={savedDataMarts}
     />
   );
 };

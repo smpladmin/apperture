@@ -31,6 +31,7 @@ export enum ActionFrequency {
   DAILY = 'daily',
   WEEKLY = 'weekly',
   MONTHLY = 'monthly',
+  DATAMART = 'after_table',
 }
 
 export enum TimePeriod {
@@ -44,6 +45,7 @@ export type Schedule = {
   day?: string;
   date?: string;
   frequency: ActionFrequency;
+  datamartId?: string;
 };
 
 export type DatamartAction = {

@@ -3,6 +3,7 @@ import logging
 from typing import Dict, List, Union
 
 from beanie import PydanticObjectId
+from beanie.operators import And
 from fastapi import Depends
 from domain.apps.models import ClickHouseCredential
 from domain.integrations.models import MsSQLCredential, MySQLCredential
@@ -122,9 +123,39 @@ class DatamartActionService:
         ).to_list()
 
     async def delete_datamart_action(self, id: str):
-        await DatamartAction.find_one(
-            DatamartAction.id == PydanticObjectId(id),
-        ).update({"$set": {"enabled": False}})
+        
+        primary_data_action = await DatamartAction.find_one(DatamartAction.id == PydanticObjectId(id))
+        await DatamartAction.find_one(DatamartAction.id == PydanticObjectId(id)).update({"$set": {"enabled": False}})
+        logging.debug(f"Deleted primary_data_action: {primary_data_action}")
+
+        ## Delete dependent_data_actions
+        if primary_data_action and primary_data_action.type == ActionType.TABLE:
+            primary_datamart_id = primary_data_action.datamart_id
+            
+            # Check if there are other data actions for same table (then do not need to delete dependents hence exiting)
+            data_actions_for_table = await DatamartAction.find(
+                And(
+                    DatamartAction.type == ActionType.TABLE,
+                    DatamartAction.datamart_id == PydanticObjectId(primary_datamart_id),
+                    DatamartAction.enabled == True,
+                )
+            ).to_list()
+            if len(data_actions_for_table) > 0:
+                return
+
+            # Fetching dependent_data_actions
+            dependent_data_actions = await DatamartAction.find(
+                And(
+                    DatamartAction.type == ActionType.TABLE,
+                    DatamartAction.schedule.datamartId == str(primary_datamart_id),
+                    DatamartAction.enabled == True,
+                )
+            ).to_list()
+
+            # Recurring delete dependent_data_actions
+            for dependent_data_action in dependent_data_actions:
+                await self.delete_datamart_action(dependent_data_action.id)
+
         return
 
     async def delete_datamart_actions_for_datamart(self, datamart_id: str):
