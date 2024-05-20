@@ -62,7 +62,7 @@ class TestDataMartService:
                 sheet="Sheet1",
             ),
             schedule=Schedule(
-                frequency="hourly", time=None, period=None, date=None, day=None
+                frequency="hourly", time=None, period=None, date=None, day=None, datamartId=None
             ),
             enabled=True,
         )
@@ -108,6 +108,7 @@ class TestDataMartService:
             "datamart_id": PydanticObjectId("636a1c61d715ca6baae65614"),
             "type": "google_sheet",
             "schedule": {
+                "datamartId": None,
                 "time": None,
                 "period": None,
                 "date": None,
