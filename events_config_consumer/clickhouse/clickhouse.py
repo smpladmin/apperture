@@ -167,6 +167,30 @@ class ClickHouse:
             )
         return result[0][0] if result else ""
 
+    def escape_sql_string(self, value):
+        """
+        Escapes special characters in a string to safely include it in an SQL query.
+
+        This method ensures that backslashes and single quotes within the string
+        are properly escaped so they do not interfere with the SQL syntax. It is
+        particularly useful when constructing SQL queries dynamically with values
+        that may contain these special characters.
+
+        Example:
+            Input: "8389679878\\", "8389679878_ARCHIEVED", "8389679878"
+            Output after escaping:
+                "8389679878\\" becomes "8389679878\\\\"
+                "8389679878_ARCHIEVED" remains "8389679878_ARCHIEVED"
+                "8389679878" remains "8389679878"
+
+        Args:
+            value (str): The string value to be escaped.
+
+        Returns:
+            str: The escaped string suitable for use in an SQL query.
+        """
+        return value.replace("\\", "\\\\").replace("'", "\\'")
+
     def get_row_values(
         self,
         table: str,
@@ -179,9 +203,12 @@ class ClickHouse:
         clickhouse_client = ClickHouseClientFactory.get_client(
             app_id=app_id, clickhouse_server_credentials=clickhouse_server_credential
         )
-        quoted_values = [f"'{value}'" for value in id_values]
-        values = ",".join(quoted_values)
-        query = f"SELECT * FROM {database}.{table} FINAL WHERE {id} IN ({values})"
+        formatted_values = ",".join(
+            f"'{self.escape_sql_string(value)}'" for value in id_values
+        )
+        query = (
+            f"SELECT * FROM {database}.{table} FINAL WHERE {id} IN ({formatted_values})"
+        )
         result = clickhouse_client.query(query=query)
 
         data = result.result_set
