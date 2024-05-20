@@ -193,11 +193,15 @@ def create_sparse_dataframe(
 
     id_path = config["id_path"]
     column_mapping = config["column_mapping"]
+    jsonpath_expr_id = parse(id_path)
+    id_value = [match.value for match in jsonpath_expr_id.find(event)][0]
+
+    id_type = columns_with_types.get(primary_key, "")
+    result_dict[primary_key] = convert_values_to_desired_types(
+        value=id_value, type=id_type
+    )
 
     for column in column_mapping:
-        jsonpath_expr_id = parse(id_path)
-        id_value = [match.value for match in jsonpath_expr_id.find(event)][0]
-
         destination_column, source_path = list(column.items())[0]
 
         # Extracting value from source_path
@@ -207,7 +211,6 @@ def create_sparse_dataframe(
 
         column_type = columns_with_types.get(destination_column, "")
 
-        result_dict[primary_key] = id_value
         result_dict[destination_column] = convert_values_to_desired_types(
             value=column_value, type=column_type
         )
@@ -450,9 +453,9 @@ def fetch_values_from_kafka_records(
                 table_topic = f"{topic}_{table}"
                 event_tables_config.event_tables[table_topic].events.append(values)
 
-        process_event_buckets(
-            event_tables_config=event_tables_config, alert_service=alert_service
-        )
+    process_event_buckets(
+        event_tables_config=event_tables_config, alert_service=alert_service
+    )
 
 
 def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesConfig):
