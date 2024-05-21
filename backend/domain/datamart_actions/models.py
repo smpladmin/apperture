@@ -21,6 +21,7 @@ class Frequency(str, Enum):
     DAILY = "daily"
     WEEKLY = "weekly"
     MONTHLY = "monthly"
+    DATAMART = 'after_table'
 
 
 class Schedule(BaseModel):
@@ -29,6 +30,7 @@ class Schedule(BaseModel):
     date: Optional[str]
     day: Optional[str]
     frequency: Frequency
+    datamartId: Optional[str]
 
 
 class TableMeta(BaseModel):

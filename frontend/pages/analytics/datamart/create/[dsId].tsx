@@ -7,8 +7,10 @@ import HomeLayout from '@components/HomeLayout';
 import { _getAppertureUserInfo } from '@lib/services/userService';
 import { AppertureUser } from '@lib/domain/user';
 import Scripts from '@components/Scripts';
+import { _getSavedDataMartsForDatasourceId } from '@lib/services/dataMartService';
+import { DataMartObj } from '@lib/domain/datamart';
 
-export const getServerSideProps: GetServerSideProps = async ({ req }) => {
+export const getServerSideProps: GetServerSideProps = async ({ req, query }) => {
   const token = getAuthToken(req);
   if (!token) {
     return {
@@ -26,15 +28,20 @@ export const getServerSideProps: GetServerSideProps = async ({ req }) => {
       props: {},
     };
   }
+
+  // Fetching saved datamarts to display in drop down
+  const datasourceId = query.dsId;
+  let savedDataMarts = (await _getSavedDataMartsForDatasourceId(datasourceId as string, token)) || [];
+
   return {
-    props: { apps, user },
+    props: { apps, user, savedDataMarts },
   };
 };
 
-const CreateDataMart = ({ user }: { user: AppertureUser }) => {
+const CreateDataMart = ({ user, savedDataMarts }: { user: AppertureUser; savedDataMarts: DataMartObj[]; }) => {
   const isUserAuthenticatedWithGoogleSheet = !!user.sheetToken;
 
-  return <Scripts isAuthenticated={isUserAuthenticatedWithGoogleSheet} />;
+  return <Scripts isAuthenticated={isUserAuthenticatedWithGoogleSheet} savedDataMarts={savedDataMarts} />;
 };
 
 CreateDataMart.getLayout = function getLayout(

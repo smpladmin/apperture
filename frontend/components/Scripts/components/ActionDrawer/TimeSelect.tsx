@@ -7,14 +7,16 @@ import React from 'react';
 const TimeSelect = ({
   schedule,
   setSchedule,
+  isHourly
 }: {
   schedule: Schedule | {};
   setSchedule: React.Dispatch<React.SetStateAction<Schedule | {}>>;
+  isHourly: boolean;
 }) => {
   const generateTimes = () => {
     const times = [];
-    for (let hour = 1; hour <= 12; hour++) {
-      for (let m = 0; m < 60; m += 15) {
+    for (let hour = isHourly === true ? 12 : 1; hour <= 12; hour++) {
+      for (let m = 0; m < 60; m += isHourly === true ? 5 : 15) {
         const minute = m < 10 ? `0${m}` : m;
         times.push(`${hour}:${minute}`);
       }
@@ -55,50 +57,51 @@ const TimeSelect = ({
       >
         {timeOptions}
       </Select>
-
-      <RadioGroup
-        value={(schedule as Schedule)?.period}
-        onChange={(value: string) => {
-          setSchedule((prevSchedule) => ({
-            ...prevSchedule,
-            period: value,
-          }));
-        }}
-      >
-        <Flex>
-          {Object.values(TimePeriod).map((period) => {
-            return (
-              <Flex
-                key={period}
-                cursor={'pointer'}
-                as={'label'}
-                py={'6px'}
-                px={'2'}
-                border={'0.4px solid #BDBDBD'}
-                borderColor={'grey.700'}
-                borderWidth={'1px'}
-                borderLeftWidth={period === TimePeriod.AM ? '1px' : 0}
-                borderRadius={
-                  period === TimePeriod.AM ? '4px 0 0 4px' : '0 4px 4px 0'
-                }
-                bg={
-                  (schedule as Schedule)?.period === period ? 'white.200' : ''
-                }
-              >
-                <Text
-                  fontSize={'xs-10'}
-                  lineHeight={'xs-10'}
-                  fontWeight={'400'}
-                  color={'grey.900'}
+      {isHourly !== true && (
+        <RadioGroup
+          value={(schedule as Schedule)?.period}
+          onChange={(value: string) => {
+            setSchedule((prevSchedule) => ({
+              ...prevSchedule,
+              period: value,
+            }));
+          }}
+        >
+          <Flex>
+            {Object.values(TimePeriod).map((period) => {
+              return (
+                <Flex
+                  key={period}
+                  cursor={'pointer'}
+                  as={'label'}
+                  py={'6px'}
+                  px={'2'}
+                  border={'0.4px solid #BDBDBD'}
+                  borderColor={'grey.700'}
+                  borderWidth={'1px'}
+                  borderLeftWidth={period === TimePeriod.AM ? '1px' : 0}
+                  borderRadius={
+                    period === TimePeriod.AM ? '4px 0 0 4px' : '0 4px 4px 0'
+                  }
+                  bg={
+                    (schedule as Schedule)?.period === period ? 'white.200' : ''
+                  }
                 >
-                  {period.toLocaleUpperCase()}
-                </Text>
-                <Radio hidden value={period} />
-              </Flex>
-            );
-          })}
-        </Flex>
-      </RadioGroup>
+                  <Text
+                    fontSize={'xs-10'}
+                    lineHeight={'xs-10'}
+                    fontWeight={'400'}
+                    color={'grey.900'}
+                  >
+                    {period.toLocaleUpperCase()}
+                  </Text>
+                  <Radio hidden value={period} />
+                </Flex>
+              );
+            })}
+          </Flex>
+        </RadioGroup>
+      )}
     </Flex>
   );
 };

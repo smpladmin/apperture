@@ -163,6 +163,7 @@ def test_get_datamart_list(client_init, datamart_service):
                         "date": None,
                         "day": None,
                         "frequency": "hourly",
+                        "datamartId": None,
                     },
                     "meta": {
                         "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},

@@ -53,6 +53,11 @@ export const getSavedDataMartsForDatasourceId = async (dsId: string) => {
   return res.data;
 };
 
+export const _getSavedDataMartsForDatasourceId = async (dsId: string,token: string) => {
+  const res = await ApperturePrivateGet(`/datamart?datasource_id=${dsId}`, token);
+  return res.data;
+};
+
 export const deleteDataMart = async (id: string) => {
   return await AppertureDelete(`/datamart/${id}`);
 };

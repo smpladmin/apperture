@@ -17,6 +17,7 @@ import { DatamartAction } from '@lib/domain/datamartActions';
 import SavedActionsList from './SavedActionsList';
 import EmptyCreateAction from '@assets/images/create-action.svg';
 import Image from 'next/image';
+import { DataMartObj } from '@lib/domain/datamart';
 
 type ActionDrawerProps = {
   isOpen: boolean;
@@ -25,6 +26,7 @@ type ActionDrawerProps = {
   workbookName: string;
   savedDatamartActions?: DatamartAction[];
   isAuthenticated?: boolean;
+  savedDataMarts: DataMartObj[]
 };
 
 const ActionDrawer = ({
@@ -34,6 +36,7 @@ const ActionDrawer = ({
   workbookName,
   savedDatamartActions,
   isAuthenticated,
+  savedDataMarts,
 }: ActionDrawerProps) => {
   const router = useRouter();
   const { showActionDrawer } = router.query;
@@ -99,6 +102,7 @@ const ActionDrawer = ({
               setDatartActions={setDatartActions}
               onClose={onClose}
               isAuthenticated={isAuthenticated}
+              savedDataMarts={savedDataMarts}
             />
           ) : datamartActions.length ? (
             <SavedActionsList

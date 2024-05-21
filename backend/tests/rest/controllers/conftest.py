@@ -431,7 +431,7 @@ def datamart_action_service(apperture_user_response):
             sheet="Sheet1",
         ),
         schedule=Schedule(
-            frequency="hourly", time=None, period=None, date=None, day=None
+            frequency="hourly", time=None, period=None, date=None, day=None, datamartId=None
         ),
         enabled=True,
     )
@@ -2034,6 +2034,7 @@ def datamart_action_response():
             "date": None,
             "day": None,
             "frequency": "hourly",
+            "datamartId": None,
         },
         "meta": {
             "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},

@@ -19,10 +19,12 @@ const Scripts = ({
   savedDatamart,
   savedDatamartActions,
   isAuthenticated,
+  savedDataMarts,
 }: {
   savedDatamart?: DataMartObj;
   savedDatamartActions?: DatamartAction[];
   isAuthenticated?: boolean;
+  savedDataMarts: DataMartObj[];
 }) => {
   const [isQueryResponseLoading, setIsQueryResponseLoading] = useState(false);
   const [name, setName] = useState<string>(
@@ -85,10 +87,11 @@ const Scripts = ({
       setIsDataMartBeingEdited(true);
   }, [savedDatamartId]);
 
-  useEffect(() => {
-    if (!query) return;
-    fetchData();
-  }, []);
+  // // Disabling running on page load
+  // useEffect(() => {
+  //   if (!query) return;
+  //   fetchData(); Disabling running on page load
+  // }, []);
 
   const handleSaveAndUpdate = async () => {
     setSaveButtonDisabled(true);
@@ -146,6 +149,7 @@ const Scripts = ({
         workbookName={name}
         savedDatamartActions={savedDatamartActions}
         isAuthenticated={isAuthenticated}
+        savedDataMarts={savedDataMarts}
       />
     </>
   );

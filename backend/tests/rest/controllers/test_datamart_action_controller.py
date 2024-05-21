@@ -56,7 +56,7 @@ async def test_update_datamart_action(
         app_id=PydanticObjectId("635ba034807ab86d8a2aadd7"),
         user_id="mock-user-id",
         schedule=Schedule(
-            time=None, period=None, date=None, day=None, frequency=Frequency.HOURLY
+            time=None, period=None, date=None, day=None, frequency=Frequency.HOURLY, datamartId=None
         ),
         type=ActionType.GOOGLE_SHEET,
         meta=GoogleSheetMeta(
@@ -86,6 +86,7 @@ async def test_update_datamart_action(
             "date": None,
             "day": None,
             "frequency": "hourly",
+            "datamartId": None,
         },
         "meta": {
             "spreadsheet": {"id": "1qu87sylkjuesopp98", "name": "Test"},
