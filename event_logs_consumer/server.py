@@ -230,7 +230,7 @@ async def process_kafka_messages() -> None:
             data=data, event_logs_datasources=app.event_logs_datasources
         )
 
-        if total_records >= MAX_RECORDS:
+        if total_records > MAX_RECORDS:
             logging.info(
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )
