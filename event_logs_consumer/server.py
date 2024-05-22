@@ -2,6 +2,7 @@ import asyncio
 from datetime import datetime
 from functools import reduce
 import json
+import ast
 import logging
 import os
 import sys
@@ -33,7 +34,12 @@ logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 total_records = 0
 
-KEYS_TYPECAST_TO_STRING = os.getenv("KEYS_TYPECAST_TO_STRING", ["lat", "lng"])
+KEYS_TYPECAST_TO_STRING = json.loads(os.getenv("KEYS_TYPECAST_TO_STRING", '["lat", "lng"]'))
+KEYS_TYPECAST_TO_LIST_OF_LIST = json.loads(os.getenv("KEYS_TYPECAST_TO_LIST_OF_LIST"))
+
+logging.info(f"KEYS_TYPECAST_TO_LIST_OF_LIST: {KEYS_TYPECAST_TO_LIST_OF_LIST}")
+logging.info(f"KEYS_TYPECAST_TO_STRING: {KEYS_TYPECAST_TO_STRING}")
+
 
 
 def format_date_string_to_desired_format(
@@ -70,9 +76,37 @@ def format_date_string_to_desired_format(
 
 
 def convert_object_keys_to_string(data: dict):
+
+    if not KEYS_TYPECAST_TO_STRING:
+        return data
+    
     for key in data.keys():
         if key in KEYS_TYPECAST_TO_STRING:
             data[key] = str(data[key])
+
+    return data
+
+
+def convert_object_keys_to_list_of_list(data:dict):
+    if not KEYS_TYPECAST_TO_LIST_OF_LIST:
+        return data
+    
+    
+    for key in data.keys():
+        if key in KEYS_TYPECAST_TO_LIST_OF_LIST:
+            value = data[key]
+            if isinstance(value, list):
+                continue
+
+            try:
+                result = json.loads(value)
+                data[key] = [result]
+            except (ValueError, json.JSONDecodeError):
+                try:
+                    result = ast.literal_eval(value)
+                    data[key] = [result]
+                except (ValueError, SyntaxError):
+                    pass
 
     return data
 
@@ -137,7 +171,7 @@ def save_topic_data_to_clickhouse(
                     data.get("task_id", ""),
                     data.get("account_id", ""),
                     data.get("key", ""),
-                    convert_object_keys_to_string(data.get("data", {})),
+                    convert_object_keys_to_string(convert_object_keys_to_list_of_list(data.get("data", {}))),
                     data.get("datasource_id", ""),
                 ]
                 for data in to_insert
@@ -196,7 +230,7 @@ async def process_kafka_messages() -> None:
             data=data, event_logs_datasources=app.event_logs_datasources
         )
 
-        if total_records > MAX_RECORDS:
+        if total_records >= MAX_RECORDS:
             logging.info(
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )
