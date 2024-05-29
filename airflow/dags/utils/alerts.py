@@ -10,6 +10,7 @@ CDC_INTERNAL_ALERTS_URL = os.getenv("SLACK_URL_CDC_INTERNAL_ALERTS")
 WIOM_CDC_ALERTS_URL = os.getenv("SLACK_URL_WIOM_CDC_ALERTS")
 WARNING_ALERTS_URL = os.getenv("SLACK_URL_WARNING_ALERTS")
 AIRFLOW_ALERTS_URL = os.getenv("SLACK_URL_AIRFLOW_ALERTS")
+AIRFLOW_ALERTS_DATAMART_URL = os.getenv("SLACK_URL_AIRFLOW_ALERTS_DATAMART")
 logging.info(f"CDC_INTERNAL_ALERTS_URL: {CDC_INTERNAL_ALERTS_URL}")
 logging.info(f"WIOM_CDC_ALERTS_URL: {WIOM_CDC_ALERTS_URL}")
 logging.info(f"WARNING_ALERTS_URL: {WARNING_ALERTS_URL}")
@@ -23,6 +24,8 @@ DAGS_SLACK_URLS = {
 }
 # Default slack urls
 DEFAULT_SLACK_URLS = [AIRFLOW_ALERTS_URL]
+# datamart slack urls
+DATAMART_SLACK_URLS = [AIRFLOW_ALERTS_DATAMART_URL]
 
 
 def send_failure_alert_to_slack(context):
@@ -54,7 +57,8 @@ def send_failure_alert_to_slack(context):
         }
 
         # Note: If list of urls is not available in DAGS_SLACK_URLS then by default sending the messages to AIRFLOW_ALERTS_URL.
-        for webhook_url in DAGS_SLACK_URLS.get(dag_id, DEFAULT_SLACK_URLS):
+        slack_urls = DATAMART_SLACK_URLS if dag_id.startswith("datamart_") else DAGS_SLACK_URLS.get(dag_id, DEFAULT_SLACK_URLS)
+        for webhook_url in slack_urls:
             response = requests.post(
                 webhook_url,
                 json=slack_msg,

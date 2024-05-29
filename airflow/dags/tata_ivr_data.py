@@ -100,7 +100,7 @@ def create_dag(datasource_id: str, created_date: datetime):
     @dag(
         dag_id=f"tata_ivr_data_ingestion_{datasource_id}",
         description=f"TATA IVR daily refresh for {datasource_id}",
-        schedule="0 8 * * *",
+        schedule="50 7 * * *",
         start_date=pendulum.instance(
             datetime.strptime(dag_start_date, "%Y-%m-%d"),
             tz=pendulum.timezone("Asia/Kolkata"),
