@@ -135,7 +135,7 @@ def create_dag(datasource_id: str, created_date: datetime):
     @dag(
         dag_id=f"google_ads_data_loader_{datasource_id}",
         description=f"google ads daily refresh for {datasource_id}",
-        schedule="0 8 * * *",
+        schedule="52 7 * * *",
         start_date=pendulum.instance(
             datetime.strptime(dag_start_date, "%Y-%m-%d"),
             tz=pendulum.timezone("Asia/Kolkata"),

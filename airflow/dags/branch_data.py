@@ -177,7 +177,7 @@ def create_dag(datasource_id: str, created_date: datetime):
     @dag(
         dag_id=f"branch_data_loader_{datasource_id}",
         description=f"Branch daily refresh for {datasource_id}",
-        schedule="0 12 * * *",
+        schedule="55 11 * * *",
         start_date=pendulum.instance(
             datetime.strptime(dag_start_date, "%Y-%m-%d"),
             tz=pendulum.timezone("Asia/Kolkata"),
@@ -224,7 +224,7 @@ def create_dag(datasource_id: str, created_date: datetime):
     @dag(
         dag_id=f"branch_summary_data_loader_{datasource_id}",
         description=f"Branch summary data daily ingestion for {datasource_id}",
-        schedule="0 12 * * *",
+        schedule="55 11 * * *",
         start_date=pendulum.instance(
             datetime.strptime(dag_start_date, "%Y-%m-%d"),
             tz=pendulum.timezone("Asia/Kolkata"),
