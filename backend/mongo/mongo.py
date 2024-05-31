@@ -26,6 +26,7 @@ from domain.spreadsheets.models import WorkBook
 from domain.google_sheet.models import SheetQuery
 from domain.datamart_actions.models import DatamartAction
 from domain.alerts.models import Alert
+from domain.queries.models import Queries
 
 
 class Mongo:
@@ -57,6 +58,7 @@ class Mongo:
                 SheetQuery,
                 DatamartAction,
                 Alert,
+                Queries,
             ],
         )
 
