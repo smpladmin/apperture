@@ -33,6 +33,3 @@ class QueriesService:
 
     async def get_query_data(self, id: str):
         return await Queries.find_one({"_id": PydanticObjectId(id)})
-
-    async def get_queries_table(self, id: str) -> Queries:
-        return await Queries.get(PydanticObjectId(id))

@@ -68,7 +68,6 @@ async def save_queries(
     queries_service: QueriesService = Depends(),
 ):
     datasource = await datasource_service.get_datasource(id=dto.datasourceId)
-    print(datasource)
     queries_table = queries_service.build_queries_table(
         datasource_id=PydanticObjectId(dto.datasourceId),
         app_id=datasource.app_id,
@@ -87,4 +86,4 @@ async def get_saved_queries(
     id: str,
     datamart_service: QueriesService = Depends(),
 ):
-    return await datamart_service.get_queries_table(id=id)
+    return await datamart_service.get_query_data(id=id)
