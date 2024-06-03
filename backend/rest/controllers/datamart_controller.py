@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, HTTPException, Request
 from starlette.responses import RedirectResponse
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends, HTTPException
 from authorisation import OAuthClientFactory, OAuthProvider
 from authorisation.oauth_provider import GoogleOauthContext
 
