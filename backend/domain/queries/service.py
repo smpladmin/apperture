@@ -7,6 +7,7 @@ from fastapi import Depends
 from domain.queries.models import Queries
 from mongo import Mongo
 import pandas as pd
+import numpy as np
 from typing import List, Dict
 from rest.dtos.queries import QueriesTableDto
 from rest.controllers.actions.compute_query import ComputeQueryAction
@@ -89,7 +90,8 @@ class QueriesService:
                 )
             else:
                 merged_df[f"diff_{col_df1}_{col_df2}"] = None
-
+        merged_df.replace([np.inf, -np.inf], np.nan, inplace=True)
+        merged_df.fillna(0, inplace=True)
         return merged_df
 
     async def compute_queries(
