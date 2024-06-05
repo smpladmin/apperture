@@ -7,3 +7,6 @@ class Queries(Document):
     app_id: PydanticObjectId
     user_id: PydanticObjectId
     query: str
+
+    class Settings:
+        name = "queries"
