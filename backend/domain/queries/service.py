@@ -84,12 +84,16 @@ class QueriesService:
         )
 
         for col_df1, col_df2 in compare_columns.items():
-            if col_df1 in merged_df.columns and col_df2 in merged_df.columns:
+            col_df1_query1 = col_df1 + "_query1"
+            col_df2_query2 = col_df2 + "_query2"
+            
+            if col_df1_query1 in merged_df.columns and col_df2_query2 in merged_df.columns:
                 merged_df[f"diff_{col_df1}_{col_df2}"] = (
-                    merged_df[col_df1] - merged_df[col_df2]
+                    merged_df[col_df1_query1] - merged_df[col_df2_query2]
                 )
             else:
                 merged_df[f"diff_{col_df1}_{col_df2}"] = None
+
         merged_df.replace([np.inf, -np.inf], np.nan, inplace=True)
         merged_df.fillna(0, inplace=True)
         return merged_df
