@@ -1,3 +1,4 @@
+import logging
 import os
 import pendulum
 import json
@@ -55,7 +56,8 @@ def get_app_database(
 @task
 def create_and_process_dataframe() -> pd.DataFrame:
     csv = os.getenv("MIGRATE_EVENTS_CSV")
-    df = pd.read_csv(csv)
+    logging.info(f"csv : {csv}")
+    df = pd.read_csv(f"{csv}")
     df["event_name"] = df["event_name"].astype("string")
     df["added_time"] = pd.to_datetime(df["added_time"], errors="coerce")
     df["table"] = df["table"].astype("string")
