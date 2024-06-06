@@ -53,7 +53,7 @@ def get_app_database(
 
 @task
 def create_and_process_dataframe() -> pd.DataFrame:
-    df = pd.read_csv("https://cdn.apperture.io/replica_ch_events.csv")
+    df = pd.read_csv("https://cdn.apperture.io/jan_to_march_miss_events.csv")
     df["event_name"] = df["event_name"].astype("string")
     df["added_time"] = pd.to_datetime(df["added_time"], errors="coerce")
     df["table"] = df["table"].astype("string")
