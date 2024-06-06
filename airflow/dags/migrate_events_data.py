@@ -1,3 +1,4 @@
+import os
 import pendulum
 import json
 
@@ -53,7 +54,8 @@ def get_app_database(
 
 @task
 def create_and_process_dataframe() -> pd.DataFrame:
-    df = pd.read_csv("https://cdn.apperture.io/jan_to_march_miss_events.csv")
+    csv = os.getenv("MIGRATE_EVENTS_CSV")
+    df = pd.read_csv(csv)
     df["event_name"] = df["event_name"].astype("string")
     df["added_time"] = pd.to_datetime(df["added_time"], errors="coerce")
     df["table"] = df["table"].astype("string")
