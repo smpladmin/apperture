@@ -55,9 +55,9 @@ def get_app_database(
 
 @task
 def create_and_process_dataframe() -> pd.DataFrame:
-    csv = os.getenv("MIGRATE_EVENTS_CSV")
-    logging.info(f"csv : {csv}")
-    df = pd.read_csv(f"{csv}")
+    # csv = os.getenv("MIGRATE_EVENTS_CSV")
+    # logging.info(f"csv : {csv}")
+    df = pd.read_csv("https://cdn.apperture.io/final_sheet_x.csv")
     df["event_name"] = df["event_name"].astype("string")
     df["added_time"] = pd.to_datetime(df["added_time"], errors="coerce")
     df["table"] = df["table"].astype("string")
