@@ -23,7 +23,7 @@ class Schedule(BaseModel):
 
 
 class SlackChannel(BaseModel):
-    slack_channel: Optional[str]
+    alert_name: Optional[str]
     slack_url: Optional[str]
 
 

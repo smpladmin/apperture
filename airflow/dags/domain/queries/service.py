@@ -69,7 +69,7 @@ class QueriesScheduleService:
 
         return [QueriesSchedule(**sl) for sl in schedules_list]
 
-    def create_payload(self, image_url):
+    def create_payload(self, image_url, alert_name):
         logging.info(f"Image stored at: {image_url}")
         payload = {
             "blocks": [
@@ -77,7 +77,7 @@ class QueriesScheduleService:
                     "type": "header",
                     "text": {
                         "type": "plain_text",
-                        "text": "🚨 Alert - Query Comparison Count 🚨",
+                        "text": f"🚨 Alert - {alert_name} 🚨",
                         "emoji": True,
                     },
                 },

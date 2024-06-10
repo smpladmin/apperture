@@ -33,8 +33,8 @@ def create_table_and_save_image_to_s3(results, queries_schedule_id: str):
 
 
 @task
-def create_payload(image_url):
-    payload = queries_schedules_service.create_payload(image_url)
+def create_payload(image_url, alert_name):
+    payload = queries_schedules_service.create_payload(image_url,alert_name)
     return payload
 
 
@@ -69,7 +69,7 @@ def create_dag(schedule: QueriesSchedule, created_date: datetime):
     def compute_queries_compare_alert():
         results = get_queries_comparison(schedule)
         url = create_table_and_save_image_to_s3(results, schedule.id)
-        payload = create_payload(url)
+        payload = create_payload(url,schedule.channel.alert_name)
         slack_url = schedule.channel.slack_url
         if slack_url == "string":
             slack_url = WIOM_QC_ALERTS_URL
