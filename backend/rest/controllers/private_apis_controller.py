@@ -7,7 +7,7 @@ from typing import List, Optional, Union
 from fastapi_limiter.depends import RateLimiter
 
 from beanie import PydanticObjectId
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, HTTPException
 from base64 import b64decode
 
 from authorisation.service import AuthService
@@ -47,6 +47,9 @@ from domain.notifications.service import NotificationService
 from domain.properties.service import PropertiesService
 from domain.runlogs.service import RunLogService
 from domain.spreadsheets.models import DatabaseClient
+from domain.queries.service import QueriesService
+from domain.queries_schedule.service import QueriesScheduleService
+from domain.queries_schedule.models import QueriesSchedule
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
@@ -61,6 +64,7 @@ from rest.dtos.clickstream_event_properties import (
     ClickStreamEventPropertiesDto,
     ClickStreamEventPropertiesResponse,
 )
+from rest.dtos.queries import QueryComparisonDto
 from rest.dtos.datamart import RefreshDataMartDto
 from rest.dtos.datasources import DataSourceResponse, PrivateDataSourceResponse
 from rest.dtos.edges import CreateEdgesDto
@@ -745,3 +749,47 @@ async def get_apps_for_provider(
         return await app_service.get_app_by_api_key(api_key=api_key)
 
     return await app_service.get_all_apps()
+
+
+@router.get(
+    "/queries/schedules",
+    response_model=List[QueriesSchedule],
+)
+async def get_all_query_schedules(
+    query_schedule_service: QueriesScheduleService = Depends(),
+):
+    return await query_schedule_service.get_all_query_schedules()
+
+
+@router.post(
+    "/queries/compare",
+    response_model=dict,
+)
+async def run_internal_queries(
+    query_comparison_dto: QueryComparisonDto,
+    compute_query_action: ComputeQueryAction = Depends(),
+    queries_service: QueriesService = Depends(),
+):
+    try:
+        query_ids = query_comparison_dto.query_ids
+        key_columns = query_comparison_dto.key_columns
+        compare_columns = query_comparison_dto.compare_columns
+
+        if len(query_ids) < 2:
+            raise HTTPException(
+                status_code=400, detail="At least two query IDs must be provided."
+            )
+
+        query_id1, query_id2 = query_ids
+        difference_df = await queries_service.compute_difference_between_queries(
+            query_id1=query_id1,
+            query_id2=query_id2,
+            key_columns=key_columns,
+            compare_columns=compare_columns,
+            compute_query_action=compute_query_action,
+        )
+        result = difference_df.to_dict(orient="records")
+        return {"data": result}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))

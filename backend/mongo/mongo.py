@@ -27,6 +27,7 @@ from domain.google_sheet.models import SheetQuery
 from domain.datamart_actions.models import DatamartAction
 from domain.alerts.models import Alert
 from domain.queries.models import Queries
+from domain.queries_schedule.models import QueriesSchedule
 
 
 class Mongo:
@@ -59,6 +60,7 @@ class Mongo:
                 DatamartAction,
                 Alert,
                 Queries,
+                QueriesSchedule,
             ],
         )
 
