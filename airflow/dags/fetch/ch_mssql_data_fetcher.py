@@ -47,9 +47,7 @@ class ClickHouseClient:
 
     def query(self, query):
         try:
-            print(query)
             result = self.client.query(query)
-            print(f"Query Result: {result}")
             data = result.result_set
             columns = result.column_names
             df = pd.DataFrame(data, columns=columns)
