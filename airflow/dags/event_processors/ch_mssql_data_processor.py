@@ -7,6 +7,7 @@ import logging
 import os
 from dotenv import load_dotenv
 
+
 def convert_object_keys_to_list_of_list(data: dict, keys: list):
     for key in data.keys():
         if key in keys:
@@ -27,7 +28,7 @@ def convert_object_keys_to_list_of_list(data: dict, keys: list):
 
 def process_data():
     KEYS_TYPECAST_TO_LIST_OF_LIST = ["partners"]
-
+    load_dotenv()
     mssql_server = os.getenv("MSSQL_SERVER")
     mssql_database = os.getenv("MSSQL_DATABASE")
     mssql_username = os.getenv("MSSQL_USERNAME")
@@ -50,7 +51,6 @@ def process_data():
     formatted_date = today.strftime("%d%b")
     final_result = "backfill_" + formatted_date
 
-    logging.info(f"the file is for:{final_result}")
     mssql_query = f"""
     SELECT *
     FROM
@@ -89,9 +89,8 @@ def process_data():
     df_clickhouse = ch_client.query(ch_query)
     if df_clickhouse is None:
         raise ValueError("ClickHouse query returned None")
-    logging.info(f"ClickHouse query returned: {df_clickhouse}")
-    logging.info(f"ClickHouse query type: {type(df_clickhouse)}")
     df_clickhouse = df_clickhouse.drop_duplicates()
+    logging.info(f"CLickhouse query returned:{df_clickhouse}")
 
     merged_df = df_mssql.merge(
         df_clickhouse[["message_id"]], on="message_id", how="left", indicator=True
@@ -138,4 +137,5 @@ def process_data():
     final_df["key"] = final_df["key"].astype("string")
     final_df["datasource_id"] = final_df["datasource_id"].astype("string")
     final_df["source_flag"] = final_df["source_flag"].astype("string")
+    logging.info(f"Final DF is : {final_df}")
     return final_df
