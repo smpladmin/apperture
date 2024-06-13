@@ -74,7 +74,7 @@ def process_data():
         raise ValueError("MSSQL query returned None")
     df_mssql = df_mssql.fillna("")
     df_mssql = df_mssql.drop_duplicates()
-    logging.info(f"MSSQL query returned:{df_mssql}")
+    logging.info(f"MSSQL query returned {len(df_mssql)} rows")
     ch_query = """
     SELECT message_id AS message_id
     FROM
@@ -90,7 +90,7 @@ def process_data():
     if df_clickhouse is None:
         raise ValueError("ClickHouse query returned None")
     df_clickhouse = df_clickhouse.drop_duplicates()
-    logging.info(f"CLickhouse query returned:{df_clickhouse}")
+    logging.info(f"Clickhouse query returned {len(df_clickhouse)} rows")
 
     merged_df = df_mssql.merge(
         df_clickhouse[["message_id"]], on="message_id", how="left", indicator=True
@@ -137,5 +137,5 @@ def process_data():
     final_df["key"] = final_df["key"].astype("string")
     final_df["datasource_id"] = final_df["datasource_id"].astype("string")
     final_df["source_flag"] = final_df["source_flag"].astype("string")
-    logging.info(f"Final DF is : {final_df}")
+    logging.info(f"Data to be added :{final_df}")
     return final_df

@@ -43,6 +43,7 @@ class ClickHouseClient:
             username=self.username,
             password=self.password,
             database=self.database,
+            query_limit=0
         )
 
     def query(self, query):
