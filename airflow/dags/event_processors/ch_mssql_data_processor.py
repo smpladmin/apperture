@@ -4,7 +4,8 @@ import ast
 from fetch.ch_mssql_data_fetcher import MSSQLClient, ClickHouseClient
 from datetime import datetime
 import logging
-
+import os
+from dotenv import load_dotenv
 
 def convert_object_keys_to_list_of_list(data: dict, keys: list):
     for key in data.keys():
@@ -27,16 +28,16 @@ def convert_object_keys_to_list_of_list(data: dict, keys: list):
 def process_data():
     KEYS_TYPECAST_TO_LIST_OF_LIST = ["partners"]
 
-    mssql_server = "replica.i2e1.in"
-    mssql_database = "i2e1"
-    mssql_username = "vishalreadonly"
-    mssql_password = "edtft34t34552222"
+    mssql_server = os.getenv("MSSQL_SERVER")
+    mssql_database = os.getenv("MSSQL_DATABASE")
+    mssql_username = os.getenv("MSSQL_USERNAME")
+    mssql_password = os.getenv("MSSQL_PASSWORD")
 
-    ch_host = "3.109.69.126"
-    ch_port = 8123
-    ch_username = "default"
-    ch_password = "DyI9aNRn"
-    ch_database = "default"
+    ch_host = os.getenv("CH_HOST")
+    ch_port = int(os.getenv("CH_PORT"))
+    ch_username = os.getenv("CH_USERNAME")
+    ch_password = os.getenv("CH_PASSWORD")
+    ch_database = os.getenv("CH_DATABASE")
 
     mssql_client = MSSQLClient(
         mssql_server, mssql_database, mssql_username, mssql_password
