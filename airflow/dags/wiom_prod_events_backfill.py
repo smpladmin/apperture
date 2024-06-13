@@ -85,7 +85,7 @@ def create_dag(datasource_id: str):
     @dag(
         dag_id=f"migration_{datasource_id}",
         description=f"migration for {datasource_id}",
-        schedule="0 8 * * *",
+        schedule="30 1 * * *",
         start_date=pendulum.instance(
             datetime.now() - timedelta(days=FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET),
             tz=pendulum.timezone("Asia/Kolkata"),
@@ -95,6 +95,7 @@ def create_dag(datasource_id: str):
         default_args={
             "on_failure_callback": [send_failure_alert_to_slack],
         },
+        is_paused_upon_creation=True,
     )
     def facebook_ads_data_loader():
         datasource_with_credential = get_datasource_and_credential(

@@ -55,7 +55,8 @@ def process_data():
     SELECT *
     FROM
     (
-        SELECT 'booking_logs' AS table_, '65b1f642f3213a617bbedf8f' AS datasource_id, '{final_result}' AS source_flag, JSON_VALUE(data, '$.messageId') AS message_id, *
+        SELECT 'booking_logs' AS table_, '65b1f642f3213a617bbedf8f' AS datasource_id, '{final_result}' AS source_flag,
+               JSON_VALUE(data, '$.messageId') AS message_id, *
         FROM log_db.dbo.booking_logs
         WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
     ) a
@@ -63,8 +64,36 @@ def process_data():
     SELECT *
     FROM
     (
-        SELECT 'task_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag, JSON_VALUE(data, '$.messageId') AS message_id, *
+        SELECT 'task_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+               JSON_VALUE(data, '$.messageId') AS message_id, *
         FROM log_db.dbo.task_logs
+        WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
+    ) a
+    UNION ALL
+    SELECT *
+    FROM
+    (
+        SELECT 'payment_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+               JSON_VALUE(data, '$.messageId') AS message_id, *
+        FROM log_db.dbo.payment_logs
+        WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
+    ) a
+    UNION ALL
+    SELECT *
+    FROM
+    (
+        SELECT 'customer_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+               JSON_VALUE(data, '$.messageId') AS message_id, *
+        FROM log_db.dbo.customer_logs
+        WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
+    ) a
+    UNION ALL
+    SELECT *
+    FROM
+    (
+        SELECT 'ginie_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+               JSON_VALUE(data, '$.messageId') AS message_id, *
+        FROM log_db.dbo.ginie_logs
         WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
     ) a
     """
@@ -82,7 +111,7 @@ def process_data():
         SELECT  data.messageId message_id,*
         FROM wiom_in.prod_events
         WHERE toDate(added_time) = toDate(now() - INTERVAL 1 DAY)
-         and table in ('booking_logs','task_logs')
+         and table in ('booking_logs','task_logs','ginie_logs','customer_logs','payment_logs','partner_logs')
     )
     group by 1
     """
