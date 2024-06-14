@@ -83,8 +83,8 @@ def save_datatframe(
 def create_dag(datasource_id: str):
 
     @dag(
-        dag_id=f"migration_{datasource_id}",
-        description=f"migration for {datasource_id}",
+        dag_id=f"wiom_prod_events_backfill_{datasource_id}",
+        description=f"backfill for {datasource_id}",
         schedule="30 1 * * *",
         start_date=pendulum.instance(
             datetime.now() - timedelta(days=FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET),
