@@ -32,6 +32,6 @@ class QueriesSchedule(BaseModel):
     key_columns: List[str]
     compare_columns: Dict[str, str]
     schedule: Schedule
-    channel: SlackChannel
+    channel: Optional[SlackChannel]
     created_at: datetime
     enabled: bool = True

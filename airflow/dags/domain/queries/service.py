@@ -37,15 +37,12 @@ class QueriesScheduleService:
 
     def dispatch_alert(self, slack_url: str, payload: dict):
         try:
-            print(f"slack url is:{slack_url}")
             response = requests.post(
                 slack_url,
                 json=payload,
                 headers={"Content-Type": "application/json"},
             )
-
-            logging.info(f"SG_1: Payload is: {response}")
-            logging.info(f"SG_1: Response: {response.status_code} {response.text}")
+            logging.info(f"Response: {response.status_code} {response.text}")
 
             if response.status_code != 200:
                 logging.error(

@@ -31,7 +31,7 @@ class QueriesSchedule(Document):
     key_columns: List[str]
     compare_columns: Dict[str, str]
     schedule: Schedule
-    channel: SlackChannel
+    channel: Optional[SlackChannel]
     enabled: bool = True
 
     class Settings:
