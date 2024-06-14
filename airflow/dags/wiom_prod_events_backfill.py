@@ -1,5 +1,3 @@
-import logging
-import os
 import pendulum
 import json
 
@@ -10,6 +8,9 @@ from airflow.decorators import task, dag
 
 from domain.datasource.service import DataSourceService
 from store.facebook_ads_saver import FacebookAdsDataSaver
+
+from event_processors import ch_mssql_data_processor
+
 
 from utils.utils import (
     FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET,
@@ -54,21 +55,8 @@ def get_app_database(
 
 
 @task
-def create_and_process_dataframe() -> pd.DataFrame:
-    csv = os.getenv("MIGRATE_EVENTS_CSV")
-    logging.info(f"csv : {csv}")
-    df = pd.read_csv(f"{csv}")
-    df["event_name"] = df["event_name"].astype("string")
-    df["added_time"] = pd.to_datetime(df["added_time"], errors="coerce")
-    df["table"] = df["table"].astype("string")
-    df["mobile"] = df["mobile"].astype("string")
-    df["task_id"] = df["task_id"].astype("string")
-    df["account_id"] = df["account_id"].astype("string")
-    df["key"] = df["key"].astype("string")
-    df["datasource_id"] = df["datasource_id"].astype("string")
-    df["data"] = df["data"].apply(json.loads)
-    df["source_flag"] = df["source_flag"].astype("string")
-
+def create_and_process_dataframe():
+    df = ch_mssql_data_processor.process_data()
     return df
 
 
@@ -97,7 +85,7 @@ def create_dag(datasource_id: str):
     @dag(
         dag_id=f"migration_{datasource_id}",
         description=f"migration for {datasource_id}",
-        schedule="0 8 * * *",
+        schedule="30 1 * * *",
         start_date=pendulum.instance(
             datetime.now() - timedelta(days=FACEBOOK_ADS_DATA_FETCH_DAYS_OFFSET),
             tz=pendulum.timezone("Asia/Kolkata"),
@@ -107,6 +95,7 @@ def create_dag(datasource_id: str):
         default_args={
             "on_failure_callback": [send_failure_alert_to_slack],
         },
+        is_paused_upon_creation=True,
     )
     def facebook_ads_data_loader():
         datasource_with_credential = get_datasource_and_credential(
