@@ -71,7 +71,7 @@ def create_dag(schedule: QueriesSchedule, created_date: datetime):
         url = create_table_and_save_image_to_s3(results, schedule.id)
         payload = create_payload(url,schedule.channel.alert_name)
         slack_url = schedule.channel.slack_url
-        if slack_url == "string":
+        if slack_url is None:
             slack_url = WIOM_QC_ALERTS_URL
         dispatch_alert(
             slack_url=slack_url,
