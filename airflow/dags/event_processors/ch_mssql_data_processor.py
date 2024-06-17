@@ -52,52 +52,52 @@ def process_data():
     final_result = "backfill_" + formatted_date
 
     mssql_query = f"""
-    SELECT *
-    FROM
-    (
-        SELECT 'booking_logs' AS table_, '65b1f642f3213a617bbedf8f' AS datasource_id, '{final_result}' AS source_flag,
-               JSON_VALUE(data, '$.messageId') AS message_id, *
-        FROM log_db.dbo.booking_logs
-        WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
-    ) a
-    UNION ALL
-    SELECT *
-    FROM
-    (
-        SELECT 'task_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
-               JSON_VALUE(data, '$.messageId') AS message_id, *
-        FROM log_db.dbo.task_logs
-        WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
-    ) a
-    UNION ALL
-    SELECT *
-    FROM
-    (
-        SELECT 'payment_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
-               JSON_VALUE(data, '$.messageId') AS message_id, *
-        FROM log_db.dbo.payment_logs
-        WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
-    ) a
-    UNION ALL
-    SELECT *
-    FROM
-    (
-        SELECT 'customer_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
-               JSON_VALUE(data, '$.messageId') AS message_id, *
-        FROM log_db.dbo.customer_logs
-        WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
-    ) a
-    UNION ALL
-    SELECT *
-    FROM
-    (
-        SELECT 'ginie_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
-               JSON_VALUE(data, '$.messageId') AS message_id, *
-        FROM log_db.dbo.ginie_logs
-        WHERE CAST(added_time AS DATE) = CAST(DATEADD(DAY, -1, GETDATE()) AS DATE)
-    ) a
-    """
-
+        SELECT *
+        FROM
+        (
+            SELECT 'booking_logs' AS table_, '65b1f642f3213a617bbedf8f' AS datasource_id, '{final_result}' AS source_flag,
+                JSON_VALUE(data, '$.messageId') AS message_id, *
+            FROM log_db.dbo.booking_logs
+            WHERE CAST(added_time AS DATE)  >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+        ) a
+        UNION ALL
+        SELECT *
+        FROM
+        (
+            SELECT 'task_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+                JSON_VALUE(data, '$.messageId') AS message_id, *
+            FROM log_db.dbo.task_logs
+            WHERE CAST(added_time AS DATE)  >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+        ) a
+        UNION ALL
+        SELECT *
+        FROM
+        (
+            SELECT 'payment_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+                JSON_VALUE(data, '$.messageId') AS message_id, *
+            FROM log_db.dbo.payment_logs
+            WHERE CAST(added_time AS DATE) >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+        ) a
+        UNION ALL
+        SELECT *
+        FROM
+        (
+            SELECT 'customer_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+                JSON_VALUE(data, '$.messageId') AS message_id, *
+            FROM log_db.dbo.customer_logs
+            WHERE CAST(added_time AS DATE)  >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+        ) a
+        UNION ALL
+        SELECT *
+        FROM
+        (
+            SELECT 'ginie_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+                JSON_VALUE(data, '$.messageId') AS message_id, *
+            FROM log_db.dbo.ginie_logs
+            WHERE CAST(added_time AS DATE)  >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+        ) a
+        """
+    
     df_mssql = mssql_client.query(mssql_query)
     if df_mssql is None:
         raise ValueError("MSSQL query returned None")
@@ -110,7 +110,7 @@ def process_data():
     (
         SELECT  data.messageId message_id,*
         FROM wiom_in.prod_events
-        WHERE toDate(added_time) = toDate(now() - INTERVAL 1 DAY)
+        WHERE toDate(added_time) >= toDate(now() - INTERVAL 7 DAY)
          and table in ('booking_logs','task_logs','ginie_logs','customer_logs','payment_logs','partner_logs')
     )
     group by 1
