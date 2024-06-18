@@ -45,6 +45,7 @@ from rest.controllers import (
     datamart_action_controller,
     alert_controller,
     queries_controller,
+    queries_schedule_controller,
 )
 
 settings = apperture_settings()
@@ -127,6 +128,7 @@ app.include_router(cdc_controller.router)
 app.include_router(datamart_action_controller.router)
 app.include_router(alert_controller.router)
 app.include_router(queries_controller.router)
+app.include_router(queries_schedule_controller.router)
 
 
 @app.get("/sentry-debug")

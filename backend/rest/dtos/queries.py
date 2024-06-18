@@ -1,5 +1,4 @@
 from typing import List, Dict
-from enum import Enum
 from pydantic import BaseModel
 from domain.queries.models import Queries
 from rest.dtos.model_response import ModelResponse
@@ -8,6 +7,7 @@ from rest.dtos.model_response import ModelResponse
 class QueriesTableDto(BaseModel):
     query_id: str
     datasourceId: str
+
 
 class QueriesDto(BaseModel):
     datasourceId: str
@@ -23,6 +23,3 @@ class QueryComparisonDto(BaseModel):
     query_ids: List[str]
     key_columns: List[str]
     compare_columns: Dict[str, str]
-
-
-
