@@ -52,10 +52,9 @@ def format_date_string_to_desired_format(
     date_formats = [
         "%Y-%m-%dT%H:%M:%S.%fZ",
         "%Y-%m-%dT%H:%M:%S.%f",
-        "%Y-%m-%dT%H:%M:%SZ"
+        "%Y-%m-%dT%H:%M:%SZ",
         "%Y-%m-%d %H:%M:%S.%f",
         "%Y-%m-%d %H:%M:%S",
-        "%Y-%m-%d %H:%M:%SZ",
         "%d-%m-%Y %H:%M",
         "%Y-%m-%d",
     ]
