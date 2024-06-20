@@ -17,6 +17,7 @@ from models import (
     FlutterBatchData,
     GupshupDeliveryReportEvent,
     GupshupDeliveryReportEventObject,
+    AgentLogEvent,
 )
 
 load_dotenv()
@@ -110,6 +111,24 @@ async def capture_event(
     """Capture an event and send it to Kafka."""
     await producer.send_and_wait(KAFKA_TOPIC, value=data.encode("utf-8"))
     return {"status": "ok"}
+
+
+@app.post("/events/capture/agentlog/")
+async def capture_agent_log_event(event: AgentLogEvent):
+    try:
+        logging.info(f"Received event: {event}")
+        data = event.dict()
+        logging.debug(f"Converted data: {data}")
+
+        kafka_topic = "agent_log"
+        await producer.send_and_wait(
+            kafka_topic, value=json.dumps(data).encode("utf-8")
+        )
+
+        return {"status": "ok"}
+    except Exception as e:
+        logging.error(f"Error processing request: {str(e)}")
+        raise
 
 
 @app.post("/events/deliveryreport")
