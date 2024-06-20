@@ -29,7 +29,6 @@ MAX_POLL_INTERVAL_MS = int(os.getenv("MAX_POLL_INTERVAL_MS", 300000))
 SESSION_TIMEOUT_MS = int(os.getenv("SESSION_TIMEOUT_MS", 10000))
 HEARTBEAT_INTERVAL_MS = int(os.getenv("HEARTBEAT_INTERVAL_MS", 3000))
 REQUEST_TIMEOUT_MS = int(os.getenv("REQUEST_TIMEOUT_MS", 40 * 1000))
-AGENT_LOG_MAX_RECORDS = int(os.getenv("AGENT_LOG_MAX_RECORDS", "5"))
 
 logging.getLogger().setLevel(LOG_LEVEL)
 
@@ -159,28 +158,22 @@ def generate_gupshup_events_from_records(record):
 def generate_agent_log_events_from_records(record):
     """Process agent log events."""
     try:
-        events = json.loads(record.value)
-        if not isinstance(events, list):
-            events = [events]
-        return [
-            (
-                e["query_id"],
-                e["user_query"],
-                datetime.fromisoformat(e["timestamp"].replace("Z", "+00:00")),
-                e["cost"],
-                e["agent_calls"],
-            )
-            for e in events
+        event = json.loads(record.value)
+        result = [
+            {
+                "query_id": event["query_id"],
+                "user_query": event["user_query"],
+                "timestamp": datetime.fromisoformat(
+                    event["timestamp"].replace("Z", "+00:00")
+                ),
+                "cost": event["cost"],
+                "agent_calls": event["agent_calls"],
+            }
         ]
-    except json.JSONDecodeError as jde:
-        logging.error(f"JSON decoding error: {jde}")
-    except KeyError as ke:
-        logging.error(f"Missing key error: {ke}")
-    except TypeError as te:
-        logging.error(f"Type error: {te}")
-    except Exception as ex:
-        logging.error(f"Unexpected error: {ex}")
-    return []
+        return result
+    except (json.JSONDecodeError, KeyError, TypeError, Exception) as error:
+        logging.error(f"Error processing agent log events: {error}")
+        return []
 
 
 async def process_kafka_messages() -> None:
@@ -277,15 +270,10 @@ async def process_kafka_messages() -> None:
                 al_events = generate_agent_log_events_from_records(record)
                 agent_log_events.extend(al_events)
             agent_log_records = []
-            logging.debug(f"Agent Log Events:{agent_log_events}")
-
-        if len(agent_log_events) >= AGENT_LOG_MAX_RECORDS:
-            app.clickhouse.save_agent_log_events(agent_log_events)
-            logging.debug(f"Saved Agent Log Events: {agent_log_events}")
-            agent_log_events = []
+            logging.debug(f"Agent Log Events: {agent_log_events}")
 
         # Save events to ClickHouse
-        if (len(events) + len(flutter_events)) >= MAX_RECORDS:
+        if (len(events) + len(flutter_events) + len(agent_log_events)) >= MAX_RECORDS:
             cs_events = []
             if events:
                 save_events(events)
@@ -301,6 +289,10 @@ async def process_kafka_messages() -> None:
                 save_flutter_events(events=flutter_events)
                 logging.debug(flutter_events)
                 flutter_events = []
+            if agent_log_events:
+                app.clickhouse.save_agent_log_events(agent_log_events)
+                logging.debug(f"Saved Agent Log Events: {agent_log_events}")
+                agent_log_events = []
 
             await consumer.commit()
 

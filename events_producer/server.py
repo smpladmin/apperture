@@ -116,9 +116,7 @@ async def capture_event(
 @app.post("/events/capture/agentlog/")
 async def capture_agent_log_event(event: AgentLogEvent):
     try:
-        logging.info(f"Received event: {event}")
         data = event.dict()
-        logging.debug(f"Converted data: {data}")
 
         kafka_topic = "agent_log"
         await producer.send_and_wait(

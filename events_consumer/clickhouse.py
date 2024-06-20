@@ -135,21 +135,13 @@ class ClickHouse:
         data = []
         for event in agent_log_events:
             try:
-                if isinstance(event, tuple):
-                    query_id, user_query, timestamp, cost, agent_calls = event
-                    if not isinstance(timestamp, datetime):
-                        raise ValueError("Timestamp must be a datetime object")
-                    agent_calls = json.dumps(agent_calls)
-                elif isinstance(event, dict):
-                    query_id = event["query_id"]
-                    user_query = event["user_query"]
-                    timestamp = datetime.fromisoformat(
-                        event["timestamp"].replace("Z", "+00:00")
-                    )
-                    cost = event["cost"]
-                    agent_calls = json.dumps(event["agent_calls"])
-                else:
-                    raise TypeError("Unsupported event data type")
+                query_id = event["query_id"]
+                user_query = event["user_query"]
+                timestamp = event["timestamp"]
+                if not isinstance(timestamp, datetime):
+                    raise ValueError("Timestamp must be a datetime object")
+                cost = event["cost"]
+                agent_calls = json.dumps(event["agent_calls"])
 
                 data.append((query_id, user_query, timestamp, cost, agent_calls))
             except (KeyError, ValueError, TypeError) as e:

@@ -1,4 +1,4 @@
-from typing import List, Union
+from typing import List, Union, Any
 from enum import Enum
 from pydantic import BaseModel
 
@@ -39,7 +39,7 @@ class Message(BaseModel):
 class AgentCall(BaseModel):
     messages: List[Message]
     llm_output: str
-    final_output: str
+    final_output: Any
     cost: float
     input_tokens: int
     output_tokens: int
