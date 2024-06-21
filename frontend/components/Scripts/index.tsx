@@ -70,7 +70,7 @@ const Scripts = ({
         data: queriedData?.data,
         headers: queriedData?.headers,
       });
-      setSaveButtonDisabled(false);
+      // setSaveButtonDisabled(false);
       setError('');
     } else {
       setQueryResult({
@@ -110,7 +110,7 @@ const Scripts = ({
         variant: 'subtle',
         isClosable: true,
       });
-      setSaveButtonDisabled(false);
+      // setSaveButtonDisabled(false);
     }
   };
 
