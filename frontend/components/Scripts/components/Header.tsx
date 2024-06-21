@@ -40,7 +40,7 @@ const ScriptHeader = ({
             cursor={'pointer'}
             onClick={() => {
               router.push({
-                pathname: `/analytics/home/[dsId]`,
+                pathname: `/analytics/datamart/list/[dsId]`,
                 query: { dsId },
               });
             }}

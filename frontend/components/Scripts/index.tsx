@@ -36,7 +36,7 @@ const Scripts = ({
     data: [],
     headers: [],
   });
-  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(true);
+  const [isSaveButtonDisabled, setSaveButtonDisabled] = useState(false);
   const [error, setError] = useState('');
   const [isDataMartBeingEdited, setIsDataMartBeingEdited] =
     useState<boolean>(false);
@@ -92,6 +92,14 @@ const Scripts = ({
   //   if (!query) return;
   //   fetchData(); Disabling running on page load
   // }, []);
+
+  useEffect(() => {
+    if (!query) {
+      setSaveButtonDisabled(true);
+    } else {
+      setSaveButtonDisabled(false);
+    }
+  }, [query]);
 
   const handleSaveAndUpdate = async () => {
     setSaveButtonDisabled(true);
