@@ -2,6 +2,8 @@ import logging
 import os
 import clickhouse_connect
 from clickhouse_connect.driver.exceptions import DatabaseError
+from datetime import datetime
+import json
 
 # ClickHouse configuration.
 CLICKHOUSE_HOST = "clickhouse"
@@ -127,3 +129,35 @@ class ClickHouse:
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
         logging.info(f"Saved {len(gupshup_events)} gupshup events.")
+
+    def save_agent_log_events(self, agent_log_events):
+        """Saves the agent log events to ClickHouse."""
+        data = []
+        for event in agent_log_events:
+            try:
+                query_id = event["query_id"]
+                user_query = event["user_query"]
+                timestamp = event["timestamp"]
+                cost = event["cost"]
+                agent_calls = json.dumps(event["agent_calls"])
+
+                data.append((query_id, user_query, timestamp, cost, agent_calls))
+            except (KeyError, ValueError, TypeError) as e:
+                logging.warning(f"Skipping event due to invalid data: {e}")
+
+        if data:
+            self.client.insert(
+                table="agent_log_events",
+                data=data,
+                column_names=[
+                    "query_id",
+                    "user_query",
+                    "timestamp",
+                    "cost",
+                    "agent_calls",
+                ],
+                settings={"insert_async": True, "wait_for_async_insert": False},
+            )
+            logging.info(f"Saved {len(data)} agent log events.")
+        else:
+            logging.warning("No valid agent log events to save.")

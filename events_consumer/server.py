@@ -30,7 +30,6 @@ SESSION_TIMEOUT_MS = int(os.getenv("SESSION_TIMEOUT_MS", 10000))
 HEARTBEAT_INTERVAL_MS = int(os.getenv("HEARTBEAT_INTERVAL_MS", 3000))
 REQUEST_TIMEOUT_MS = int(os.getenv("REQUEST_TIMEOUT_MS", 40 * 1000))
 
-
 logging.getLogger().setLevel(LOG_LEVEL)
 
 # Kafka configuration
@@ -156,6 +155,27 @@ def generate_gupshup_events_from_records(record):
     ]
 
 
+def generate_agent_log_events_from_records(record):
+    """Process agent log events."""
+    try:
+        event = json.loads(record.value)
+        result = [
+            {
+                "query_id": event["query_id"],
+                "user_query": event["user_query"],
+                "timestamp": datetime.fromisoformat(
+                    event["timestamp"].replace("Z", "+00:00")
+                ),
+                "cost": event["cost"],
+                "agent_calls": event["agent_calls"],
+            }
+        ]
+        return result
+    except (json.JSONDecodeError, KeyError, TypeError, Exception) as error:
+        logging.error(f"Error processing agent log events: {error}")
+        return []
+
+
 async def process_kafka_messages() -> None:
     """Processes Kafka messages and inserts them into ClickHouse.."""
     consumer = AIOKafkaConsumer(
@@ -179,6 +199,8 @@ async def process_kafka_messages() -> None:
     flutter_records = []
     gupshup_records = []
     gupshup_events = []
+    agent_log_records = []
+    agent_log_events = []
     while True:
         # Get messages from Kafka
         data = await consumer.getmany(
@@ -198,6 +220,9 @@ async def process_kafka_messages() -> None:
 
             elif topic_partition.topic == "flutter_eventstream":
                 flutter_records.extend(records)
+
+            elif topic_partition.topic == "agent_log":
+                agent_log_records.extend(records)
 
         if cs_records:
             _events = [
@@ -240,8 +265,15 @@ async def process_kafka_messages() -> None:
             logging.debug(f"Saved gupshup events {gupshup_events}")
             gupshup_events = []
 
+        if agent_log_records:
+            for record in agent_log_records:
+                al_events = generate_agent_log_events_from_records(record)
+                agent_log_events.extend(al_events)
+            agent_log_records = []
+            logging.debug(f"Agent Log Events: {agent_log_events}")
+
         # Save events to ClickHouse
-        if (len(events) + len(flutter_events)) >= MAX_RECORDS:
+        if (len(events) + len(flutter_events) + len(agent_log_events)) >= MAX_RECORDS:
             cs_events = []
             if events:
                 save_events(events)
@@ -257,6 +289,10 @@ async def process_kafka_messages() -> None:
                 save_flutter_events(events=flutter_events)
                 logging.debug(flutter_events)
                 flutter_events = []
+            if agent_log_events:
+                app.clickhouse.save_agent_log_events(agent_log_events)
+                logging.debug(f"Saved Agent Log Events: {agent_log_events}")
+                agent_log_events = []
 
             await consumer.commit()
 
