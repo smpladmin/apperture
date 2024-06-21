@@ -138,8 +138,6 @@ class ClickHouse:
                 query_id = event["query_id"]
                 user_query = event["user_query"]
                 timestamp = event["timestamp"]
-                if not isinstance(timestamp, datetime):
-                    raise ValueError("Timestamp must be a datetime object")
                 cost = event["cost"]
                 agent_calls = json.dumps(event["agent_calls"])
 
