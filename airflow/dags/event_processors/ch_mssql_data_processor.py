@@ -104,67 +104,67 @@ def process_data():
     df_mssql = df_mssql.fillna("")
     df_mssql = df_mssql.drop_duplicates()
     logging.info(f"MSSQL query returned {len(df_mssql)} rows")
-    ch_query = """
-    SELECT message_id AS message_id
-    FROM
-    (
-        SELECT  data.messageId message_id,*
-        FROM wiom_in.prod_events
-        WHERE toDate(added_time) between '2024-03-21' and '2024-03-31'
-         and table in ('booking_logs','task_logs','ginie_logs','customer_logs','payment_logs','partner_logs')
-    )
-    group by 1
-    """
-    df_clickhouse = ch_client.query(ch_query)
-    if df_clickhouse is None:
-        raise ValueError("ClickHouse query returned None")
-    df_clickhouse = df_clickhouse.drop_duplicates()
-    logging.info(f"Clickhouse query returned {len(df_clickhouse)} rows")
+    # ch_query = """
+    # SELECT message_id AS message_id
+    # FROM
+    # (
+    #     SELECT  data.messageId message_id,*
+    #     FROM wiom_in.prod_events
+    #     WHERE toDate(added_time) between '2024-03-21' and '2024-03-31'
+    #      and table in ('booking_logs','task_logs','ginie_logs','customer_logs','payment_logs','partner_logs')
+    # )
+    # group by 1
+    # """
+    # df_clickhouse = ch_client.query(ch_query)
+    # if df_clickhouse is None:
+    #     raise ValueError("ClickHouse query returned None")
+    # df_clickhouse = df_clickhouse.drop_duplicates()
+    # logging.info(f"Clickhouse query returned {len(df_clickhouse)} rows")
 
-    merged_df = df_mssql.merge(
-        df_clickhouse[["message_id"]], on="message_id", how="left", indicator=True
-    )
-    merged_df = merged_df[merged_df["_merge"] != "both"]
-    merged_df = merged_df.drop(columns=["message_id", "_merge", "id"])
-    merged_df = merged_df.rename(columns={"event": "event_name", "table_": "table"})
-    merged_df["task_id"] = (
-        merged_df["task_id"]
-        .replace("", 0)
-        .replace("NaN", 0)
-        .astype(float)
-        .astype(object)
-    )
-    column_select = [
-        "event_name",
-        "added_time",
-        "table",
-        "mobile",
-        "task_id",
-        "account_id",
-        "key",
-        "data",
-        "datasource_id",
-        "source_flag",
-    ]
-    final_df = merged_df[column_select]
-    final_df = final_df.drop_duplicates()
-    final_df["data"] = (
-        final_df["data"]
-        .apply(json.loads)
-        .apply(
-            lambda x: convert_object_keys_to_list_of_list(
-                x, KEYS_TYPECAST_TO_LIST_OF_LIST
-            )
-        )
-    )
-    final_df["event_name"] = final_df["event_name"].astype("string")
-    final_df["added_time"] = pd.to_datetime(final_df["added_time"], errors="coerce")
-    final_df["table"] = final_df["table"].astype("string")
-    final_df["mobile"] = final_df["mobile"].astype("string")
-    final_df["task_id"] = final_df["task_id"].astype("string")
-    final_df["account_id"] = final_df["account_id"].astype("string")
-    final_df["key"] = final_df["key"].astype("string")
-    final_df["datasource_id"] = final_df["datasource_id"].astype("string")
-    final_df["source_flag"] = final_df["source_flag"].astype("string")
-    logging.info(f"Data to be added :{final_df}")
-    return final_df
+    # merged_df = df_mssql.merge(
+    #     df_clickhouse[["message_id"]], on="message_id", how="left", indicator=True
+    # )
+    # merged_df = merged_df[merged_df["_merge"] != "both"]
+    # merged_df = merged_df.drop(columns=["message_id", "_merge", "id"])
+    # merged_df = merged_df.rename(columns={"event": "event_name", "table_": "table"})
+    # merged_df["task_id"] = (
+    #     merged_df["task_id"]
+    #     .replace("", 0)
+    #     .replace("NaN", 0)
+    #     .astype(float)
+    #     .astype(object)
+    # )
+    # column_select = [
+    #     "event_name",
+    #     "added_time",
+    #     "table",
+    #     "mobile",
+    #     "task_id",
+    #     "account_id",
+    #     "key",
+    #     "data",
+    #     "datasource_id",
+    #     "source_flag",
+    # ]
+    # final_df = merged_df[column_select]
+    # final_df = final_df.drop_duplicates()
+    # final_df["data"] = (
+    #     final_df["data"]
+    #     .apply(json.loads)
+    #     .apply(
+    #         lambda x: convert_object_keys_to_list_of_list(
+    #             x, KEYS_TYPECAST_TO_LIST_OF_LIST
+    #         )
+    #     )
+    # )
+    # final_df["event_name"] = final_df["event_name"].astype("string")
+    # final_df["added_time"] = pd.to_datetime(final_df["added_time"], errors="coerce")
+    # final_df["table"] = final_df["table"].astype("string")
+    # final_df["mobile"] = final_df["mobile"].astype("string")
+    # final_df["task_id"] = final_df["task_id"].astype("string")
+    # final_df["account_id"] = final_df["account_id"].astype("string")
+    # final_df["key"] = final_df["key"].astype("string")
+    # final_df["datasource_id"] = final_df["datasource_id"].astype("string")
+    # final_df["source_flag"] = final_df["source_flag"].astype("string")
+    # logging.info(f"Data to be added :{final_df}")
+    return df_mssql
