@@ -173,5 +173,34 @@ def process_data(start_date, end_date):
         final_df["source_flag"] = final_df["source_flag"].astype("string")
         logging.info(f"Data to be added :{final_df}")
         return final_df
+    
+    # TODO: Refactor this to de duplicate transformation logic
     logging.info(f"MSSql Data to be added")
+    df_mssql = df_mssql.drop(columns=["message_id", "id"])
+    df_mssql=df_mssql.rename(columns={"event": "event_name", "table_": "table"})
+    df_mssql["data"] = (
+            df_mssql["data"]
+            .apply(json.loads)
+            .apply(
+                lambda x: convert_object_keys_to_list_of_list(
+                    x, KEYS_TYPECAST_TO_LIST_OF_LIST
+                )
+            )
+        )
+    df_mssql["task_id"] = (
+            df_mssql["task_id"]
+            .replace("", 0)
+            .replace("NaN", 0)
+            .astype(float)
+            .astype(object)
+        )
+    df_mssql["event_name"] = df_mssql["event_name"].astype("string")
+    df_mssql["added_time"] = pd.to_datetime(df_mssql["added_time"], errors="coerce")
+    df_mssql["table"] = df_mssql["table"].astype("string")
+    df_mssql["mobile"] = df_mssql["mobile"].astype("string")
+    df_mssql["task_id"] = df_mssql["task_id"].astype("string")
+    df_mssql["account_id"] = df_mssql["account_id"].astype("string")
+    df_mssql["key"] = df_mssql["key"].astype("string")
+    df_mssql["datasource_id"] = df_mssql["datasource_id"].astype("string")
+    df_mssql["source_flag"] = df_mssql["source_flag"].astype("string")
     return df_mssql
