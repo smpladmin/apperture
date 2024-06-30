@@ -99,6 +99,8 @@ def process_data(start_date, end_date):
         ) a
         """
     
+    logging.info(f"Running mssql query: {mssql_query}")
+    
     df_mssql = mssql_client.query(mssql_query)
     if df_mssql is None:
         raise ValueError("MSSQL query returned None")
@@ -116,6 +118,8 @@ def process_data(start_date, end_date):
     )
     group by 1
     """
+    logging.info(f"Running clickhouse query: {ch_query}")
+
     df_clickhouse = ch_client.query(ch_query)
     if df_clickhouse is None:
         raise ValueError("ClickHouse query returned None")

@@ -55,7 +55,9 @@ def get_app_database(
 
 
 @task
-def create_and_process_dataframe(start_date, end_date):
+def create_and_process_dataframe(run_dates):
+    start_date=run_dates[0]
+    end_date=run_dates[1]
     df = ch_mssql_data_processor.process_data(start_date, end_date)
     return df
 
@@ -141,7 +143,7 @@ def create_dag(datasource_id: str):
         app_database_details = get_app_database(datasource=datasource)
 
         run_dates = get_run_dates()
-        df = create_and_process_dataframe(run_dates[0], run_dates[1])
+        df = create_and_process_dataframe(run_dates)
         save_datatframe(
             df=df,
             datasource=datasource,
