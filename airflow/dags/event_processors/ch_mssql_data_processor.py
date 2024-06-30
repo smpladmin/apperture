@@ -58,7 +58,7 @@ def process_data():
             SELECT 'booking_logs' AS table_, '65b1f642f3213a617bbedf8f' AS datasource_id, '{final_result}' AS source_flag,
                 JSON_VALUE(data, '$.messageId') AS message_id, *
             FROM log_db.dbo.booking_logs
-            WHERE CAST(added_time AS DATE)  >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+            WHERE CAST(added_time AS DATE)  between '2024-03-21' and '2024-03-31'
         ) a
         UNION ALL
         SELECT *
@@ -67,7 +67,7 @@ def process_data():
             SELECT 'task_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
                 JSON_VALUE(data, '$.messageId') AS message_id, *
             FROM log_db.dbo.task_logs
-            WHERE CAST(added_time AS DATE)  >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+            WHERE CAST(added_time AS DATE)  between '2024-03-21' and '2024-03-31'
         ) a
         UNION ALL
         SELECT *
@@ -76,7 +76,7 @@ def process_data():
             SELECT 'payment_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
                 JSON_VALUE(data, '$.messageId') AS message_id, *
             FROM log_db.dbo.payment_logs
-            WHERE CAST(added_time AS DATE) >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+            WHERE CAST(added_time AS DATE) between '2024-03-21' and '2024-03-31'
         ) a
         UNION ALL
         SELECT *
@@ -85,7 +85,7 @@ def process_data():
             SELECT 'customer_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
                 JSON_VALUE(data, '$.messageId') AS message_id, *
             FROM log_db.dbo.customer_logs
-            WHERE CAST(added_time AS DATE)  >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+            WHERE CAST(added_time AS DATE)  between '2024-03-21' and '2024-03-31'
         ) a
         UNION ALL
         SELECT *
@@ -94,7 +94,7 @@ def process_data():
             SELECT 'ginie_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
                 JSON_VALUE(data, '$.messageId') AS message_id, *
             FROM log_db.dbo.ginie_logs
-            WHERE CAST(added_time AS DATE)  >= CAST(DATEADD(DAY, -7, GETDATE()) AS DATE)
+            WHERE CAST(added_time AS DATE)  between '2024-03-21' and '2024-03-31'
         ) a
         """
     
@@ -110,7 +110,7 @@ def process_data():
     (
         SELECT  data.messageId message_id,*
         FROM wiom_in.prod_events
-        WHERE toDate(added_time) >= toDate(now() - INTERVAL 7 DAY)
+        WHERE toDate(added_time) between '2024-03-21' and '2024-03-31'
          and table in ('booking_logs','task_logs','ginie_logs','customer_logs','payment_logs','partner_logs')
     )
     group by 1
