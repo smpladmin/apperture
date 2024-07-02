@@ -131,9 +131,11 @@ class PrecisionEvent(NamedTuple):
     def build(datasourceId, timestamp, userId, eventName, properties):
         return PrecisionEvent(
             datasourceId=datasourceId,
-            timestamp=datetime.fromisoformat(timestamp[:-1])
-            if isinstance(timestamp, str)
-            else datetime.fromtimestamp(timestamp),
+            timestamp=(
+                datetime.fromisoformat(timestamp[:-1])
+                if isinstance(timestamp, str)
+                else datetime.fromtimestamp(timestamp)
+            ),
             provider="apperture",
             userId=userId,
             eventName=eventName,
@@ -167,3 +169,15 @@ class ClickStreamEventProperties(NamedTuple):
             event=event,
             properties=properties,
         )
+
+
+class ClickHouseCredentials(BaseModel):
+    host: str
+    port: int
+    username: str
+    password: str
+
+
+class AppServerDetails(BaseModel):
+    app_id: str
+    ch_server_credential: Optional[ClickHouseCredentials]
