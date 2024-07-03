@@ -1,5 +1,5 @@
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -171,12 +171,15 @@ class TestServer:
                 "offset": 948,
             },
         ]
+        self.app_details = MagicMock()
 
-    def test_save_events(self):
+    @patch("server.DatasourceDetails.get_details")
+    def test_save_events(self, mock_get_details):
+        mock_get_details.return_value = self.app_details
         save_events(self.events)
 
         app.clickhouse.save_events.assert_called_once_with(
-            [
+            events=[
                 ClickStream(
                     datasourceId="63eb4eea19c763c212bc444d",
                     timestamp=datetime.fromtimestamp(1681714333.385),
@@ -345,14 +348,18 @@ class TestServer:
                         "$pageview_id": "1878dfc4737114e-08cffb238cfcc7-1d525634-16a7f0-1878dfc47382a0d",
                     },
                 ),
-            ]
+            ],
+            app_id=mock_get_details.return_value.app_id,
+            clickhouse_server_credentials=mock_get_details.return_value.ch_server_credential,
         )
 
-    def test_save_events(self):
+    @patch("server.DatasourceDetails.get_details")
+    def test_save_precision_events(self, mock_get_details):
+        mock_get_details.return_value = self.app_details
         save_precision_events(self.events)
 
         app.clickhouse.save_precision_events.assert_called_once_with(
-            [
+            events=[
                 PrecisionEvent(
                     datasourceId="63eb4eea19c763c212bc444d",
                     timestamp=datetime.fromtimestamp(1681714333.385),
@@ -521,7 +528,9 @@ class TestServer:
                         "$pageview_id": "1878dfc4737114e-08cffb238cfcc7-1d525634-16a7f0-1878dfc47382a0d",
                     },
                 ),
-            ]
+            ],
+            app_id=mock_get_details.return_value.app_id,
+            clickhouse_server_credentials=mock_get_details.return_value.ch_server_credential,
         )
 
     @pytest.mark.parametrize(
