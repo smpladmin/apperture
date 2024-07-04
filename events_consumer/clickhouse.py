@@ -5,6 +5,8 @@ from clickhouse_connect.driver.exceptions import DatabaseError
 from datetime import datetime
 import json
 
+from clickhouse_client_factory import ClickHouseClientFactory
+
 # ClickHouse configuration.
 CLICKHOUSE_HOST = "clickhouse"
 CLICKHOUSE_PORT = 8123
@@ -33,28 +35,32 @@ class ClickHouse:
     def disconnect(self):
         self.client.close()
 
-    def save_events(self, events) -> None:
+    def save_events(self, events, app_id, clickhouse_server_credentials) -> None:
         """Saves events to ClickHouse."""
         logging.info(f"No. of events to be saved: {len(events)}")
         try:
-            self._save(events)
+            self._save(events, app_id, clickhouse_server_credentials)
         except DatabaseError as e:
             logging.info(f"Exception saving events to ClickHouse: {e}")
             logging.info("Trying to save recursively")
-            self.rsave_events(events=events)
+            self.rsave_events(
+                events=events,
+                app_id=app_id,
+                clickhouse_server_credentials=clickhouse_server_credentials,
+            )
             logging.info("Saving recursively ends")
 
-    def rsave_events(self, events):
+    def rsave_events(self, events, app_id, clickhouse_server_credentials):
         """Saves events to clickHouse with recursive retries using split backoff."""
         if not events:
             return
 
         if len(events) == 1:
-            self._save(events)
+            self._save(events, app_id, clickhouse_server_credentials)
             return
 
         try:
-            self._save(events)
+            self._save(events, app_id, clickhouse_server_credentials)
         except Exception as e:
             logging.info(f"Exception saving events to ClickHouse: {e}")
             logging.info("Trying to split and save")
@@ -63,12 +69,16 @@ class ClickHouse:
             first_half = events[:mid]
             second_half = events[mid:]
 
-            self.rsave_events(first_half)
-            self.rsave_events(second_half)
+            self.rsave_events(first_half, app_id, clickhouse_server_credentials)
+            self.rsave_events(second_half, app_id, clickhouse_server_credentials)
 
-    def _save(self, events) -> None:
+    def _save(self, events, app_id, clickhouse_server_credentials) -> None:
         logging.info(f"Saving {len(events)} events")
-        self.client.insert(
+        clickhouse_client = ClickHouseClientFactory.get_client(
+            app_id=app_id, clickhouse_server_credentials=clickhouse_server_credentials
+        )
+        # clickhouse_client
+        clickhouse_client.connection.insert(
             table="clickstream",
             data=events,
             column_names=[
@@ -83,8 +93,13 @@ class ClickHouse:
         )
         logging.info(f"Saved {len(events)} events")
 
-    def _save_precision_events(self, events) -> None:
-        self.client.insert(
+    def _save_precision_events(
+        self, events, app_id, clickhouse_server_credentials
+    ) -> None:
+        clickhouse_client = ClickHouseClientFactory.get_client(
+            app_id=app_id, clickhouse_server_credentials=clickhouse_server_credentials
+        )
+        clickhouse_client.connection.insert(
             table="events",
             data=events,
             column_names=[
@@ -98,15 +113,23 @@ class ClickHouse:
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
 
-    def save_precision_events(self, events):
+    def save_precision_events(self, events, app_id, clickhouse_server_credentials):
         """Saves precision events to ClickHouse."""
         try:
-            self._save_precision_events(events)
+            self._save_precision_events(
+                events=events,
+                app_id=app_id,
+                clickhouse_server_credentials=clickhouse_server_credentials,
+            )
         except DatabaseError as e:
             logging.info(f"Exception saving events to Eventstream: {e}")
             logging.info("Trying to save sequentially")
             for event in events:
-                self._save_precision_events([event])
+                self._save_precision_events(
+                    [event],
+                    app_id=app_id,
+                    clickhouse_server_credentials=clickhouse_server_credentials,
+                )
             logging.info("Saved sequentially")
 
     def save_gupshup_events(self, gupshup_events):

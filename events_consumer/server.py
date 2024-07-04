@@ -13,6 +13,8 @@ from aiokafka import AIOKafkaConsumer
 
 from dotenv import load_dotenv
 
+from datasource_details import DatasourceDetails
+
 load_dotenv()
 
 from clickhouse import ClickHouse
@@ -49,50 +51,84 @@ DEFAULT_EVENTS = [
 def save_events(events):
     """Saves events to ClickHouse."""
     logging.debug(f"Saving {len(events)} events")
-    cs_events = [
-        ClickStream.build(
-            datasource_id=event["properties"]["token"],
+
+    segregated_events = {}
+
+    # Iterate over the events and group them by datasource_id
+    for event in events:
+        datasource_id = event["properties"]["token"]
+        cs_event = ClickStream.build(
+            datasource_id=datasource_id,
             timestamp=event["properties"]["$time"],
             user_id=event["properties"]["$device_id"],
             event=event["event"],
             properties=event["properties"],
         )
-        for event in events
-    ]
-    app.clickhouse.save_events(cs_events)
+        if datasource_id not in segregated_events:
+            segregated_events[datasource_id] = []
+        segregated_events[datasource_id].append(cs_event)
+
+    for datasource, cs_events in segregated_events.items():
+        app_details = app.datasource_details.get_details(datasource_id=datasource)
+        app.clickhouse.save_events(
+            events=cs_events,
+            app_id=app_details.app_id,
+            clickhouse_server_credentials=app_details.ch_server_credential,
+        )
+
     logging.info("Saved events")
 
 
 def save_flutter_events(events):
     logging.debug(f"Saving {len(events)} flutter events")
-    flutter_events = [
-        PrecisionEvent.build(
+    segregated_events = {}
+    for event in events:
+        datasource_id = event["datasource_id"]
+        flutter_event = PrecisionEvent.build(
             datasourceId=event["datasource_id"],
             timestamp=event["timestamp"],
             userId=event["distinct_id"],
             eventName=event["event"],
             properties=event["properties"],
         )
-        for event in events
-    ]
-    app.clickhouse.save_precision_events(flutter_events)
+        if datasource_id not in segregated_events:
+            segregated_events[datasource_id] = []
+        segregated_events[datasource_id].append(flutter_event)
+
+    for datasource, flutter_events in segregated_events.items():
+        app_details = app.datasource_details.get_details(datasource_id=datasource)
+        app.clickhouse.save_precision_events(
+            flutter_events,
+            app_id=app_details.app_id,
+            clickhouse_server_credentials=app_details.ch_server_credential,
+        )
     logging.info("Saved flutter events")
 
 
 def save_precision_events(events):
     """Saves events to Events table."""
     logging.debug(f"Saving {len(events)} precision events to events table")
-    cs_events = [
-        PrecisionEvent.build(
-            datasourceId=event["properties"]["token"],
+
+    segregated_events = {}
+    for event in events:
+        datasource_id = event["properties"]["token"]
+        cs_event = PrecisionEvent.build(
+            datasourceId=datasource_id,
             timestamp=event["properties"]["$time"],
             userId=event["properties"]["$device_id"],
             eventName=event["event"],
             properties=event["properties"],
         )
-        for event in events
-    ]
-    app.clickhouse.save_precision_events(cs_events)
+        if datasource_id not in segregated_events:
+            segregated_events[datasource_id] = []
+        segregated_events[datasource_id].append(cs_event)
+    for datasource, precision_event in segregated_events.items():
+        app_details = app.datasource_details.get_details(datasource)
+        app.clickhouse.save_precision_events(
+            events=precision_event,
+            app_id=app_details.app_id,
+            clickhouse_server_credentials=app_details.ch_server_credential,
+        )
     logging.info("Saved precision events")
 
 
@@ -312,6 +348,7 @@ class App:
     def __init__(self) -> None:
         self.clickhouse = ClickHouse()
         self.event_properties_saver = EventPropertiesSaver()
+        self.datasource_details = DatasourceDetails()
 
     def connect(self) -> None:
         self.clickhouse.connect()

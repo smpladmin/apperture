@@ -1,17 +1,22 @@
 from datetime import datetime
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
 from clickhouse import ClickHouse
 from clickhouse_connect.driver.exceptions import DatabaseError
 from models.models import ClickStream, PrecisionEvent
+from clickhouse_client_factory import ClickHouseClient
 
 
 class TestClickHouse:
     def setup_method(self):
         self.clickhouse = ClickHouse()
         self.clickhouse.client = MagicMock()
+        self.clickhouse_client = MagicMock()
+        self.clickhouse_client.connection = MagicMock()
 
-    def test_save_events(self):
+    @patch("clickhouse.ClickHouseClientFactory.get_client")
+    def test_save_events(self, mock_get_client):
+        mock_get_client.return_value = self.clickhouse_client
         cs_events = [
             ClickStream(
                 "test_ds_id",
@@ -91,9 +96,9 @@ class TestClickHouse:
             ),
         ]
 
-        self.clickhouse.save_events(cs_events)
+        self.clickhouse.save_events(cs_events, "test_app", None)
 
-        self.clickhouse.client.insert.assert_called_once_with(
+        self.clickhouse_client.connection.insert.assert_called_once_with(
             table="clickstream",
             data=cs_events,
             column_names=[
@@ -107,7 +112,9 @@ class TestClickHouse:
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
 
-    def test_save_precision_events(self):
+    @patch("clickhouse.ClickHouseClientFactory.get_client")
+    def test_save_precision_events(self, mock_get_client):
+        mock_get_client.return_value = self.clickhouse_client
         events = [
             PrecisionEvent(
                 datasourceId="63eb4eea19c763c212bc444d",
@@ -278,9 +285,9 @@ class TestClickHouse:
                 },
             ),
         ]
-        self.clickhouse.save_precision_events(events)
+        self.clickhouse.save_precision_events(events, "test_app", None)
 
-        self.clickhouse.client.insert.assert_called_once_with(
+        self.clickhouse_client.connection.insert.assert_called_once_with(
             table="events",
             data=events,
             column_names=[
@@ -294,140 +301,9 @@ class TestClickHouse:
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
 
-    # def test_save_events_sequentially(self):
-    #     cs_events = [
-    #         ClickStream(
-    #             "test_ds_id",
-    #             datetime(2021, 8, 10, 20, 20, 47, 370000),
-    #             "test_user_id",
-    #             "",
-    #             "$pageview",
-    #             {
-    #                 "$browser": "Chrome",
-    #                 "$browser_language": "en-GB",
-    #                 "$browser_version": 109,
-    #                 "$ce_version": 0,
-    #                 "$current_url": "http://localhost:3000/analytics/app/create",
-    #                 "$device_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
-    #                 "$device_type": "Desktop",
-    #                 "$elements": [],
-    #                 "$event_type": "",
-    #                 "$host": "localhost:3000",
-    #                 "$insert_id": "uyvllc1rseh4gdym",
-    #                 "$lib": "web",
-    #                 "$lib_version": "1.43.1",
-    #                 "$os": "Mac OS X",
-    #                 "$pageview_id": "186348305ce2227-082e406114e4e3-16525635-16a7f0-186348305cf2c5f",
-    #                 "$pathname": "/analytics/app/create",
-    #                 "$referrer": "http://localhost:3000/analytics/segment/create/638f1aac8e54760eafc64d70",
-    #                 "$referring_domain": "localhost:3000",
-    #                 "$screen_height": 982,
-    #                 "$screen_width": 1512,
-    #                 "$session_id": "186348305ca99b-05bdb409c347f-16525635-16a7f0-186348305cb2335",
-    #                 "$time": 1675918247.37,
-    #                 "$viewport_height": 780,
-    #                 "$viewport_width": 1512,
-    #                 "$window_id": "186348305cc2af1-0d198248776bf4-16525635-16a7f0-186348305cd2d7c",
-    #                 "currency": "",
-    #                 "distinct_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
-    #                 "price": 0,
-    #                 "token": "63d8ef5a7b02dbd1dcf20dcc",
-    #             },
-    #         ),
-    #         ClickStream(
-    #             "test_ds_id",
-    #             datetime(2021, 8, 10, 20, 20, 47, 370000),
-    #             "test_user_id",
-    #             "",
-    #             "$pageview",
-    #             {
-    #                 "$browser": "Chrome",
-    #                 "$browser_language": "en-GB",
-    #                 "$browser_version": 109,
-    #                 "$ce_version": 0,
-    #                 "$current_url": "http://localhost:3000/analytics/app/create",
-    #                 "$device_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
-    #                 "$device_type": "Desktop",
-    #                 "$elements": [],
-    #                 "$event_type": "",
-    #                 "$host": "localhost:3000",
-    #                 "$insert_id": "uyvllc1rseh4gdym",
-    #                 "$lib": "web",
-    #                 "$lib_version": "1.43.1",
-    #                 "$os": "Mac OS X",
-    #                 "$pageview_id": "186348305ce2227-082e406114e4e3-16525635-16a7f0-186348305cf2c5f",
-    #                 "$pathname": "/analytics/app/create",
-    #                 "$referrer": "http://localhost:3000/analytics/segment/create/638f1aac8e54760eafc64d70",
-    #                 "$referring_domain": "localhost:3000",
-    #                 "$screen_height": 982,
-    #                 "$screen_width": 1512,
-    #                 "$session_id": "186348305ca99b-05bdb409c347f-16525635-16a7f0-186348305cb2335",
-    #                 "$time": 1675918247.37,
-    #                 "$viewport_height": 780,
-    #                 "$viewport_width": 1512,
-    #                 "$window_id": "186348305cc2af1-0d198248776bf4-16525635-16a7f0-186348305cd2d7c",
-    #                 "currency": "",
-    #                 "distinct_id": "1862a9e52121a37-0b39b9498d8c54-16525635-16a7f0-1862a9e521328fa",
-    #                 "price": 0,
-    #                 "token": "63d8ef5a7b02dbd1dcf20dcc",
-    #             },
-    #         ),
-    #     ]
-    #
-    #     self.clickhouse.client.insert.side_effect = [DatabaseError("Test"), 2, 3]
-    #
-    #     self.clickhouse.save_events(cs_events)
-    #
-    #     assert self.clickhouse.client.insert.call_count == 3
-    #     assert self.clickhouse.client.insert.call_args_list == [
-    #         (
-    #             {
-    #                 "table": "clickstream",
-    #                 "data": cs_events,
-    #                 "column_names": [
-    #                     "datasource_id",
-    #                     "timestamp",
-    #                     "user_id",
-    #                     "element_chain",
-    #                     "event",
-    #                     "properties",
-    #                 ],
-    #                 "settings": {"insert_async": True, "wait_for_async_insert": False},
-    #             },
-    #         ),
-    #         (
-    #             {
-    #                 "table": "clickstream",
-    #                 "data": cs_events[0:1],
-    #                 "column_names": [
-    #                     "datasource_id",
-    #                     "timestamp",
-    #                     "user_id",
-    #                     "element_chain",
-    #                     "event",
-    #                     "properties",
-    #                 ],
-    #                 "settings": {"insert_async": True, "wait_for_async_insert": False},
-    #             },
-    #         ),
-    #         (
-    #             {
-    #                 "table": "clickstream",
-    #                 "data": cs_events[1:2],
-    #                 "column_names": [
-    #                     "datasource_id",
-    #                     "timestamp",
-    #                     "user_id",
-    #                     "element_chain",
-    #                     "event",
-    #                     "properties",
-    #                 ],
-    #                 "settings": {"insert_async": True, "wait_for_async_insert": False},
-    #             },
-    #         ),
-    #     ]
-
-    def test_save_precision_events_sequentially(self):
+    @patch("clickhouse.ClickHouseClientFactory.get_client")
+    def test_save_precision_events_sequentially(self, mock_get_client):
+        mock_get_client.return_value = self.clickhouse_client
         events = [
             PrecisionEvent(
                 datasourceId="63eb4eea19c763c212bc444d",
@@ -565,11 +441,14 @@ class TestClickHouse:
             ),
         ]
 
-        self.clickhouse.client.insert.side_effect = [DatabaseError("Test"), 2, 3]
-        self.clickhouse.save_precision_events(events)
-
-        assert self.clickhouse.client.insert.call_count == 3
-        assert self.clickhouse.client.insert.call_args_list == [
+        self.clickhouse_client.connection.insert.side_effect = [
+            DatabaseError("Test"),
+            2,
+            3,
+        ]
+        self.clickhouse.save_precision_events(events, "test_app", None)
+        assert self.clickhouse_client.connection.insert.call_count == 3
+        assert self.clickhouse_client.connection.insert.call_args_list == [
             (
                 {
                     "table": "events",
