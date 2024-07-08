@@ -52,6 +52,7 @@ class AgentLogEvent(BaseModel):
     timestamp: str
     cost: float
     agent_calls: List[AgentCall]
+    datasource_id: str
 
     @staticmethod
     def build(
@@ -60,6 +61,7 @@ class AgentLogEvent(BaseModel):
         timestamp: str,
         cost: float,
         agent_calls: List[AgentCall],
+        datasource_id: str,
     ):
         return AgentLogEvent(
             query_id=query_id,
@@ -67,4 +69,5 @@ class AgentLogEvent(BaseModel):
             timestamp=timestamp,
             cost=cost,
             agent_calls=agent_calls,
+            datasource_id=datasource_id,
         )
