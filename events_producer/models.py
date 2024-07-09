@@ -1,4 +1,4 @@
-from typing import List, Union, Any
+from typing import List, Union, Any, Optional
 from enum import Enum
 from pydantic import BaseModel
 
@@ -52,7 +52,7 @@ class AgentLogEvent(BaseModel):
     timestamp: str
     cost: float
     agent_calls: List[AgentCall]
-    datasource_id: str
+    datasource_id: Optional[str] = None
 
     @staticmethod
     def build(
@@ -61,7 +61,7 @@ class AgentLogEvent(BaseModel):
         timestamp: str,
         cost: float,
         agent_calls: List[AgentCall],
-        datasource_id: str,
+        datasource_id: Optional[str] = None,
     ):
         return AgentLogEvent(
             query_id=query_id,
