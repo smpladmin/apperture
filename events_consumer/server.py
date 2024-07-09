@@ -204,6 +204,7 @@ def generate_agent_log_events_from_records(record):
                 ),
                 "cost": event["cost"],
                 "agent_calls": event["agent_calls"],
+                "datasource_id": event["datasource_id"],
             }
         ]
         return result

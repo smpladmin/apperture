@@ -3,7 +3,7 @@ import logging
 import os
 from typing import List, Union, Callable
 
-from fastapi import FastAPI, Form, HTTPException, Response
+from fastapi import FastAPI, Form, HTTPException, Response, Header, Request
 from fastapi.middleware.cors import CORSMiddleware
 from aiokafka import AIOKafkaProducer
 from dotenv import load_dotenv
@@ -114,8 +114,14 @@ async def capture_event(
 
 
 @app.post("/events/capture/agentlog/")
-async def capture_agent_log_event(event: AgentLogEvent):
+async def capture_agent_log_event(
+    event: AgentLogEvent, request: Request, nexus_api_key: str = Header(None)
+):
     try:
+        headers = request.headers
+        nexus_api_key = headers.get("nexus_api_key")
+        event.datasource_id = nexus_api_key
+
         data = event.dict()
 
         kafka_topic = "agent_log"

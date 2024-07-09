@@ -163,8 +163,11 @@ class ClickHouse:
                 timestamp = event["timestamp"]
                 cost = event["cost"]
                 agent_calls = json.dumps(event["agent_calls"])
+                datasource_id = event["datasource_id"]
 
-                data.append((query_id, user_query, timestamp, cost, agent_calls))
+                data.append(
+                    (query_id, user_query, timestamp, cost, agent_calls, datasource_id)
+                )
             except (KeyError, ValueError, TypeError) as e:
                 logging.warning(f"Skipping event due to invalid data: {e}")
 
@@ -178,6 +181,7 @@ class ClickHouse:
                     "timestamp",
                     "cost",
                     "agent_calls",
+                    "datasource_id",
                 ],
                 settings={"insert_async": True, "wait_for_async_insert": False},
             )
