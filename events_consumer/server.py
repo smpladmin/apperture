@@ -260,6 +260,7 @@ async def process_kafka_messages() -> None:
 
             elif topic_partition.topic == "agent_log":
                 agent_log_records.extend(records)
+                logging.info(f"agent_log_records: {agent_log_records}")
 
         if cs_records:
             _events = [
