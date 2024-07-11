@@ -120,9 +120,6 @@ async def capture_agent_log_event(
     nexus_api_key: Annotated[str, Header()],
 ):
     try:
-        # headers = request.headers
-        # nexus_api_key = headers.get("nexus_api_key")
-        print(f"nexus_api_key:{nexus_api_key}")
         event.datasource_id = nexus_api_key
 
         data = event.dict()
