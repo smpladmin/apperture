@@ -168,9 +168,11 @@ class ClickHouse:
                 data.append(
                     (query_id, user_query, timestamp, cost, agent_calls, datasource_id)
                 )
+                logging.info(f"agent data: {data}")
             except (KeyError, ValueError, TypeError) as e:
                 logging.warning(f"Skipping event due to invalid data: {e}")
 
+        logging.info(f"saving this agent data: {data}")
         if data:
             self.client.insert(
                 table="agent_log_events",
