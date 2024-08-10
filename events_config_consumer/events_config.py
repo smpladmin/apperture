@@ -133,7 +133,7 @@ class EventTablesConfig:
 
                 for table, config in events_table_config.items():
                     # create buckets based on config tables
-                    table_topic = f"eventsconfig_{datasource['_id']}_{table}"
+                    table_topic = f"eventsconfig_topic_{datasource['_id']}_{table}"
                     ch_db = app["clickhouseCredential"]["databasename"]
                     ch_server_credential = (
                         ClickHouseCredentials(**app["remoteConnection"])
