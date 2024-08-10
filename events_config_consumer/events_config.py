@@ -119,7 +119,7 @@ class EventTablesConfig:
 
         for datasource in event_logs_datasources:
             # topic to read events from, defined in logs producer
-            topic = f"eventsconfig_{datasource['_id']}"
+            topic = f"eventsconfig_topic_{datasource['_id']}"
             self.topics.append(topic)
 
             config = await self.get_config_for_integration(
