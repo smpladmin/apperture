@@ -22,7 +22,7 @@ class FacebookAdsFetcher:
         }
         self.date = date
         self.credential = credential
-        self.base_url = "https://graph.facebook.com/v18.0"
+        self.base_url = "https://graph.facebook.com/v20.0"
 
     def get_ads(self, account_id: str, after: Union[str, None]):
         ads_url = self.base_url + f"/act_{account_id}/ads"
