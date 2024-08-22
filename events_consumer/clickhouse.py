@@ -148,6 +148,7 @@ class ClickHouse:
                 "err_code",
                 "channel",
                 "hsm_template_id",
+                "no_of_frags",
             ],
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
