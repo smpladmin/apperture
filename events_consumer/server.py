@@ -175,6 +175,7 @@ def generate_flutter_events_from_record(record) -> List:
 def generate_gupshup_events_from_records(record):
     """Process gupshup delivery reports."""
     events = json.loads(record.value)
+    logging.info(f"Gupshup base events: {events}")
     return [
         (
             e["externalId"],
