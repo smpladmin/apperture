@@ -97,10 +97,19 @@ def process_data(start_date, end_date):
             FROM log_db.dbo.ginie_logs
             WHERE CAST(added_time AS DATE)  between '{start_date}' and '{end_date}'
         ) a
+        UNION ALL
+        SELECT *
+        FROM
+        (
+            SELECT 'ticket_logs' AS table_, '65b1f642f3213a617bbedf8' AS datasource_id, '{final_result}' AS source_flag,
+                JSON_VALUE(data, '$.messageId') AS message_id, *
+            FROM log_db.dbo.ticket_logs
+            WHERE CAST(added_time AS DATE)  between '{start_date}' and '{end_date}'
+        ) a
         """
-    
+
     logging.info(f"Running mssql query: {mssql_query}")
-    
+
     df_mssql = mssql_client.query(mssql_query)
     if df_mssql is None:
         raise ValueError("MSSQL query returned None")
@@ -114,7 +123,7 @@ def process_data(start_date, end_date):
         SELECT  data.messageId message_id,*
         FROM wiom_in.prod_events
         WHERE toDate(added_time) between '{start_date}' and '{end_date}'
-         and table in ('booking_logs','task_logs','ginie_logs','customer_logs','payment_logs','partner_logs')
+         and table in ('booking_logs','task_logs','ginie_logs','customer_logs','payment_logs','partner_logs','ticket_logs')
     )
     group by 1
     """
@@ -173,27 +182,27 @@ def process_data(start_date, end_date):
         final_df["source_flag"] = final_df["source_flag"].astype("string")
         logging.info(f"Data to be added :{final_df}")
         return final_df
-    
+
     # TODO: Refactor this to de duplicate transformation logic
     logging.info(f"MSSql Data to be added")
     df_mssql = df_mssql.drop(columns=["message_id", "id"])
-    df_mssql=df_mssql.rename(columns={"event": "event_name", "table_": "table"})
+    df_mssql = df_mssql.rename(columns={"event": "event_name", "table_": "table"})
     df_mssql["data"] = (
-            df_mssql["data"]
-            .apply(json.loads)
-            .apply(
-                lambda x: convert_object_keys_to_list_of_list(
-                    x, KEYS_TYPECAST_TO_LIST_OF_LIST
-                )
+        df_mssql["data"]
+        .apply(json.loads)
+        .apply(
+            lambda x: convert_object_keys_to_list_of_list(
+                x, KEYS_TYPECAST_TO_LIST_OF_LIST
             )
         )
+    )
     df_mssql["task_id"] = (
-            df_mssql["task_id"]
-            .replace("", 0)
-            .replace("NaN", 0)
-            .astype(float)
-            .astype(object)
-        )
+        df_mssql["task_id"]
+        .replace("", 0)
+        .replace("NaN", 0)
+        .astype(float)
+        .astype(object)
+    )
     df_mssql["event_name"] = df_mssql["event_name"].astype("string")
     df_mssql["added_time"] = pd.to_datetime(df_mssql["added_time"], errors="coerce")
     df_mssql["table"] = df_mssql["table"].astype("string")
