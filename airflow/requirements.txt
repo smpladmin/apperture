@@ -2,7 +2,7 @@ pandas
 requests
 clickhouse_connect==0.3.6
 pytest
-google-ads==22.1.0
+google-ads==25.0.0
 pymysql
 pymssql
 psycopg2-binary
