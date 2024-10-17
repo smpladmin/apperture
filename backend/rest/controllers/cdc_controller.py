@@ -27,7 +27,10 @@ KAFKA_CONNECTOR_BASE_URL = os.getenv(
 async def create_cdc_connector(
     id: str,
     dto: dict,
+    resume_date: Optional[str] = None,
     integration_service: IntegrationService = Depends(),
+    app_service: AppService = Depends(),
+    cdc_service: CDCService = Depends(),
 ):
     config = {}
     headers = {"Accept": "application/json", "Content-Type": "application/json"}
@@ -40,6 +43,12 @@ async def create_cdc_connector(
         config = integration_service.generate_connector_config(
             tables=credential.tables, credential=credential, integration_id=id
         )
+
+        if resume_date:
+            app = await app_service.get_app(id=integration.app_id)
+            config = await cdc_service.generate_update_connector_config_to_resume(
+                config=config, app=app, date=resume_date
+            )
 
     data = {
         "name": f"cdc_{id}",
