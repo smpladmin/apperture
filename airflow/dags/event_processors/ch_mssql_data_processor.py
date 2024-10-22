@@ -41,6 +41,8 @@ def process_data(start_date, end_date):
     ch_password = os.getenv("CH_PASSWORD")
     ch_database = os.getenv("CH_DATABASE")
 
+    logging.info(f"Server mssql username: {mssql_username}")
+
     mssql_client = MSSQLClient(
         mssql_server, mssql_database, mssql_username, mssql_password
     )
