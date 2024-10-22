@@ -11,7 +11,7 @@ from cdc_integrations import CDCIntegrations
 from clickhouse import ClickHouse
 
 load_dotenv()
-logging.getLogger().setLevel(logging.INFO)
+
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "600000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "10000"))
@@ -21,6 +21,9 @@ MAX_POLL_INTERVAL_MS = int(os.getenv("MAX_POLL_INTERVAL_MS", 300000))
 SESSION_TIMEOUT_MS = int(os.getenv("SESSION_TIMEOUT_MS", 10000))
 HEARTBEAT_INTERVAL_MS = int(os.getenv("HEARTBEAT_INTERVAL_MS", 3000))
 REQUEST_TIMEOUT_MS = int(os.getenv("REQUEST_TIMEOUT_MS", 40 * 1000))
+LOG_LEVEL = os.getenv("LOG_LEVEL", "INFO")
+
+logging.getLogger().setLevel(LOG_LEVEL)
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 
@@ -126,6 +129,8 @@ async def process_kafka_messages() -> None:
                     )
                     columns = to_insert[0].keys()
                     events = [data.values() for data in to_insert]
+                    logging.debug(f"Columns for table {table}: {columns}")
+                    logging.debug(f"Events for table {table}: {events}")
                     app.clickhouse.save_events(
                         events=events,
                         columns=columns,
