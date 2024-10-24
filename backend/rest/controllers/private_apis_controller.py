@@ -796,7 +796,7 @@ async def run_internal_queries(
         raise HTTPException(status_code=500, detail=str(e))
 
 
-@router.get("/clickstream/report/{dsId}")
+@router.get("/clickstream/report/{project_id}")
 async def get_clickstream_events(
     project_id: str,
     user_id: str,
