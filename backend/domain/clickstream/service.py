@@ -2,7 +2,7 @@ import json
 import logging
 from datetime import datetime
 from typing import Dict, List
-
+import urllib.parse
 from fastapi import Depends
 from starlette.concurrency import run_in_threadpool
 
@@ -149,3 +149,24 @@ class ClickstreamService:
         ]
         count = await self.repository.get_stream_count_by_dsId(dsId=dsId, app_id=app_id)
         return {"count": count[0][0], "data": data_list}
+
+    async def get_user_data_by_id(
+        self, dsId: str, interval: int, app_id: str, user_id: str
+    ):
+        search_result = await self.repository.get_user_data_by_id(
+            dsId=dsId,
+            interval=interval,
+            user_id=user_id,
+            app_id=app_id,
+            service="/search-result/",
+        )
+        browse_result = await self.repository.get_user_data_by_id(
+            dsId=dsId,
+            interval=interval,
+            user_id=user_id,
+            app_id=app_id,
+            service="/product-details/",
+        )
+        search_result = {urllib.parse.unquote(key): value for key, value in search_result}
+        browse_result = {urllib.parse.unquote(key): value for key, value in browse_result}
+        return {"project_id":dsId,"user_id":user_id,"interval":interval,"product_searched":search_result, "product_browsed": browse_result}

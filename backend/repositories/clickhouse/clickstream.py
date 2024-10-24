@@ -59,3 +59,21 @@ class Clickstream(EventsBase):
         )
 
         return query.get_sql(), parameters
+
+    async def get_user_data_by_id(self, dsId: str, interval: int, user_id: str, app_id: str,service:str) -> List[any]:
+        query = f"""
+            SELECT 
+                splitByString('{service}',replaceAll(splitByChar('?', properties.8)[1], '?', ''))[2] AS truncated_url, count(*) as activity_tally
+            FROM 
+                default.clickstream
+            WHERE 
+                datasource_id = '{dsId}'
+                AND toDate(timestamp) BETWEEN yesterday() - {interval-1} AND today()
+                AND properties.8 LIKE '%{service}%' AND user_id = '{user_id}' 
+            GROUP BY 1
+            ORDER BY 2 desc
+        """
+        result= await self.execute_query_for_app(
+            query=query, parameters={}, app_id=app_id
+        )
+        return result
