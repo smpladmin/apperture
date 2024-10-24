@@ -4,6 +4,7 @@ import json
 import logging
 import re
 from typing import List, Optional, Union
+from domain.clickstream.service import ClickstreamService
 from fastapi_limiter.depends import RateLimiter
 
 from beanie import PydanticObjectId
@@ -793,3 +794,21 @@ async def run_internal_queries(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get("/clickstream/report/{dsId}")
+async def get_clickstream_events(
+    project_id: str,
+    user_id: str,
+    interval: int = 7,
+    clickstream_service: ClickstreamService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    if interval < 1 or interval > 300:
+        return {"success":False,"count": 0, "data": []}
+    datasource = await ds_service.get_datasource(project_id)
+    if datasource:
+        return await clickstream_service.get_user_data_by_id(
+            dsId=project_id, app_id=str(datasource.app_id), interval=interval, user_id=user_id
+        )
+    return {"count": 0, "data": []}
