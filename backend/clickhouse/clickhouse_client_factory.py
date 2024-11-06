@@ -1,6 +1,8 @@
 import logging
 import os
 
+import logfire
+
 import clickhouse_connect
 from beanie import PydanticObjectId
 
@@ -96,13 +98,24 @@ class ClickHouseClientFactory:
         }
 
     @staticmethod
-    async def get_client(app_id) -> ClickHouseClient:
-        if app_id not in ClickHouseClientFactory.__clients:
-            apps = await App.find(App.id == PydanticObjectId(app_id)).to_list()
-            app = apps[0]
+    async def get_client(app_id, read=False) -> ClickHouseClient:
+        read_key = f"read_{app_id}"
 
-            ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(app)
-        return ClickHouseClientFactory.__clients[app_id]
+        if (
+            app_id not in ClickHouseClientFactory.__clients
+            or read_key not in ClickHouseClientFactory.__clients
+        ):
+            with logfire.span(f"Creating new connection for the app {app_id}"):
+                apps = await App.find(App.id == PydanticObjectId(app_id)).to_list()
+                app = apps[0]
+
+                ClickHouseClientFactory.__clients[read_key] = ClickHouseClient(app)
+                ClickHouseClientFactory.__clients[app_id] = ClickHouseClient(app)
+        if read:
+            with logfire.span(f"Using read-only connection"):
+                return ClickHouseClientFactory.__clients[read_key]
+        with logfire.span(f"Using default connection"):
+            return ClickHouseClientFactory.__clients[app_id]
 
     @staticmethod
     def close_all_client_connection():

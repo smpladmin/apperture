@@ -76,6 +76,6 @@ class Clickstream(EventsBase):
         """
         with logfire.span(f"executing query for {service} details"):
             result= await self.execute_query_for_app(
-                query=query, parameters={}, app_id=app_id
+                query=query, parameters={}, app_id=app_id,read=True
             )
         return result
