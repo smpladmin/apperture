@@ -17,7 +17,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
 import logfire
 
-logfire.install_auto_tracing("repositories", min_duration=0,check_imported_modules='ignore')
+logfire.install_auto_tracing(
+    "repositories", min_duration=0, check_imported_modules="ignore"
+)
 logfire.install_auto_tracing(
     "domain.service", min_duration=0, check_imported_modules="ignore"
 )
