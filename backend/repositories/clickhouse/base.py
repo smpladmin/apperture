@@ -70,12 +70,12 @@ class EventsBase(ABC):
             return []
 
     async def execute_query_for_app(
-        self, app_id: str, query: str, parameters: Dict
+        self, app_id: str, query: str, parameters: Dict,read=False
     ) -> Sequence:
         logging.info(f"Executing query: {query}")
         logging.info(f"Parameters: {parameters}")
         try:
-            client = await ClickHouseClientFactory.get_client(app_id)
+            client = await ClickHouseClientFactory.get_client(app_id,read=read)
             query_result = client.resticted_client_query(
                 query=query, parameters=parameters
             )
