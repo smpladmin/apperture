@@ -15,7 +15,20 @@ import sentry_sdk
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.sessions import SessionMiddleware
+import logfire
 
+logfire.install_auto_tracing("repositories.clickhouse", min_duration=0,check_imported_modules='ignore')
+logfire.install_auto_tracing(
+    "domain.datasources.service", min_duration=0, check_imported_modules="ignore"
+)
+logfire.install_auto_tracing(
+    "domain.clickstream.service", min_duration=0, check_imported_modules="ignore"
+)
+logfire.install_auto_tracing(
+    "rest.controllers.private_apis_controller",
+    min_duration=0,
+    check_imported_modules="ignore",
+)
 from clickhouse import Clickhouse
 from mongo import Mongo
 from rest.controllers import (
@@ -69,6 +82,7 @@ async def init_rate_limiter(redis_host: str, redis_password: str):
     )
     await FastAPILimiter.init(redis)
 
+logfire.configure(service_name="apperture-backend")
 
 async def on_startup():
     mongo = Mongo()
@@ -91,7 +105,7 @@ async def on_shutdown():
 
 
 app = FastAPI(on_startup=[on_startup], on_shutdown=[on_shutdown])
-
+logfire.instrument_fastapi(app) 
 
 app.add_middleware(
     CORSMiddleware,
