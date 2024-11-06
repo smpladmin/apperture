@@ -1,5 +1,6 @@
 from typing import List
 
+import logfire
 from pypika import ClickHouseQuery, Criterion, Field, Order, Parameter
 from pypika import functions as fn
 
@@ -73,7 +74,8 @@ class Clickstream(EventsBase):
             GROUP BY 1
             ORDER BY 2 desc
         """
-        result= await self.execute_query_for_app(
-            query=query, parameters={}, app_id=app_id
-        )
+        with logfire.span(f"executing query for {service} details"):
+            result= await self.execute_query_for_app(
+                query=query, parameters={}, app_id=app_id
+            )
         return result
