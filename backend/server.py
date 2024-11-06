@@ -21,6 +21,11 @@ logfire.install_auto_tracing(
     "repositories", min_duration=0, check_imported_modules="ignore"
 )
 logfire.install_auto_tracing(
+    "clickhouse.clickhouse_client_factory",
+    min_duration=0,
+    check_imported_modules="ignore",
+)
+logfire.install_auto_tracing(
     "domain.service", min_duration=0, check_imported_modules="ignore"
 )
 logfire.install_auto_tracing(
