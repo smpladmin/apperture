@@ -103,7 +103,7 @@ class ClickHouseClientFactory:
 
         if (
             app_id not in ClickHouseClientFactory.__clients
-            and read_key not in ClickHouseClientFactory.__clients
+            or read_key not in ClickHouseClientFactory.__clients
         ):
             with logfire.span(f"Creating new connection for the app {app_id}"):
                 apps = await App.find(App.id == PydanticObjectId(app_id)).to_list()
