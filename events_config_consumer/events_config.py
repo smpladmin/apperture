@@ -23,6 +23,8 @@ clickhouse_to_pandas_type_map = {
     "Float64": "Float64",
     "String": "str",
     "DateTime": "datetime64[ns]",
+    "DateTime64(3)": "datetime64[ns]",
+    "DateTime64(6)": "datetime64[ns]",
     "Array": "object",
     "Array(String)": "object",
     "Array(Int64)": "object",
@@ -40,10 +42,12 @@ clickhouse_to_pandas_type_map = {
     "Nullable(Float64)": "Float64",
     "Nullable(String)": "str",
     "Nullable(DateTime)": "datetime64[ns]",
+    "Nullable(DateTime64(3))": "datetime64[ns]",
+    "Nullable(DateTime64(6))": "datetime64[ns]",
     "Nullable(Object('json'))": "object",
 }
 
-INT_TYPES = ["Int64", "Int8", "Int16", "Int32", "INT128"]
+INT_TYPES = ["Int64", "Int8", "Int16", "Int32", "INT128", "Int128"]
 
 FLOAT_TYPES = ["Float64", "Float32"]
 
