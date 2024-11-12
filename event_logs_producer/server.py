@@ -61,7 +61,7 @@ async def capture_event_logs(
     datasource_id: str, dto: EventLogsDto, service: EventLogsService = Depends()
 ):
     log_kafka_topic = f"eventlogs_{datasource_id}"
-    config_kafka_topic = f"eventsconfig_topic_{datasource_id}"
+    config_kafka_topic = f"config_events_{datasource_id}"
     # update data with datasource_id to track apperture datasource associated with log stream
     event = {
         "eventName": dto.event.eventName,
