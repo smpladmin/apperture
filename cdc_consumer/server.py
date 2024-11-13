@@ -84,8 +84,8 @@ async def process_kafka_messages() -> None:
                 shard = app.cdc_integrations.cdc_buckets[record.topic]["shard"]
                 ch_table = app.cdc_integrations.cdc_buckets[record.topic]["ch_table"]
 
-                # Temporary workaround for the 't_device' table: Due to a specific issue,
-                # manually assign an ID to each record based on the 'device_id' field as it was the need of the hour.
+                # Temporary workaround for the 't_device' table: Due to a lack of any primary key,
+                # manually assign an ID to each record based on the 'mac' field as it was the need of the hour.
                 # TODO: Implement a more robust solution and introduce a flag to handle
                 # such cases in a cleaner and sustainable way.
                 if ch_table == "t_device":

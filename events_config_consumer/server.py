@@ -45,7 +45,7 @@ total_records = 0
 
 
 def format_date_string_to_desired_format(
-    date_str: str, output_date_format="%Y-%m-%d %H:%M:%S"
+    date_str: str, output_date_format="%Y-%m-%d %H:%M:%S.%f"
 ):
     date_formats = [
         "%Y-%m-%dT%H:%M:%S.%fZ",
