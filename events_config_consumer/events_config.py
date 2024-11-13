@@ -123,7 +123,7 @@ class EventTablesConfig:
 
         for datasource in event_logs_datasources:
             # topic to read events from, defined in logs producer
-            topic = f"config_events_{datasource['_id']}"
+            topic = f"config_events_1_{datasource['_id']}"
             self.topics.append(topic)
 
             config = await self.get_config_for_integration(
@@ -137,7 +137,7 @@ class EventTablesConfig:
 
                 for table, config in events_table_config.items():
                     # create buckets based on config tables
-                    table_topic = f"config_events_{datasource['_id']}_{table}"
+                    table_topic = f"config_events_1_{datasource['_id']}_{table}"
                     ch_db = app["clickhouseCredential"]["databasename"]
                     ch_server_credential = (
                         ClickHouseCredentials(**app["remoteConnection"])
