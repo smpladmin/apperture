@@ -54,6 +54,7 @@ from domain.queries_schedule.models import QueriesSchedule
 from rest.controllers.actions.compute_query import ComputeQueryAction
 from rest.dtos.apidata import CreateAPIDataDto
 from rest.dtos.apperture_users import PrivateUserResponse, ResetPasswordDto
+from rest.dtos.private import TestQueryDto
 from rest.dtos.apps import (
     AppDatabaseResponse,
     AppResponse,
@@ -812,3 +813,13 @@ async def get_clickstream_events(
             dsId=project_id, app_id=str(datasource.app_id), interval=interval, user_id=user_id
         )
     return {"count": 0, "data": []}
+
+
+@router.post("/query/test")
+async def test_query(
+    dto:TestQueryDto,
+    clickstream_service: ClickstreamService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    datasource = await ds_service.get_datasource(dto.datasource_id)
+    return await clickstream_service.test_query(app_id=str(datasource.app_id),query=dto.query)
