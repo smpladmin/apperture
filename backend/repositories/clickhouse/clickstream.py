@@ -79,3 +79,9 @@ class Clickstream(EventsBase):
                 query=query, parameters={}, app_id=app_id,read=True
             )
         return result
+
+    async def execute_test_query(self,query:str,app_id:str):
+        result = await self.execute_query_for_app(
+            query=query, parameters={}, app_id=app_id, read=True
+        )
+        return result

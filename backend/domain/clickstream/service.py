@@ -149,6 +149,13 @@ class ClickstreamService:
         ]
         count = await self.repository.get_stream_count_by_dsId(dsId=dsId, app_id=app_id)
         return {"count": count[0][0], "data": data_list}
+    
+    async def test_query(
+            self,
+            app_id:str,
+            query:str,
+    ):
+        return await self.repository.execute_test_query(query=query,app_id=app_id)
 
     async def get_user_data_by_id(
         self, dsId: str, interval: int, app_id: str, user_id: str
