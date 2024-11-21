@@ -210,6 +210,8 @@ def save_topic_data_to_clickhouse(
                         data.get("datasource_id", ""),
                     ]
                     for data in to_insert
+                    if data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP  # Check added to skip some events
+
                 ]
                 
                 clickhouse.save_events(
