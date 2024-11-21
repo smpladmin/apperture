@@ -21,7 +21,7 @@ class ClickHouseClient:
             password=connection_detail.password if connection_detail else "",
             allow_experimental_object_type=1,
             query_limit=0,
-            max_execution_time=120,
+            max_execution_time=600,
         )
 
     def query(self, query, parameters={}, settings={}):
