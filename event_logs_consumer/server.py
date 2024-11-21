@@ -36,9 +36,11 @@ total_records = 0
 
 KEYS_TYPECAST_TO_STRING = json.loads(os.getenv("KEYS_TYPECAST_TO_STRING", '["lat", "lng"]'))
 KEYS_TYPECAST_TO_LIST_OF_LIST = json.loads(os.getenv("KEYS_TYPECAST_TO_LIST_OF_LIST"))
+EVENTS_TO_SKIP = json.loads(os.getenv("EVENTS_TO_SKIP", '[]'))
 
 logging.info(f"KEYS_TYPECAST_TO_LIST_OF_LIST: {KEYS_TYPECAST_TO_LIST_OF_LIST}")
 logging.info(f"KEYS_TYPECAST_TO_STRING: {KEYS_TYPECAST_TO_STRING}")
+logging.info(f"EVENTS_TO_SKIP: {EVENTS_TO_SKIP}")
 
 
 
@@ -180,8 +182,7 @@ def save_topic_data_to_clickhouse(
                     data.get("datasource_id", ""),
                 ]
                 for data in to_insert
-                if data.get("key")
-                != "string"  # Check added to skip some test data which was inserted erroneously
+                if data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP  # Check added to skip some events
             ]
             logging.info(f"events: {events}")
             clickhouse.save_events(
