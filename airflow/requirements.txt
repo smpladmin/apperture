@@ -4,8 +4,8 @@ clickhouse_connect==0.3.6
 pytest
 google-ads==25.0.0
 pymysql==1.0.3
-pymssql
-psycopg2-binary
-ratelimit
+pymssql==2.1.5
+psycopg2-binary==2.9.6
+ratelimit==2.2.1
 dataframe_image==0.2.3
 matplotlib==3.7.2
