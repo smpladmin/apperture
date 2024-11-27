@@ -41,7 +41,7 @@ class TataIVREventsFetcher:
         page = 1
         have_more_data = True
         total_data = 0
-        SIZE = 1000
+        SIZE = 500
 
         while have_more_data:
             response = self.request_records(page=page, size=SIZE)
