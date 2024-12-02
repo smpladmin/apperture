@@ -25,7 +25,7 @@ DATASOURCE_ID=os.getenv("DATASOURCE_ID", "event_service_bus")
 CONFIG_KAFKA_TOPIC=os.getenv("CONFIG_KAFKA_TOPIC", "config_events_1_event_service_bus")
 
 # Azure Service Bus configuration
-NAMESPACE_CONNECTION_STR = os.getenv("NAMESPACE_CONNECTION_STR", "Endpoint=sb://wiom-prod.servicebus.windows.net/;SharedAccessKeyName=AppertureSubscriptionReceiverKey;SharedAccessKey=HMVECJ4o+L4dBnmV3g0LPLaqAWcKiMHOt+ASbAqGuS4=;EntityPath=log_events")
+NAMESPACE_CONNECTION_STR = os.getenv("NAMESPACE_CONNECTION_STR")
 SUBSCRIPTION_NAME = os.getenv("SUBSCRIPTION_NAME", "datastream-V2-prod-314fba53")
 TOPIC_NAME = os.getenv("TOPIC_NAME", "log_events")
 
