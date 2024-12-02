@@ -1,0 +1,121 @@
+import asyncio
+import json
+import logging
+import os
+from aiokafka import AIOKafkaProducer
+from azure.servicebus.aio import ServiceBusClient
+from dotenv import load_dotenv
+from domain.event_logs.models import EventLogsDto
+
+# Environment setup
+load_dotenv()
+logging.getLogger().setLevel(logging.INFO)
+
+# Kafka configuration
+KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
+REDIS_HOST = os.getenv("REDIS_HOST", "redis")
+REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
+logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
+
+# Event Logs configuration
+START_TIME=os.getenv("START_TIME", "2024-11-29T04:24:54.8964118Z")
+LOG_KAFKA_TOPIC=os.getenv("LOG_KAFKA_TOPIC", "eventlogs_event_service_bus")
+DATASOURCE_ID=os.getenv("DATASOURCE_ID", "event_service_bus")
+CONFIG_KAFKA_TOPIC=os.getenv("CONFIG_KAFKA_TOPIC", "config_events_1_event_service_bus")
+
+# Azure Service Bus configuration
+NAMESPACE_CONNECTION_STR = os.getenv("NAMESPACE_CONNECTION_STR", "Endpoint=sb://wiom-prod.servicebus.windows.net/;SharedAccessKeyName=AppertureSubscriptionReceiverKey;SharedAccessKey=HMVECJ4o+L4dBnmV3g0LPLaqAWcKiMHOt+ASbAqGuS4=;EntityPath=log_events")
+SUBSCRIPTION_NAME = os.getenv("SUBSCRIPTION_NAME", "datastream-V2-prod-314fba53")
+TOPIC_NAME = os.getenv("TOPIC_NAME", "log_events")
+
+
+producer = None
+
+async def startup_event():
+    global producer
+    producer = AIOKafkaProducer(
+        bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
+        max_request_size=5242880,
+    )
+    await producer.start()
+    logging.info("Kafka producer started.")
+
+async def shutdown_event():
+    if producer:
+        await producer.stop()
+        logging.info("Kafka producer stopped.")
+
+async def proccess_message(
+    message_dict
+):
+    dto = EventLogsDto.parse_obj(message_dict["payload"])
+    
+    # update data with datasource_id to track apperture datasource associated with log stream
+    event = {
+        "eventName": dto.event.eventName,
+        "addedTime": dto.event.addedTime,
+        "table": dto.event.table,
+        "mobile": dto.event.mobile or "",
+        "task_id": dto.event.task_id or "",
+        "account_id": dto.event.account_id or "",
+        "key": dto.event.key or "",
+        "data": dto.event.data,
+        "datasource_id": DATASOURCE_ID,
+        "source_flag": "event_service_bus",
+    }
+    value = json.dumps(event)
+    
+    try:
+        await producer.send_and_wait(LOG_KAFKA_TOPIC, value=value.encode("utf-8"))
+        logging.info(f"Sending event {event} to log kafka topic: {LOG_KAFKA_TOPIC}")
+
+        await producer.send_and_wait(CONFIG_KAFKA_TOPIC, value=value.encode("utf-8"))
+        logging.info(f"Sending event {event} to config kafka topic: {CONFIG_KAFKA_TOPIC}")
+
+        logging.info(f"Successfully wrote event {event} to kafka topics")
+
+        return True
+    except Exception as e:
+        logging.error(f"Error writing message to kafka: {str(e)}")
+
+        return False
+
+
+async def receive_servicebus_messages():
+    # create a Service Bus client using the connection string
+    async with ServiceBusClient.from_connection_string(
+        conn_str=NAMESPACE_CONNECTION_STR,
+        logging_enable=True) as servicebus_client:
+
+        async with servicebus_client:
+            # get the Subscription Receiver object for the subscription
+            receiver = servicebus_client.get_subscription_receiver(
+                topic_name=TOPIC_NAME, 
+                subscription_name=SUBSCRIPTION_NAME, 
+                max_wait_time=5
+            )
+            async with receiver:
+                while True:
+                    received_msgs = await receiver.receive_messages(max_wait_time=5, max_message_count=50)
+                    if not received_msgs:
+                        logging.info("No new messages, waiting")
+                        await asyncio.sleep(2)
+                        continue
+                    for message in received_msgs:
+                        logging.info("Received: " + str(message))
+                        message_dict = json.loads(str(message))
+                        success_flag = await proccess_message(message_dict)
+                        if success_flag:
+                            logging.info("Received: " + str(message))
+                            logging.info(f"Event wrote to kafka topics? - {success_flag}")
+                            await receiver.complete_message(message)
+
+async def main():
+    await startup_event()
+    try:
+        await receive_servicebus_messages()
+    finally:
+        await shutdown_event()
+
+if __name__ == "__main__":
+    asyncio.run(main())
