@@ -181,7 +181,7 @@ def save_topic_data_to_clickhouse(
                     data.get("key", ""),
                     convert_object_keys_to_string(convert_object_keys_to_list_of_list(data.get("data", {}))),
                     data.get("datasource_id", ""),
-                    data.get("source_flag", ""),
+                    data.get("source_flag", None),
                 ]
                 for data in to_insert
                 if data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP  # Check added to skip some events
@@ -210,7 +210,7 @@ def save_topic_data_to_clickhouse(
                         data.get("key", ""),
                         convert_object_keys_to_string(convert_object_keys_to_list_of_list(data.get("data", {}))),
                         data.get("datasource_id", ""),
-                        data.get("source_flag", ""),
+                        data.get("source_flag", None),
                     ]
                     for data in to_insert
                     if data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP  # Check added to skip some events
