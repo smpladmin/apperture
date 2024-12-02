@@ -41,6 +41,8 @@ jobs:
               - 'event_logs_consumer/**'
             events_config_consumer:
               - 'events_config_consumer/**'
+            event_service_bus_consumer_producer:
+              - 'event_service_bus_consumer_producer/**'
 
       - name: Set short commit-sha
         id: commit
@@ -200,6 +202,18 @@ jobs:
           IMAGE_TAG: latest
         run: |
           cd events_config_consumer
+          docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
+          docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
+
+      - name: Build and Push Event Service Bus Consumer
+        if: steps.filter.outputs.event_service_bus_consumer_producer == 'true'
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          ECR_REPOSITORY: event_service_bus_consumer_producer
+          IMAGE_TAG: latest
+        run: |
+          cd event_service_bus_consumer_producer
           docker build --target production -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:${{ steps.commit.outputs.sha_short }} .
           docker push $ECR_REGISTRY/$ECR_REPOSITORY --all-tags
