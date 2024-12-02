@@ -2,6 +2,7 @@ import asyncio
 import json
 import logging
 import os
+from datetime import datetime
 from aiokafka import AIOKafkaProducer
 from azure.servicebus.aio import ServiceBusClient
 from dotenv import load_dotenv
@@ -18,7 +19,7 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 # Event Logs configuration
-START_TIME=os.getenv("START_TIME", "2024-11-29T04:24:54.8964118Z")
+START_TIME=os.getenv("START_TIME", "2024-12-02T11:07:12.312113Z")
 LOG_KAFKA_TOPIC=os.getenv("LOG_KAFKA_TOPIC", "eventlogs_event_service_bus")
 DATASOURCE_ID=os.getenv("DATASOURCE_ID", "event_service_bus")
 CONFIG_KAFKA_TOPIC=os.getenv("CONFIG_KAFKA_TOPIC", "config_events_1_event_service_bus")
@@ -30,6 +31,42 @@ TOPIC_NAME = os.getenv("TOPIC_NAME", "log_events")
 
 
 producer = None
+
+def format_date_string_to_desired_format(
+    date_str: str, output_date_format="%Y-%m-%d %H:%M:%S"
+):
+    if not date_str:
+        return
+ 
+    date_formats = [
+        "%Y-%m-%dT%H:%M:%S.%fZ",
+        "%Y-%m-%dT%H:%M:%S.%f",
+        "%Y-%m-%dT%H:%M:%SZ",
+        "%Y-%m-%dT%H:%M:%S",
+        "%Y-%m-%d %H:%M:%S.%f",
+        "%Y-%m-%d %H:%M:%S",
+        "%d-%m-%Y %H:%M",
+        "%Y-%m-%d",
+        "%Y-%m-%dT%H:%M:%S%z"
+    ]
+
+    for date_format in date_formats:
+        try:
+            if (
+                "%f" in date_format
+                and "." in date_str
+                and len(date_str.split(".")[-1]) > 6
+            ):
+                milliseconds_part = date_str.split(".")[-1]
+                digits_to_remove = len(milliseconds_part) - 6
+                date_str = date_str[:-digits_to_remove]
+            dt_object = datetime.strptime(date_str, date_format)
+            result_date_str = dt_object.strftime(output_date_format)
+            return datetime.strptime(result_date_str, output_date_format)
+        except ValueError as e:
+            pass
+
+    return None
 
 async def startup_event():
     global producer
@@ -49,6 +86,13 @@ async def proccess_message(
     message_dict
 ):
     dto = EventLogsDto.parse_obj(message_dict["payload"])
+
+    datetime_of_event = format_date_string_to_desired_format(dto.event.addedTime)
+    datetime_threshold = format_date_string_to_desired_format(START_TIME)
+
+    if datetime_of_event < datetime_threshold:
+        logging.info(f"Skipping as this event is an older that the datetime threshold mentioned in env")
+        return True
     
     # update data with datasource_id to track apperture datasource associated with log stream
     event = {
@@ -107,7 +151,7 @@ async def receive_servicebus_messages():
                         success_flag = await proccess_message(message_dict)
                         if success_flag:
                             logging.info("Received: " + str(message))
-                            logging.info(f"Event wrote to kafka topics? - {success_flag}")
+                            logging.info(f"proccess_message flag: {success_flag}")
                             await receiver.complete_message(message)
 
 async def main():
