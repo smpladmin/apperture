@@ -70,6 +70,17 @@ services:
       - ./event_logs_producer:/code
     depends_on:
       - kafka
+  event_service_bus_consumer_producer:
+    restart: on-failure
+    build:
+      context: ./event_service_bus_consumer_producer
+      target: dev
+    ports:
+      - "8085:8085"
+    volumes:
+      - ./event_service_bus_consumer_producer:/code
+    depends_on:
+      - kafka
   event_logs_consumer:
     restart: on-failure
     build:
