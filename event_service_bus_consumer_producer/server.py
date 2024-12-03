@@ -121,7 +121,7 @@ async def proccess_message(
     try:
         # If event's table in TABLES_TO_SKIP_LIST, then skipping event
         if dto.event.table in TABLES_TO_SKIP_LIST:
-            logging.info(f"Skipping this event as table is: {dto.event.table} and TABLES_TO_SKIP_LIST is: {TABLES_TO_SKIP_LIST}")
+            logging.info(f"Skipping this event as table is: {dto.event.table} and TABLES_TO_SKIP_LIST is: {TABLES_TO_SKIP_LIST}. Event is: {event}")
             return True
         
         # Sending events to KAFKA - LOG TOPIC
