@@ -19,7 +19,7 @@ REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
 # Event Logs configuration
-START_TIME=os.getenv("START_TIME", "2024-12-02T11:07:12.312113Z")
+START_TIME=os.getenv("START_TIME")
 LOG_KAFKA_TOPIC=os.getenv("LOG_KAFKA_TOPIC", "eventlogs_event_service_bus")
 DATASOURCE_ID=os.getenv("DATASOURCE_ID", "event_service_bus")
 CONFIG_KAFKA_TOPIC=os.getenv("CONFIG_KAFKA_TOPIC", "config_events_1_event_service_bus")
@@ -29,6 +29,11 @@ NAMESPACE_CONNECTION_STR = os.getenv("NAMESPACE_CONNECTION_STR")
 SUBSCRIPTION_NAME = os.getenv("SUBSCRIPTION_NAME", "datastream-V2-prod-314fba53")
 TOPIC_NAME = os.getenv("TOPIC_NAME", "log_events")
 
+AZURE_BATCH_SIZE = int(os.getenv("AZURE_BATCH_SIZE", 50))
+AZURE_MAX_WAIT_TIME = int(os.getenv("AZURE_MAX_WAIT_TIME", 5))
+AZURE_NO_MESSAGE_DELAY = int(os.getenv("AZURE_NO_MESSAGE_DELAY", 2))
+CONFIG_KAFKA_TABLES = os.getenv("CONFIG_KAFKA_TABLES","")
+CONFIG_KAFKA_TABLES_LIST = [table.strip() for table in CONFIG_KAFKA_TABLES.split(",")]
 
 producer = None
 
@@ -87,12 +92,13 @@ async def proccess_message(
 ):
     dto = EventLogsDto.parse_obj(message_dict["payload"])
 
-    datetime_of_event = format_date_string_to_desired_format(dto.event.addedTime)
-    datetime_threshold = format_date_string_to_desired_format(START_TIME)
-
-    if datetime_of_event < datetime_threshold:
-        logging.info(f"Skipping as this event is an older that the datetime threshold mentioned in env")
-        return True
+    if START_TIME is not None and START_TIME != "":
+        datetime_of_event = format_date_string_to_desired_format(dto.event.addedTime)
+        datetime_threshold = format_date_string_to_desired_format(START_TIME)
+        
+        if datetime_of_event < datetime_threshold:
+            logging.info(f"Skipping as this event is an older that the datetime threshold mentioned in env")
+            return True
     
     # update data with datasource_id to track apperture datasource associated with log stream
     event = {
@@ -113,10 +119,13 @@ async def proccess_message(
         await producer.send_and_wait(LOG_KAFKA_TOPIC, value=value.encode("utf-8"))
         logging.info(f"Sending event {event} to log kafka topic: {LOG_KAFKA_TOPIC}")
 
-        await producer.send_and_wait(CONFIG_KAFKA_TOPIC, value=value.encode("utf-8"))
-        logging.info(f"Sending event {event} to config kafka topic: {CONFIG_KAFKA_TOPIC}")
-
-        logging.info(f"Successfully wrote event {event} to kafka topics")
+        if dto.event.table in CONFIG_KAFKA_TABLES_LIST:
+            await producer.send_and_wait(CONFIG_KAFKA_TOPIC, value=value.encode("utf-8"))
+            logging.info(f"Sending event {event} to config kafka topic: {CONFIG_KAFKA_TOPIC}")
+        else:
+            logging.info(f"Skipping config kafka as table is: {dto.event.table} and CONFIG_KAFKA_TABLES_LIST is: {CONFIG_KAFKA_TABLES_LIST}")
+        
+        logging.info(f"Successfully wrote event to kafka topics")
 
         return True
     except Exception as e:
@@ -140,17 +149,15 @@ async def receive_servicebus_messages():
             )
             async with receiver:
                 while True:
-                    received_msgs = await receiver.receive_messages(max_wait_time=5, max_message_count=50)
+                    received_msgs = await receiver.receive_messages(max_wait_time=AZURE_MAX_WAIT_TIME, max_message_count=AZURE_BATCH_SIZE)
                     if not received_msgs:
                         logging.info("No new messages, waiting")
-                        await asyncio.sleep(2)
+                        await asyncio.sleep(AZURE_NO_MESSAGE_DELAY)
                         continue
                     for message in received_msgs:
-                        logging.info("Received: " + str(message))
                         message_dict = json.loads(str(message))
                         success_flag = await proccess_message(message_dict)
                         if success_flag:
-                            logging.info("Received: " + str(message))
                             logging.info(f"proccess_message flag: {success_flag}")
                             await receiver.complete_message(message)
 
