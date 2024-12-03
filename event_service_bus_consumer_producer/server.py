@@ -148,7 +148,6 @@ async def receive_servicebus_messages():
                 subscription_name=SUBSCRIPTION_NAME, 
                 max_wait_time=AZURE_MAX_WAIT_TIME,
                 receive_mode=ServiceBusReceiveMode.PEEK_LOCK,
-                prefetch_count=AZURE_BATCH_SIZE,
             )
             async with receiver:
                 while True:
