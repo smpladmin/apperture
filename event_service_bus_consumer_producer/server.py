@@ -162,7 +162,7 @@ async def receive_servicebus_messages():
                         success_flag = await proccess_message(message_dict)
                         if success_flag:
                             logging.info(f"proccess_message flag: {success_flag}")
-                            # await receiver.complete_message(message)
+                            await receiver.complete_message(message)
 
 async def main():
     await startup_event()
