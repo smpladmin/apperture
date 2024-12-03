@@ -5,6 +5,7 @@ import os
 from datetime import datetime
 from aiokafka import AIOKafkaProducer
 from azure.servicebus.aio import ServiceBusClient
+from azure.servicebus import ServiceBusReceiveMode
 from dotenv import load_dotenv
 from domain.event_logs.models import EventLogsDto
 
@@ -33,7 +34,7 @@ AZURE_BATCH_SIZE = int(os.getenv("AZURE_BATCH_SIZE", 50))
 AZURE_MAX_WAIT_TIME = int(os.getenv("AZURE_MAX_WAIT_TIME", 5))
 AZURE_NO_MESSAGE_DELAY = int(os.getenv("AZURE_NO_MESSAGE_DELAY", 2))
 CONFIG_KAFKA_TABLES = os.getenv("CONFIG_KAFKA_TABLES","")
-CONFIG_KAFKA_TABLES_LIST = [table.strip() for table in CONFIG_KAFKA_TABLES.split(",")]
+CONFIG_KAFKA_TABLES_LIST = [table.strip().replace("'", "").replace('"', "") for table in CONFIG_KAFKA_TABLES.split(",")]
 
 producer = None
 
@@ -145,7 +146,9 @@ async def receive_servicebus_messages():
             receiver = servicebus_client.get_subscription_receiver(
                 topic_name=TOPIC_NAME, 
                 subscription_name=SUBSCRIPTION_NAME, 
-                max_wait_time=5
+                max_wait_time=AZURE_MAX_WAIT_TIME,
+                receive_mode=ServiceBusReceiveMode.PEEK_LOCK,
+                prefetch_count=AZURE_BATCH_SIZE,
             )
             async with receiver:
                 while True:
@@ -159,7 +162,7 @@ async def receive_servicebus_messages():
                         success_flag = await proccess_message(message_dict)
                         if success_flag:
                             logging.info(f"proccess_message flag: {success_flag}")
-                            await receiver.complete_message(message)
+                            # await receiver.complete_message(message)
 
 async def main():
     await startup_event()
