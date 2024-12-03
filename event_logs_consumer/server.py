@@ -42,6 +42,7 @@ TABLES_TO_SKIP = json.loads(os.getenv("TABLES_TO_SKIP", '[]'))
 logging.info(f"KEYS_TYPECAST_TO_LIST_OF_LIST: {KEYS_TYPECAST_TO_LIST_OF_LIST}")
 logging.info(f"KEYS_TYPECAST_TO_STRING: {KEYS_TYPECAST_TO_STRING}")
 logging.info(f"EVENTS_TO_SKIP: {EVENTS_TO_SKIP}")
+logging.info(f"TABLES_TO_SKIP: {TABLES_TO_SKIP}")
 
 
 
