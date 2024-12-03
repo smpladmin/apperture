@@ -60,8 +60,8 @@ async def shutdown_event():
 async def capture_event_logs(
     datasource_id: str, dto: EventLogsDto, service: EventLogsService = Depends()
 ):
-    log_kafka_topic = f"eventlogs_{datasource_id}"
-    config_kafka_topic = f"config_events_1_{datasource_id}"
+    log_kafka_topic = f"eventlogs_{datasource_id}_1"
+    config_kafka_topic = f"config_events_1_{datasource_id}_1"
     # update data with datasource_id to track apperture datasource associated with log stream
     event = {
         "eventName": dto.event.eventName,
