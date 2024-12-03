@@ -35,6 +35,8 @@ AZURE_MAX_WAIT_TIME = int(os.getenv("AZURE_MAX_WAIT_TIME", 5))
 AZURE_NO_MESSAGE_DELAY = int(os.getenv("AZURE_NO_MESSAGE_DELAY", 2))
 CONFIG_KAFKA_TABLES = os.getenv("CONFIG_KAFKA_TABLES","")
 CONFIG_KAFKA_TABLES_LIST = [table.strip().replace("'", "").replace('"', "") for table in CONFIG_KAFKA_TABLES.split(",")]
+TABLES_TO_SKIP = os.getenv("TABLES_TO_SKIP","")
+TABLES_TO_SKIP_LIST = [table.strip().replace("'", "").replace('"', "") for table in TABLES_TO_SKIP.split(",")]
 
 producer = None
 
@@ -117,9 +119,16 @@ async def proccess_message(
     value = json.dumps(event)
     
     try:
+        # If event's table in TABLES_TO_SKIP_LIST, then skipping event
+        if dto.event.table in TABLES_TO_SKIP_LIST:
+            logging.info(f"Skipping this event as table is: {dto.event.table} and TABLES_TO_SKIP_LIST is: {TABLES_TO_SKIP_LIST}")
+            return True
+        
+        # Sending events to KAFKA - LOG TOPIC
         await producer.send_and_wait(LOG_KAFKA_TOPIC, value=value.encode("utf-8"))
         logging.info(f"Sending event {event} to log kafka topic: {LOG_KAFKA_TOPIC}")
 
+        # Selectively sending events to KAFKA - CONFIG TOPIC
         if dto.event.table in CONFIG_KAFKA_TABLES_LIST:
             await producer.send_and_wait(CONFIG_KAFKA_TOPIC, value=value.encode("utf-8"))
             logging.info(f"Sending event {event} to config kafka topic: {CONFIG_KAFKA_TOPIC}")
