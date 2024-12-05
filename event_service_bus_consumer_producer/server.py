@@ -19,6 +19,7 @@ REDIS_HOST = os.getenv("REDIS_HOST", "redis")
 REDIS_PASSWORD = os.getenv("REDIS_PASSWORD", "")
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
+
 # Event Logs configuration
 START_TIME=os.getenv("START_TIME")
 LOG_KAFKA_TOPIC=os.getenv("LOG_KAFKA_TOPIC", "eventlogs_event_service_bus")
@@ -29,6 +30,9 @@ CONFIG_KAFKA_TOPIC=os.getenv("CONFIG_KAFKA_TOPIC", "config_events_1_event_servic
 NAMESPACE_CONNECTION_STR = os.getenv("NAMESPACE_CONNECTION_STR")
 SUBSCRIPTION_NAME = os.getenv("SUBSCRIPTION_NAME", "datastream-V2-prod-314fba53")
 TOPIC_NAME = os.getenv("TOPIC_NAME", "log_events")
+
+logging.info(f"SUBSCRIPTION_NAME : {SUBSCRIPTION_NAME}")
+logging.info(f"TOPIC_NAME : {TOPIC_NAME}")
 
 AZURE_BATCH_SIZE = int(os.getenv("AZURE_BATCH_SIZE", 50))
 AZURE_MAX_WAIT_TIME = int(os.getenv("AZURE_MAX_WAIT_TIME", 5))
