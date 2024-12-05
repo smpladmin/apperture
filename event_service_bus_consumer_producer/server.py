@@ -28,7 +28,7 @@ CONFIG_KAFKA_TOPIC=os.getenv("CONFIG_KAFKA_TOPIC", "config_events_1_event_servic
 
 # Azure Service Bus configuration
 NAMESPACE_CONNECTION_STR = os.getenv("NAMESPACE_CONNECTION_STR")
-SUBSCRIPTION_NAME = os.getenv("SUBSCRIPTION_NAME", "datastream-V2-prod-314fba53")
+SUBSCRIPTION_NAME = os.getenv("SUBSCRIPTION_NAME")
 TOPIC_NAME = os.getenv("TOPIC_NAME", "log_events")
 
 logging.info(f"SUBSCRIPTION_NAME : {SUBSCRIPTION_NAME}")
