@@ -20,6 +20,7 @@ load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1"))
+MIN_INSERT_THRESHOLD = int(os.getenv("MIN_INSERT_THRESHOLD", 5000))
 MAX_POLL_INTERVAL_MS = int(os.getenv("MAX_POLL_INTERVAL_MS", 300000))
 SESSION_TIMEOUT_MS = int(os.getenv("SESSION_TIMEOUT_MS", 10000))
 HEARTBEAT_INTERVAL_MS = int(os.getenv("HEARTBEAT_INTERVAL_MS", 3000))
@@ -257,18 +258,20 @@ async def process_kafka_messages() -> None:
     await consumer.start()
 
     while True:
+        logging.info(f"Waiting for messages to arrive. Max wait time: {TIMEOUT_MS} and max number of records: {MAX_RECORDS}")
         data = await consumer.getmany(
             timeout_ms=TIMEOUT_MS,
             max_records=MAX_RECORDS,
         )
         if not data:
             continue
+        logging.info(f"Fetched {len(data)} messages")
 
         fetch_values_from_kafka_records(
             data=data, event_logs_datasources=app.event_logs_datasources
         )
 
-        if total_records > MAX_RECORDS:
+        if total_records > MAX_RECORDS or total_records > MIN_INSERT_THRESHOLD:
             logging.info(
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )
@@ -276,6 +279,7 @@ async def process_kafka_messages() -> None:
                 clickhouse=app.clickhouse,
                 event_logs_datasources=app.event_logs_datasources,
             )
+            logging.info(f"Successfully saved {total_records} records")
 
             await consumer.commit()
             total_records = 0
