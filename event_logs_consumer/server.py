@@ -255,7 +255,9 @@ async def process_kafka_messages() -> None:
     )
 
     global total_records
+    logging.info(f"Starting consumer")
     await consumer.start()
+    logging.info(f"Started consumer")
 
     while True:
         logging.info(f"Waiting for messages to arrive. Max wait time: {TIMEOUT_MS} and max number of records: {MAX_RECORDS}")
@@ -273,7 +275,7 @@ async def process_kafka_messages() -> None:
 
         if total_records > MAX_RECORDS or total_records > MIN_INSERT_THRESHOLD:
             logging.info(
-                f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
+                f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS} or exceed MIN_INSERT_THRESHOLD {MIN_INSERT_THRESHOLD}"
             )
             save_topic_data_to_clickhouse(
                 clickhouse=app.clickhouse,
