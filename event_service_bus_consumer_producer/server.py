@@ -165,6 +165,7 @@ async def receive_servicebus_messages():
             async with receiver:
                 while True:
                     received_msgs = await receiver.receive_messages(max_wait_time=AZURE_MAX_WAIT_TIME, max_message_count=AZURE_BATCH_SIZE)
+                    logging.info(f"Received {len(received_msgs)} messages")
                     if not received_msgs:
                         logging.info("No new messages, waiting")
                         await asyncio.sleep(AZURE_NO_MESSAGE_DELAY)
