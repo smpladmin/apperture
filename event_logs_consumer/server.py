@@ -40,10 +40,12 @@ total_records = 0
 KEYS_TYPECAST_TO_STRING = json.loads(os.getenv("KEYS_TYPECAST_TO_STRING", '["lat", "lng"]'))
 KEYS_TYPECAST_TO_LIST_OF_LIST = json.loads(os.getenv("KEYS_TYPECAST_TO_LIST_OF_LIST"))
 EVENTS_TO_SKIP = json.loads(os.getenv("EVENTS_TO_SKIP", '[]'))
+TABLES_TO_SKIP = json.loads(os.getenv("TABLES_TO_SKIP", '[]'))
 
 logging.info(f"KEYS_TYPECAST_TO_LIST_OF_LIST: {KEYS_TYPECAST_TO_LIST_OF_LIST}")
 logging.info(f"KEYS_TYPECAST_TO_STRING: {KEYS_TYPECAST_TO_STRING}")
 logging.info(f"EVENTS_TO_SKIP: {EVENTS_TO_SKIP}")
+logging.info(f"TABLES_TO_SKIP: {TABLES_TO_SKIP}")
 
 
 
@@ -187,7 +189,10 @@ def save_topic_data_to_clickhouse(
                     data.get("source_flag", None),
                 ]
                 for data in to_insert
-                if data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP  # Check added to skip some events
+                if(
+                    data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP
+                    and data.get("table", "") not in TABLES_TO_SKIP
+                )  # Check added to skip some events
             ]
             logging.info(f"events: {events}")
             clickhouse.save_events(
@@ -198,36 +203,39 @@ def save_topic_data_to_clickhouse(
                 clickhouse_server_credential=clickhouse_server_credential,
                 app_id=app_id,
             )
-            if table == 'prod_events':
-                # save events to other temp table used for migration
-                temp_events = [
-                    [
-                        data.get("event_name", data.get("eventName", "")),
-                        format_date_string_to_desired_format(
-                            data.get("added_time", data.get("addedTime")), output_date_format="%Y-%m-%d %H:%M:%S.%f"
-                        ),
-                        data.get("table", ""),
-                        data.get("mobile", ""),
-                        data.get("task_id", ""),
-                        data.get("account_id", ""),
-                        data.get("key", ""),
-                        convert_object_keys_to_string(convert_object_keys_to_list_of_list(data.get("data", {}))),
-                        data.get("datasource_id", ""),
-                        data.get("source_flag", None),
-                    ]
-                    for data in to_insert
-                    if data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP  # Check added to skip some events
-
-                ]
+            # if table == 'prod_events':
+            #     # save events to other temp table used for migration
+            #     temp_events = [
+            #         [
+            #             data.get("event_name", data.get("eventName", "")),
+            #             format_date_string_to_desired_format(
+            #                 data.get("added_time", data.get("addedTime")), output_date_format="%Y-%m-%d %H:%M:%S.%f"
+            #             ),
+            #             data.get("table", ""),
+            #             data.get("mobile", ""),
+            #             data.get("task_id", ""),
+            #             data.get("account_id", ""),
+            #             data.get("key", ""),
+            #             convert_object_keys_to_string(convert_object_keys_to_list_of_list(data.get("data", {}))),
+            #             data.get("datasource_id", ""),
+            #             data.get("source_flag", None),
+            #         ]
+            #         for data in to_insert
+            #         if (
+            #             data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP
+            #             and data.get("table", "") not in TABLES_TO_SKIP
+            #         )  # Check added to skip some events
+            #     ]
                 
-                clickhouse.save_events(
-                    events=temp_events,
-                    columns=columns,
-                    table="temp_table_mig",
-                    database=database,
-                    clickhouse_server_credential=clickhouse_server_credential,
-                    app_id=app_id
-                )
+            #     clickhouse.save_events(
+            #         events=temp_events,
+            #         columns=columns,
+            #         table="temp_table_mig",
+            #         database=database,
+            #         clickhouse_server_credential=clickhouse_server_credential,
+            #         app_id=app_id
+            #     )
+
             event_logs_datasources.datasource_with_credentials[topic].data = []
             logging.info(
                 "Successfully saved data to clickhouse, Emptying the topic bucket"
