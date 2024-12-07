@@ -34,8 +34,9 @@ TOPIC_NAME = os.getenv("TOPIC_NAME", "log_events")
 logging.info(f"SUBSCRIPTION_NAME : {SUBSCRIPTION_NAME}")
 logging.info(f"TOPIC_NAME : {TOPIC_NAME}")
 
-AZURE_BATCH_SIZE = int(os.getenv("AZURE_BATCH_SIZE", 50))
-AZURE_MAX_WAIT_TIME = int(os.getenv("AZURE_MAX_WAIT_TIME", 5))
+AZURE_BATCH_SIZE = int(os.getenv("AZURE_BATCH_SIZE", 25))
+AZURE_MAX_WAIT_TIME = int(os.getenv("AZURE_MAX_WAIT_TIME", 30))
+PREFETCH_COUNT = int(os.getenv("PREFETCH_COUNT", 25))
 AZURE_NO_MESSAGE_DELAY = int(os.getenv("AZURE_NO_MESSAGE_DELAY", 2))
 CONFIG_KAFKA_TABLES = os.getenv("CONFIG_KAFKA_TABLES","")
 CONFIG_KAFKA_TABLES_LIST = [table.strip().replace("'", "").replace('"', "") for table in CONFIG_KAFKA_TABLES.split(",")]
@@ -161,6 +162,7 @@ async def receive_servicebus_messages():
                 subscription_name=SUBSCRIPTION_NAME, 
                 max_wait_time=AZURE_MAX_WAIT_TIME,
                 receive_mode=ServiceBusReceiveMode.PEEK_LOCK,
+                prefetch_count=PREFETCH_COUNT,
             )
             async with receiver:
                 while True:
