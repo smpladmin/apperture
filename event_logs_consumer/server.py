@@ -21,6 +21,7 @@ load_dotenv()
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
 MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1"))
 MIN_INSERT_THRESHOLD = int(os.getenv("MIN_INSERT_THRESHOLD", 5000))
+FETCH_MAX_BYTES = int(os.getenv("FETCH_MAX_BYTES", 7864320))
 MAX_POLL_INTERVAL_MS = int(os.getenv("MAX_POLL_INTERVAL_MS", 300000))
 SESSION_TIMEOUT_MS = int(os.getenv("SESSION_TIMEOUT_MS", 10000))
 HEARTBEAT_INTERVAL_MS = int(os.getenv("HEARTBEAT_INTERVAL_MS", 3000))
@@ -244,7 +245,7 @@ async def process_kafka_messages() -> None:
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
-        fetch_max_bytes=7864320,
+        fetch_max_bytes=FETCH_MAX_BYTES,
         max_poll_interval_ms=MAX_POLL_INTERVAL_MS,
         heartbeat_interval_ms=HEARTBEAT_INTERVAL_MS,
         session_timeout_ms=SESSION_TIMEOUT_MS,
