@@ -33,8 +33,6 @@ logging.getLogger().setLevel(logging.INFO)
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
-total_records = 0
-
 KEYS_TYPECAST_TO_STRING = json.loads(os.getenv("KEYS_TYPECAST_TO_STRING", '["lat", "lng"]'))
 KEYS_TYPECAST_TO_LIST_OF_LIST = json.loads(os.getenv("KEYS_TYPECAST_TO_LIST_OF_LIST"))
 EVENTS_TO_SKIP = json.loads(os.getenv("EVENTS_TO_SKIP", '[]'))
@@ -49,6 +47,7 @@ logging.info(f"TABLES_TO_SKIP: {TABLES_TO_SKIP}")
 logging.info(f"PROCESS_START_TIME: {PROCESS_START_TIME}")
 logging.info(f"PROCESS_END_TIME: {PROCESS_END_TIME}")
 
+total_records = 0
 
 
 def format_date_string_to_desired_format(
