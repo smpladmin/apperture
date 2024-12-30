@@ -299,10 +299,10 @@ async def process_kafka_messages() -> None:
             gupshup_records = []
             logging.debug(f"Gupshup events: {gupshup_events}")
 
-        if len(gupshup_events) >= GUPSHUP_MAX_RECORDS:
-            app.clickhouse.save_gupshup_events(gupshup_events)
-            logging.debug(f"Saved gupshup events {gupshup_events}")
-            gupshup_events = []
+        # if len(gupshup_events) >= GUPSHUP_MAX_RECORDS:
+        #     app.clickhouse.save_gupshup_events(gupshup_events)
+        #     logging.debug(f"Saved gupshup events {gupshup_events}")
+        #     gupshup_events = []
 
         if agent_log_records:
             for record in agent_log_records:
@@ -312,7 +312,12 @@ async def process_kafka_messages() -> None:
             logging.debug(f"Agent Log Events: {agent_log_events}")
 
         # Save events to ClickHouse
-        if (len(events) + len(flutter_events) + len(agent_log_events)) >= MAX_RECORDS:
+        if (
+            len(events)
+            + len(flutter_events)
+            + len(agent_log_events)
+            + len(gupshup_events)
+        ) >= MAX_RECORDS:
             cs_events = []
             if events:
                 save_events(events)
@@ -333,7 +338,13 @@ async def process_kafka_messages() -> None:
                 logging.debug(f"Saved Agent Log Events: {agent_log_events}")
                 agent_log_events = []
 
+            if gupshup_events:
+                app.clickhouse.save_gupshup_events(gupshup_events)
+                logging.debug(f"Saved gupshup events {gupshup_events}")
+                gupshup_events = []
+
             await consumer.commit()
+            logging.info("Committing events")
 
             if cs_events:
                 app.event_properties_saver.save_cs_event_properties(events=cs_events)
