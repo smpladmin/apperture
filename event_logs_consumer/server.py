@@ -237,9 +237,8 @@ def save_topic_data_to_clickhouse(
             #     )
 
             event_logs_datasources.datasource_with_credentials[topic].data = []
-            logging.info(
-                "Successfully saved data to clickhouse, Emptying the topic bucket"
-            )
+            logging.info(f"Successfully saved {len(events)} records. Emptying the topic bucket")
+
 
 
 async def process_kafka_messages() -> None:
@@ -271,7 +270,7 @@ async def process_kafka_messages() -> None:
 
     timeout_time_ms = 0
     while True:
-        logging.info(f"Waiting for messages to arrive. Max wait time: {TIMEOUT_MS} and max number of records: {MAX_RECORDS}")
+        logging.debug(f"Waiting for messages to arrive. Max wait time: {TIMEOUT_MS} and max number of records: {MAX_RECORDS}")
         data = await consumer.getmany(
             timeout_ms=TIMEOUT_MS,
             max_records=MAX_RECORDS,
@@ -285,15 +284,14 @@ async def process_kafka_messages() -> None:
             data=data, event_logs_datasources=app.event_logs_datasources
         )
 
-        if total_records > MAX_RECORDS or total_records > MIN_INSERT_THRESHOLD or timeout_time_ms >= MAX_TIME_BEFORE_COMMIT_MS:
+        if total_records > MAX_RECORDS or timeout_time_ms >= MAX_TIME_BEFORE_COMMIT_MS:
             logging.info(
-                f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS} or exceed MIN_INSERT_THRESHOLD {MIN_INSERT_THRESHOLD} or timeout_time_ms: {timeout_time_ms} exceeded MAX_TIME_BEFORE_COMMIT_MS {MAX_TIME_BEFORE_COMMIT_MS}"
+                f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS} or timeout_time_ms: {timeout_time_ms} exceeded MAX_TIME_BEFORE_COMMIT_MS {MAX_TIME_BEFORE_COMMIT_MS}"
             )
             save_topic_data_to_clickhouse(
                 clickhouse=app.clickhouse,
                 event_logs_datasources=app.event_logs_datasources,
             )
-            logging.info(f"Successfully saved {total_records} records")
 
             await consumer.commit()
             total_records = 0
