@@ -13,7 +13,6 @@ from domain.alerts.service import AlertService
 from models.models import EventTablesBucket
 from jsonpath_ng import parse
 
-from fastapi import FastAPI
 from aiokafka import AIOKafkaConsumer
 
 from events_config import EventTablesConfig, INT_TYPES, FLOAT_TYPES
@@ -30,8 +29,9 @@ MAX_POLL_INTERVAL_MS = settings.max_poll_interval_ms
 SESSION_TIMEOUT_MS = settings.session_timeout_ms
 HEARTBEAT_INTERVAL_MS = settings.heartbeat_interval_ms
 REQUEST_TIMEOUT_MS = settings.request_timeout_ms
+LOG_LEVEL = settings.log_level
 
-logging.getLogger().setLevel(logging.INFO)
+logging.getLogger().setLevel(LOG_LEVEL)
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 logging.info(f"AUTO_OFFSET_RESET: {AUTO_OFFSET_RESET}")
 logging.info(f"MAX_POLL_INTERVAL_MS: {MAX_POLL_INTERVAL_MS}")
@@ -225,7 +225,7 @@ def create_sparse_dataframe(
     existing_row = df[df[primary_key].astype(str) == str(result_dict[primary_key])]
 
     if event_table_bucket.save_to_audit_table:
-        logging.info(f"Adding row {df_row.to_string()}.")
+        logging.debug(f"Adding row {df_row.to_string()}.")
         audit_df = pd.concat([audit_df, df_row], ignore_index=True)
 
     # If id already exists in the DataFrame, update the row; otherwise, append the row
@@ -441,7 +441,7 @@ def fetch_values_from_kafka_records(
                 continue
 
             values = json.loads(record.value)
-            logging.info(f"Values for topic {topic}::{values}")
+            logging.debug(f"Values for topic {topic}::{values}")
             events_config = event_tables_config.events_config
             destination_tables = get_destination_tables_for_event(
                 event_name=values["eventName"], config=events_config
@@ -454,10 +454,6 @@ def fetch_values_from_kafka_records(
             for table in destination_tables:
                 table_topic = f"{topic}_{table}"
                 event_tables_config.event_tables[table_topic].events.append(values)
-
-    process_event_buckets(
-        event_tables_config=event_tables_config, alert_service=alert_service
-    )
 
 
 def save_topic_data_to_clickhouse(clickhouse, event_tables_config: EventTablesConfig):
@@ -553,6 +549,10 @@ async def process_kafka_messages() -> None:
         )
 
         if total_records >= MAX_RECORDS:
+            process_event_buckets(
+                event_tables_config=app.event_tables_config, alert_service=app.alert_service
+            )
+
             logging.info(
                 f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
             )
