@@ -33,6 +33,7 @@ WIOM_CDC_TABLES_WITH_TIME_COLUMN = {
     "t_wiom_lead_audit": "modified_time",
     "booking_logs": "added_time",
     "task_logs": "added_time",
+    "t_controller": "last_ping_time",
 }
 
 
