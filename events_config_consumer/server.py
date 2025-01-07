@@ -58,7 +58,7 @@ def format_date_string_to_desired_format(
         "%d-%m-%Y %H:%M",
         "%d-%m-%Y",
         "%Y-%m-%d",
-        "%Y-%m-%dT%H:%M:%S%z"
+        "%Y-%m-%dT%H:%M:%S%z",
     ]
 
     for date_format in date_formats:
@@ -550,7 +550,8 @@ async def process_kafka_messages() -> None:
 
         if total_records >= MAX_RECORDS:
             process_event_buckets(
-                event_tables_config=app.event_tables_config, alert_service=app.alert_service
+                event_tables_config=app.event_tables_config,
+                alert_service=app.alert_service,
             )
 
             logging.info(
