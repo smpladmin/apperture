@@ -134,7 +134,6 @@ class ClickHouse:
 
     def save_gupshup_events(self, gupshup_events):
         """Saves gupshup events to Wiom's ClickHouse."""
-        logging.info(f"Saved {len(gupshup_events)} gupshup events.")
         self.gupshup_ch_client.insert(
             table=GUPSHUP_CLICKHOUSE_TABLE,
             data=gupshup_events,
