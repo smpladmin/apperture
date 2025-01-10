@@ -14,9 +14,13 @@ from models.models import EventTablesBucket
 from jsonpath_ng import parse
 
 from aiokafka import AIOKafkaConsumer
-
 from events_config import EventTablesConfig, INT_TYPES, FLOAT_TYPES
 from settings import events_settings
+
+from concurrent.futures import ThreadPoolExecutor, as_completed
+import warnings
+
+warnings.filterwarnings("ignore", category=FutureWarning)
 
 settings = events_settings()
 
@@ -30,6 +34,7 @@ SESSION_TIMEOUT_MS = settings.session_timeout_ms
 HEARTBEAT_INTERVAL_MS = settings.heartbeat_interval_ms
 REQUEST_TIMEOUT_MS = settings.request_timeout_ms
 LOG_LEVEL = settings.log_level
+MAX_WORKERS = 10
 
 logging.getLogger().setLevel(LOG_LEVEL)
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
@@ -355,76 +360,99 @@ def get_destination_tables_for_event(event_name, config):
     return table_names
 
 
+def process_single_bucket(bucket_data):
+    """Helper function to process a single event bucket"""
+    topic, bucket = bucket_data
+    table = bucket.ch_table
+    events = bucket.events
+    columns_with_types = bucket.columns_with_types
+    primary_key = bucket.primary_key
+    table_config = bucket.table_config
+
+    logging.info(f"Processing events for table: {table}")
+
+    # Initialize DataFrames with topic's data
+    df = bucket.data
+    audit_df = bucket.audit_data
+
+    for event in events:
+        id_path = table_config["id_path"]
+        jsonpath_expr_id = parse(id_path)
+        value = [match.value for match in jsonpath_expr_id.find(event)]
+        id_value = value[0] if value else None
+
+        if not id_value:
+            error_message = f"Id at path {id_path} not found for event {event}."
+            logging.info(error_message)
+            app.alert_service.post_message_to_slack(
+                message=error_message, alert_type="Invalid ID"
+            )
+            continue
+
+        df, audit_df = create_sparse_dataframe(
+            df=df,
+            audit_df=audit_df,
+            event=event,
+            columns_with_types=columns_with_types,
+            event_table_bucket=bucket,
+        )
+
+    if df.empty:
+        logging.info(f"Empty sparse dataframe for table : {table}. Skip enrichment.")
+        return topic, df, audit_df
+
+    df, audit_df = typecast_columns(
+        df=df, audit_df=audit_df, columns_with_types=columns_with_types
+    )
+
+    logging.info(f"Sparse dataframe for {table}: {df.to_string()}")
+    logging.info(f"Audit dataframe for {table}: {audit_df.to_string()}")
+
+    enrich_df = enrich_sparse_dataframe(
+        df=df,
+        primary_key_column=primary_key,
+        table=table,
+        event_tables_config=app.event_tables_config,
+        database=bucket.ch_db,
+        ch_server_credential=bucket.ch_server_credential,
+        app_id=bucket.app_id,
+    )
+
+    logging.info(f"Enriched dataframe for {table}: {enrich_df.to_string()}")
+    return topic, enrich_df, audit_df
+
+
 def process_event_buckets(
     event_tables_config: EventTablesConfig, alert_service: AlertService
 ):
     """
-    Process event buckets stored in the event tables configuration.
+    Process event buckets stored in the event tables configuration in parallel.
     """
-    for topic, bucket in event_tables_config.event_tables.items():
-        table = bucket.ch_table
-        events = bucket.events
-        columns_with_types = bucket.columns_with_types
-        primary_key = bucket.primary_key
-        table_config = bucket.table_config
+    with ThreadPoolExecutor(
+        max_workers=min(len(event_tables_config.event_tables), MAX_WORKERS)
+    ) as executor:
+        future_to_topic = {
+            executor.submit(process_single_bucket, (topic, bucket)): topic
+            for topic, bucket in event_tables_config.event_tables.items()
+        }
 
-        # Initialize DataFrames with topic's data to avoid losing intermediate values
-        df = bucket.data
-        audit_df = bucket.audit_data
+        for future in as_completed(future_to_topic):
+            try:
+                topic, df, audit_df = future.result()
+                event_tables_config.event_tables[topic].data = df
+                event_tables_config.event_tables[topic].audit_data = audit_df
 
-        for event in events:
-            id_path = table_config["id_path"]
-            jsonpath_expr_id = parse(id_path)
-            value = [match.value for match in jsonpath_expr_id.find(event)]
-            id_value = value[0] if value else None
-
-            if not id_value:
-                error_message = f"Id at path {id_path} not found for event {event}."
-                logging.info(error_message)
-                alert_service.post_message_to_slack(
-                    message=error_message, alert_type="Invalid ID"
+            except Exception as e:
+                logging.error(
+                    f"Error processing bucket for topic {future_to_topic[future]}: {str(e)}"
                 )
-                continue
-
-            df, audit_df = create_sparse_dataframe(
-                df=df,
-                audit_df=audit_df,
-                event=event,
-                columns_with_types=columns_with_types,
-                event_table_bucket=bucket,
-            )
-
-        bucket.events = []
-        bucket.data = df
-        bucket.audit_data = audit_df
-
-        if df.empty:
-            logging.info(
-                f"Empty sparse dataframe for topic : {topic}. Skip enrichment."
-            )
-            continue
-
-        if total_records >= MAX_RECORDS:
-            df, audit_df = typecast_columns(
-                df=df, audit_df=audit_df, columns_with_types=columns_with_types
-            )
-
-            logging.info(f"Sparse dataframe: {df.to_string()}")
-            logging.info(f"Audit dataframe: {audit_df.to_string()}")
-            enrich_df = enrich_sparse_dataframe(
-                df=df,
-                primary_key_column=primary_key,
-                table=table,
-                event_tables_config=event_tables_config,
-                database=bucket.ch_db,
-                ch_server_credential=bucket.ch_server_credential,
-                app_id=bucket.app_id,
-            )
-
-            logging.info(f"Enriched dataframe: {df.to_string()}")
-
-            # Assign bucket data with enriched df
-            bucket.data = enrich_df
+                alert_service.post_message_to_slack(
+                    message=f"Error processing bucket: {str(e)}",
+                    alert_type="Processing Error",
+                )
+                for f in future_to_topic:
+                    f.cancel()
+                raise RuntimeError(str(e))
 
 
 def fetch_values_from_kafka_records(
@@ -548,15 +576,15 @@ async def process_kafka_messages() -> None:
             alert_service=app.alert_service,
         )
 
-        if total_records >= MAX_RECORDS:
+        if total_records > MAX_RECORDS:
+            logging.info(
+                f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
+            )
             process_event_buckets(
                 event_tables_config=app.event_tables_config,
                 alert_service=app.alert_service,
             )
 
-            logging.info(
-                f"Total records {total_records} exceed MAX_RECORDS {MAX_RECORDS}"
-            )
             save_topic_data_to_clickhouse(
                 clickhouse=app.clickhouse,
                 event_tables_config=app.event_tables_config,
@@ -566,7 +594,7 @@ async def process_kafka_messages() -> None:
             total_records = 0
             # await app.event_tables_config.get_topics_from_event_config()
             logging.info(
-                "Committing, setting total records to 0 and refreshing buckets"
+                "--- Committing, setting total records to 0 and refreshing buckets ---"
             )
 
 
