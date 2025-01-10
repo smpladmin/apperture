@@ -1,4 +1,6 @@
 import logging
+import time
+from functools import wraps
 from typing import List, Union
 from .clickhouse_client_factory import ClickHouseClientFactory
 from domain.alerts.service import AlertService
@@ -7,10 +9,58 @@ from models.models import ClickHouseCredentials
 from clickhouse_connect.driver.exceptions import DatabaseError
 
 
+MAX_RETRIES = 3
+INITIAL_WAIT_SECONDS = 1
+MAX_WAIT_SECONDS = 10
+
+
+def with_clickhouse_retry(func):
+    """
+    Decorator that implements retry logic for ClickHouse operations.
+    Includes exponential backoff and handles session locked errors.
+    """
+
+    @wraps(func)
+    def wrapper(*args, **kwargs):
+        retry_count = 0
+        wait_time = INITIAL_WAIT_SECONDS
+
+        while retry_count < MAX_RETRIES:
+            try:
+                return func(*args, **kwargs)
+            except Exception as e:
+                retry_count += 1
+                error_msg = str(e)
+
+                if "SESSION_IS_LOCKED" in error_msg:
+                    if retry_count == MAX_RETRIES:
+                        logging.info(f"Failed after {MAX_RETRIES} retries: {error_msg}")
+                        raise
+
+                    # Calculate wait time with exponential backoff
+                    wait_time = min(wait_time * 2, MAX_WAIT_SECONDS)
+
+                    logging.info(
+                        f"ClickHouse session locked, attempt {retry_count}/{MAX_RETRIES}. "
+                        f"Retrying in {wait_time} seconds... Error: {error_msg}"
+                    )
+
+                    time.sleep(wait_time)
+                    continue
+                else:
+                    logging.info(f"ClickHouse error: {error_msg}")
+                    raise
+
+        raise Exception(f"Failed after {MAX_RETRIES} retries")
+
+    return wrapper
+
+
 class ClickHouse:
     def __init__(self):
         self.alert_service = AlertService()
 
+    @with_clickhouse_retry
     def save_events(
         self,
         events,
@@ -191,6 +241,7 @@ class ClickHouse:
         """
         return value.replace("\\", "\\\\").replace("'", "\\'")
 
+    @with_clickhouse_retry
     def get_row_values(
         self,
         table: str,
