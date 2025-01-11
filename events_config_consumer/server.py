@@ -206,7 +206,6 @@ def create_sparse_dataframe(
     result_dict[primary_key] = convert_values_to_desired_types(
         value=id_value, type=id_type
     )
-    # logging.info(f"result dict: {result_dict}")
 
     for destination_column, source_path in column_mapping.items():
         matches = jsonpath_cache[destination_column].find(event)

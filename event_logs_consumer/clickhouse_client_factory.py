@@ -1,9 +1,16 @@
 import logging
+import os
 from typing import Union
 
 import clickhouse_connect
 
 from models.models import ClickHouseCredentials
+from dotenv import load_dotenv
+
+load_dotenv()
+
+CLICKHOUSE_MAX_EXECUTION_TIME = int(os.getenv("CLICKHOUSE_MAX_EXECUTION_TIME", 900))
+logging.info(f"CLICKHOUSE_MAX_EXECUTION_TIME: {CLICKHOUSE_MAX_EXECUTION_TIME}")
 
 
 class ClickHouseClient:
@@ -21,9 +28,9 @@ class ClickHouseClient:
             password=connection_detail.password if connection_detail else "",
             allow_experimental_object_type=1,
             query_limit=0,
-            max_execution_time=900,
-            connect_timeout=900,
-            send_receive_timeout=900 
+            max_execution_time=CLICKHOUSE_MAX_EXECUTION_TIME,
+            connect_timeout=CLICKHOUSE_MAX_EXECUTION_TIME,
+            send_receive_timeout=CLICKHOUSE_MAX_EXECUTION_TIME,
         )
 
     def query(self, query, parameters={}, settings={}):
