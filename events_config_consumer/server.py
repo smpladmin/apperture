@@ -206,7 +206,6 @@ def create_sparse_dataframe(
     result_dict[primary_key] = convert_values_to_desired_types(
         value=id_value, type=id_type
     )
-
     for destination_column, source_path in column_mapping.items():
         matches = jsonpath_cache[destination_column].find(event)
         value = matches[0].value if matches else None
@@ -225,7 +224,7 @@ def create_sparse_dataframe(
     existing_row = df[df[primary_key].astype(str) == str(result_dict[primary_key])]
 
     if event_table_bucket.save_to_audit_table:
-        logging.debug(f"Adding row {df_row.to_string()}.")
+        logging.info(f"Adding row {df_row.to_string()}.")
         audit_df = pd.concat([audit_df, df_row], ignore_index=True)
 
     # If id already exists in the DataFrame, update the row; otherwise, append the row
@@ -556,7 +555,6 @@ async def process_kafka_messages() -> None:
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
         fetch_max_bytes=7864320,
-        max_poll_records=MAX_POLL_RECORDS,
         auto_offset_reset=AUTO_OFFSET_RESET,
         max_poll_interval_ms=MAX_POLL_INTERVAL_MS,
         heartbeat_interval_ms=HEARTBEAT_INTERVAL_MS,
