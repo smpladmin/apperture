@@ -295,7 +295,7 @@ def enrich_sparse_dataframe(
     app_id: str,
 ) -> pd.DataFrame:
     # Find unique 'id' values for primary key column in the DataFrame
-    logging.info("Fetching data for rows of table {table} from clickhouse.")
+    logging.info(f"Fetching data for rows of table {table} from clickhouse.")
     clickhouse_data = event_tables_config.get_row_values(
         id=primary_key_column,
         id_values=df[primary_key_column].unique(),
