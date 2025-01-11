@@ -192,34 +192,29 @@ def create_sparse_dataframe(
     event,
     columns_with_types: dict,
     event_table_bucket: EventTablesBucket,
+    jsonpath_cache,
+    id_value,
 ):
     primary_key = event_table_bucket.primary_key
     config = event_table_bucket.table_config
     result_dict = {}
     columns = list(columns_with_types.keys())
 
-    id_path = config["id_path"]
     column_mapping = config["column_mapping"]
-    jsonpath_expr_id = parse(id_path)
-    id_value = [match.value for match in jsonpath_expr_id.find(event)][0]
 
     id_type = columns_with_types.get(primary_key, "")
     result_dict[primary_key] = convert_values_to_desired_types(
         value=id_value, type=id_type
     )
 
-    for column in column_mapping:
-        destination_column, source_path = list(column.items())[0]
-
-        # Extracting value from source_path
-        jsonpath_expr_value = parse(source_path)
-        value = [match.value for match in jsonpath_expr_value.find(event)]
-        column_value = value[0] if value else None
+    for destination_column, source_path in column_mapping.items():
+        matches = jsonpath_cache[destination_column].find(event)
+        value = matches[0].value if matches else None
 
         column_type = columns_with_types.get(destination_column, "")
 
         result_dict[destination_column] = convert_values_to_desired_types(
-            value=column_value, type=column_type
+            value=value, type=column_type
         )
 
     # Add "latest_added_time" column to the result dictionary.
@@ -300,6 +295,7 @@ def enrich_sparse_dataframe(
     app_id: str,
 ) -> pd.DataFrame:
     # Find unique 'id' values for primary key column in the DataFrame
+    logging.info(f"Fetching data for rows of table {table} from clickhouse.")
     clickhouse_data = event_tables_config.get_row_values(
         id=primary_key_column,
         id_values=df[primary_key_column].unique(),
@@ -374,10 +370,17 @@ def process_single_bucket(bucket_data):
     # Initialize DataFrames with topic's data
     df = bucket.data
     audit_df = bucket.audit_data
+    id_path = table_config["id_path"]
+    jsonpath_expr_id = parse(id_path)
+
+    jsonpath_cache = {
+        id_path: jsonpath_expr_id,
+        **{
+            col: parse(path) for col, path in table_config.get("column_mapping").items()
+        },
+    }
 
     for event in events:
-        id_path = table_config["id_path"]
-        jsonpath_expr_id = parse(id_path)
         value = [match.value for match in jsonpath_expr_id.find(event)]
         id_value = value[0] if value else None
 
@@ -395,6 +398,8 @@ def process_single_bucket(bucket_data):
             event=event,
             columns_with_types=columns_with_types,
             event_table_bucket=bucket,
+            jsonpath_cache=jsonpath_cache,
+            id_value=id_value,
         )
 
     if df.empty:
@@ -623,5 +628,5 @@ async def startup_event() -> None:
 
 
 if __name__ == "__main__":
-    logging.info("Starting Consumer Server: EventLogs")
+    logging.info("Starting Consumer Server: Event Config Consumer")
     asyncio.run(startup_event())

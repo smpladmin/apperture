@@ -7,7 +7,7 @@ class EventsSettings(BaseSettings):
     redis_host: str
     redis_password: str
     kafka_bootstrap_servers: str
-    max_records: int = 3
+    max_records: int = 150
     timeout_ms: int = 60000
     max_poll_interval_ms: int = 300000
     heartbeat_interval_ms: int = 3000
