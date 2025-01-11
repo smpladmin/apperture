@@ -224,7 +224,7 @@ def create_sparse_dataframe(
     existing_row = df[df[primary_key].astype(str) == str(result_dict[primary_key])]
 
     if event_table_bucket.save_to_audit_table:
-        logging.info(f"Adding row {df_row.to_string()}.")
+        logging.debug(f"Adding row {df_row.to_string()}.")
         audit_df = pd.concat([audit_df, df_row], ignore_index=True)
 
     # If id already exists in the DataFrame, update the row; otherwise, append the row
