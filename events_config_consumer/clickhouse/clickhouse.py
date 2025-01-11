@@ -25,7 +25,7 @@ def with_clickhouse_retry(func):
         retry_count = 0
         wait_time = INITIAL_WAIT_SECONDS
 
-        while retry_count < MAX_RETRIES:
+        while retry_count <= MAX_RETRIES:
             try:
                 return func(*args, **kwargs)
             except Exception as e:
