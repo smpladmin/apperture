@@ -430,33 +430,20 @@ def process_event_buckets(
     event_tables_config: EventTablesConfig, alert_service: AlertService
 ):
     """
-    Process event buckets stored in the event tables configuration in parallel.
+    Process event buckets stored in the event tables configuration sequentially.
     """
-    with ThreadPoolExecutor(
-        max_workers=min(len(event_tables_config.event_tables), MAX_WORKERS)
-    ) as executor:
-        future_to_topic = {
-            executor.submit(process_single_bucket, (topic, bucket)): topic
-            for topic, bucket in event_tables_config.event_tables.items()
-        }
-
-        for future in as_completed(future_to_topic):
-            try:
-                topic, df, audit_df = future.result()
-                event_tables_config.event_tables[topic].data = df
-                event_tables_config.event_tables[topic].audit_data = audit_df
-
-            except Exception as e:
-                logging.error(
-                    f"Error processing bucket for topic {future_to_topic[future]}: {str(e)}"
-                )
-                alert_service.post_message_to_slack(
-                    message=f"Error processing bucket: {str(e)}",
-                    alert_type="Processing Error",
-                )
-                for f in future_to_topic:
-                    f.cancel()
-                raise RuntimeError(str(e))
+    for topic, bucket in event_tables_config.event_tables.items():
+        try:
+            topic, df, audit_df = process_single_bucket((topic, bucket))
+            event_tables_config.event_tables[topic].data = df
+            event_tables_config.event_tables[topic].audit_data = audit_df
+        except Exception as e:
+            logging.error(f"Error processing bucket for topic {topic}: {str(e)}")
+            alert_service.post_message_to_slack(
+                message=f"Error processing bucket: {str(e)}",
+                alert_type="Processing Error",
+            )
+            raise RuntimeError(str(e))
 
 
 def fetch_values_from_kafka_records(
