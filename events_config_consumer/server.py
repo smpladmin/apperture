@@ -206,10 +206,9 @@ def create_sparse_dataframe(
     result_dict[primary_key] = convert_values_to_desired_types(
         value=id_value, type=id_type
     )
+    # logging.info(f"result dict: {result_dict}")
 
-    for column in column_mapping:
-        destination_column, source_path = list(column.items())[0]
-
+    for destination_column, source_path in column_mapping.items():
         matches = jsonpath_cache[destination_column].find(event)
         value = matches[0].value if matches else None
 
@@ -377,8 +376,7 @@ def process_single_bucket(bucket_data):
     jsonpath_cache = {
         id_path: jsonpath_expr_id,
         **{
-            list(col.keys())[0]: parse(list(col.values())[0])
-            for col in table_config.get("column_mapping")
+            col: parse(path) for col, path in table_config.get("column_mapping").items()
         },
     }
 
