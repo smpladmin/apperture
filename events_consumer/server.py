@@ -299,11 +299,6 @@ async def process_kafka_messages() -> None:
             gupshup_records = []
             logging.debug(f"Gupshup events: {gupshup_events}")
 
-        # if len(gupshup_events) >= GUPSHUP_MAX_RECORDS:
-        #     app.clickhouse.save_gupshup_events(gupshup_events)
-        #     logging.debug(f"Saved gupshup events {gupshup_events}")
-        #     gupshup_events = []
-
         if agent_log_records:
             for record in agent_log_records:
                 al_events = generate_agent_log_events_from_records(record)
