@@ -218,6 +218,7 @@ def create_dag(datamart_actions: List[DatamartAction]):
 
 datamart_actions = datamart_action_service.get_datamart_actions()
 logging.info(f"DATAMART_LOG: Fetched datamart_actions: {datamart_actions}")
+print(f"DATAMART_LOG: Fetched datamart_actions: {datamart_actions}")
 
 # Fetching dependent datamarts
 datamart_actions_filtered = []
@@ -234,7 +235,9 @@ for index, datamart_action in enumerate(datamart_actions):
 
 
 logging.info(f"DATAMART_LOG: dependent_dags_map: {dependent_dags_map}")
+print(f"DATAMART_LOG: dependent_dags_map: {dependent_dags_map}")
 logging.info(f"DATAMART_LOG: datamart_actions_filtered: {datamart_actions_filtered}")
+print(f"DATAMART_LOG: datamart_actions_filtered: {datamart_actions_filtered}")
 for datamart_action in datamart_actions_filtered:
     dependent_dags = []
     # Adding dependent datamarts in same dag as a supsequent taskgroup
@@ -243,5 +246,7 @@ for datamart_action in datamart_actions_filtered:
             datamart_action.datasource_id + "$$" + datamart_action.datamart_id, []
         )
     logging.info(f"DATAMART_LOG: key to search in dependent_dags_map: {datamart_action.datasource_id}$${datamart_action.datamart_id}")
+    print(f"DATAMART_LOG: key to search in dependent_dags_map: {datamart_action.datasource_id}$${datamart_action.datamart_id}")
     logging.info(f"DATAMART_LOG: create_dag([datamart_action] + dependent_dags): {[datamart_action]} + {dependent_dags}")
+    print(f"DATAMART_LOG: create_dag([datamart_action] + dependent_dags): {[datamart_action]} + {dependent_dags}")
     create_dag([datamart_action] + dependent_dags)

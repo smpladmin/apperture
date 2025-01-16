@@ -443,7 +443,9 @@ async def get_clickstream_event_properties(
 async def get_datamart_actions(
     datamart_action_service: DatamartActionService = Depends(),
 ):
-    return await datamart_action_service.get_datamart_actions()
+    datamart_actions = await datamart_action_service.get_datamart_actions()
+    logging.info(f"/datamart_actions: {datamart_actions}")
+    return datamart_actions
 
 
 @router.post("/datamart_actions")
