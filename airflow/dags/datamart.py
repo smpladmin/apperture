@@ -227,17 +227,13 @@ for index, datamart_action in enumerate(datamart_actions):
     if datamart_action.schedule.frequency == Frequency.DATAMART:
         key = datamart_action.datasource_id + "$$" + datamart_action.schedule.datamartId
         if key in dependent_dags_map:
-            dependent_dags_map[key] = dependent_dags_map[key].append(datamart_action)
+            dependent_dags_map[key].append(datamart_action)
         else:
             dependent_dags_map[key] = [datamart_action]
     else:
         datamart_actions_filtered.append(datamart_action)
 
 
-logging.info(f"DATAMART_LOG: dependent_dags_map: {dependent_dags_map}")
-print(f"DATAMART_LOG: dependent_dags_map: {dependent_dags_map}")
-logging.info(f"DATAMART_LOG: datamart_actions_filtered: {datamart_actions_filtered}")
-print(f"DATAMART_LOG: datamart_actions_filtered: {datamart_actions_filtered}")
 for datamart_action in datamart_actions_filtered:
     dependent_dags = []
     # Adding dependent datamarts in same dag as a supsequent taskgroup
@@ -245,8 +241,4 @@ for datamart_action in datamart_actions_filtered:
         dependent_dags = dependent_dags_map.get(
             datamart_action.datasource_id + "$$" + datamart_action.datamart_id, []
         )
-    logging.info(f"DATAMART_LOG: key to search in dependent_dags_map: {datamart_action.datasource_id}$${datamart_action.datamart_id}")
-    print(f"DATAMART_LOG: key to search in dependent_dags_map: {datamart_action.datasource_id}$${datamart_action.datamart_id}")
-    logging.info(f"DATAMART_LOG: create_dag([datamart_action] + dependent_dags): {[datamart_action]} + {dependent_dags}")
-    print(f"DATAMART_LOG: create_dag([datamart_action] + dependent_dags): {[datamart_action]} + {dependent_dags}")
     create_dag([datamart_action] + dependent_dags)
