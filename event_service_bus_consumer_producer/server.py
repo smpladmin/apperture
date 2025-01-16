@@ -25,6 +25,8 @@ START_TIME=os.getenv("START_TIME")
 LOG_KAFKA_TOPIC=os.getenv("LOG_KAFKA_TOPIC", "eventlogs_event_service_bus")
 DATASOURCE_ID=os.getenv("DATASOURCE_ID", "event_service_bus")
 CONFIG_KAFKA_TOPIC=os.getenv("CONFIG_KAFKA_TOPIC", "config_events_1_event_service_bus")
+LOG_KAFKA_TOPIC_V2 = os.getenv("LOG_KAFKA_TOPIC_V2")
+
 
 # Azure Service Bus configuration
 NAMESPACE_CONNECTION_STR = os.getenv("NAMESPACE_CONNECTION_STR")
@@ -124,6 +126,9 @@ async def proccess_message(
     value = json.dumps(event)
     
     try:
+        await producer.send_and_wait(LOG_KAFKA_TOPIC_V2, value=value.encode("utf-8"))
+        logging.info(f"Sending event {event} to log kafka topic: {LOG_KAFKA_TOPIC_V2}")
+
         # If event's table in TABLES_TO_SKIP_LIST, then skipping event
         if dto.event.table in TABLES_TO_SKIP_LIST:
             logging.info(f"Skipping this event as table is: {dto.event.table} and TABLES_TO_SKIP_LIST is: {TABLES_TO_SKIP_LIST}. Event is: {event}")
