@@ -19,11 +19,12 @@ from event_logs_datasources import EventLogsDatasources
 load_dotenv()
 
 TIMEOUT_MS = int(os.getenv("TIMEOUT_MS", "60000"))
-MAX_RECORDS = int(os.getenv("MAX_RECORDS", "1"))
+MAX_RECORDS = int(os.getenv("MAX_RECORDS", "10"))
 MAX_POLL_INTERVAL_MS = int(os.getenv("MAX_POLL_INTERVAL_MS", 300000))
 SESSION_TIMEOUT_MS = int(os.getenv("SESSION_TIMEOUT_MS", 10000))
 HEARTBEAT_INTERVAL_MS = int(os.getenv("HEARTBEAT_INTERVAL_MS", 3000))
 REQUEST_TIMEOUT_MS = int(os.getenv("REQUEST_TIMEOUT_MS", 40 * 1000))
+AUTO_OFFSET_RESET = os.getenv("AUTO_OFFSET_RESET", "latest")
 
 
 logging.getLogger().setLevel(logging.INFO)
@@ -32,19 +33,11 @@ logging.getLogger().setLevel(logging.INFO)
 KAFKA_BOOTSTRAP_SERVERS = os.getenv("KAFKA_BOOTSTRAP_SERVERS", "kafka:9092").split(",")
 logging.info(f"KAFKA_BOOTSTRAP_SERVERS: {KAFKA_BOOTSTRAP_SERVERS}")
 
-KEYS_TYPECAST_TO_STRING = json.loads(os.getenv("KEYS_TYPECAST_TO_STRING", '["lat", "lng"]'))
-KEYS_TYPECAST_TO_LIST_OF_LIST = json.loads(os.getenv("KEYS_TYPECAST_TO_LIST_OF_LIST"))
-EVENTS_TO_SKIP = json.loads(os.getenv("EVENTS_TO_SKIP", '[]'))
-TABLES_TO_SKIP = json.loads(os.getenv("TABLES_TO_SKIP", '[]'))
-PROCESS_START_TIME = datetime.strptime(os.getenv("PROCESS_START_TIME"), "%Y-%m-%d %H:%M:%S")
-PROCESS_END_TIME = datetime.strptime(os.getenv("PROCESS_END_TIME"), "%Y-%m-%d %H:%M:%S")
+EVENTS_TO_SKIP = json.loads(os.getenv("EVENTS_TO_SKIP", "[]"))
+TABLES_TO_SKIP = json.loads(os.getenv("TABLES_TO_SKIP", "[]"))
 
-logging.info(f"KEYS_TYPECAST_TO_LIST_OF_LIST: {KEYS_TYPECAST_TO_LIST_OF_LIST}")
-logging.info(f"KEYS_TYPECAST_TO_STRING: {KEYS_TYPECAST_TO_STRING}")
 logging.info(f"EVENTS_TO_SKIP: {EVENTS_TO_SKIP}")
 logging.info(f"TABLES_TO_SKIP: {TABLES_TO_SKIP}")
-logging.info(f"PROCESS_START_TIME: {PROCESS_START_TIME}")
-logging.info(f"PROCESS_END_TIME: {PROCESS_END_TIME}")
 
 total_records = 0
 
@@ -54,8 +47,7 @@ def format_date_string_to_desired_format(
 ):
     if not date_str:
         return
-    
- 
+
     date_formats = [
         "%Y-%m-%dT%H:%M:%S.%fZ",
         "%Y-%m-%dT%H:%M:%S.%f",
@@ -65,7 +57,7 @@ def format_date_string_to_desired_format(
         "%Y-%m-%d %H:%M:%S",
         "%d-%m-%Y %H:%M",
         "%Y-%m-%d",
-        "%Y-%m-%dT%H:%M:%S%z"
+        "%Y-%m-%dT%H:%M:%S%z",
     ]
 
     for date_format in date_formats:
@@ -87,49 +79,19 @@ def format_date_string_to_desired_format(
     return None
 
 
-def convert_object_keys_to_string(data: dict):
-
-    if not KEYS_TYPECAST_TO_STRING:
-        return data
-    
-    for key in data.keys():
-        if key in KEYS_TYPECAST_TO_STRING:
-            data[key] = str(data[key])
-
-    return data
-
-
-def convert_object_keys_to_list_of_list(data:dict):
-    if not KEYS_TYPECAST_TO_LIST_OF_LIST:
-        return data
-    
-    
-    for key in data.keys():
-        if key in KEYS_TYPECAST_TO_LIST_OF_LIST:
-            value = data[key]
-            if isinstance(value, list):
-                continue
-
-            try:
-                result = json.loads(value)
-                data[key] = [result]
-            except (ValueError, json.JSONDecodeError):
-                try:
-                    result = ast.literal_eval(value)
-                    data[key] = [result]
-                except (ValueError, SyntaxError):
-                    pass
-
-    return data
-
-
 def fetch_values_from_kafka_records(data, event_logs_datasources: EventLogsDatasources):
     global total_records
+
     for _, records in data.items():
+        print("r", records)
         total_records += len(records)
+        print("t", total_records)
 
         for record in records:
             topic = record.topic
+            table_buckets = event_logs_datasources.datasource_with_credentials[
+                topic
+            ].table_data
 
             if not event_logs_datasources.datasource_with_credentials.get(topic):
                 logging.info(f"Bucket not found for topic: {topic}")
@@ -139,9 +101,15 @@ def fetch_values_from_kafka_records(data, event_logs_datasources: EventLogsDatas
                 continue
 
             values = json.loads(record.value)
-            event_logs_datasources.datasource_with_credentials[
-                record.topic
-            ].data.append(values)
+            table_name = values.get("table", "")
+
+            if table_name not in table_buckets:
+                table_buckets[table_name] = []
+
+            table_buckets[table_name].append(values)
+            event_logs_datasources.datasource_with_credentials[topic].table_data = (
+                table_buckets
+            )
 
 
 def save_topic_data_to_clickhouse(
@@ -151,24 +119,14 @@ def save_topic_data_to_clickhouse(
         topic,
         bucket,
     ) in event_logs_datasources.datasource_with_credentials.items():
-        table = bucket.ch_table
-        database = bucket.ch_db
-        clickhouse_server_credential = bucket.ch_server_credential
-        app_id = bucket.app_id
-        to_insert = list(filter(None, bucket.data))
-        if to_insert:
+        for table_name, events in bucket.table_data.items():
+
+            if not events:
+                continue  # Skip if there are no events in this bucket
+
             logging.info(
-                f"Data present in {topic} bucket {to_insert}, Saving {len(to_insert)} entires to {database}.{table}"
+                f"Data present in {topic} bucket for table {table_name}: {events}"
             )
-
-            last_entry_time = format_date_string_to_desired_format(
-                to_insert[-1].get("added_time", to_insert[-1].get("addedTime"))
-            )
-
-            if not last_entry_time or last_entry_time < PROCESS_START_TIME or last_entry_time > PROCESS_END_TIME:
-                event_logs_datasources.datasource_with_credentials[topic].data = []
-                logging.info(f"Skipping batch with last entry {to_insert[-1]} with time {last_entry_time}. Skipping {len(to_insert)} records ")
-                continue
 
             columns = [
                 "event_name",
@@ -182,40 +140,47 @@ def save_topic_data_to_clickhouse(
                 "datasource_id",
                 "source_flag",
             ]
-            events = [
+            formatted_events = [
                 [
                     data.get("event_name", data.get("eventName", "")),
                     format_date_string_to_desired_format(
-                        data.get("added_time", data.get("addedTime"))
+                        data.get("added_time", data.get("addedTime")),
+                        output_date_format="%Y-%m-%d %H:%M:%S.%f",
                     ),
                     data.get("table", ""),
                     data.get("mobile", ""),
                     data.get("task_id", ""),
                     data.get("account_id", ""),
                     data.get("key", ""),
-                    convert_object_keys_to_string(convert_object_keys_to_list_of_list(data.get("data", {}))),
+                    json.dumps(data.get("data", {})),
                     data.get("datasource_id", ""),
-                    "api_records_backfill_13_DEC",
+                    data.get("source_flag", None),
                 ]
-                for data in to_insert
-                if(
-                    data.get("event_name", data.get("eventName", "")) not in EVENTS_TO_SKIP
+                for data in events
+                if (
+                    data.get("event_name", data.get("eventName", ""))
+                    not in EVENTS_TO_SKIP
                     and data.get("table", "") not in TABLES_TO_SKIP
                 )  # Check added to skip some events
             ]
-            logging.info(f"events: {events}")
+            clickhouse.create_table(
+                database=bucket.ch_db,
+                table=table_name,
+                clickhouse_server_credential=bucket.ch_server_credential,
+                app_id=bucket.app_id,
+            )
             clickhouse.save_events(
-                events=events,
+                events=formatted_events,
                 columns=columns,
-                table=table,
-                database=database,
-                clickhouse_server_credential=clickhouse_server_credential,
-                app_id=app_id,
+                table=table_name,
+                database=bucket.ch_db,
+                clickhouse_server_credential=bucket.ch_server_credential,
+                app_id=bucket.app_id,
             )
-            event_logs_datasources.datasource_with_credentials[topic].data = []
             logging.info(
-                "Successfully saved data to clickhouse, Emptying the topic bucket"
+                f"Successfully saved {len(events)} in table {table_name}. Events: {formatted_events}"
             )
+        event_logs_datasources.datasource_with_credentials[topic].table_data = {}
 
 
 async def process_kafka_messages() -> None:
@@ -226,7 +191,7 @@ async def process_kafka_messages() -> None:
     )
     consumer = AIOKafkaConsumer(
         *app.event_logs_datasources.topics,
-        group_id="event_logs_1",
+        group_id="event_logs_v2",
         bootstrap_servers=KAFKA_BOOTSTRAP_SERVERS,
         value_deserializer=lambda v: v.decode("utf-8"),
         enable_auto_commit=False,
@@ -234,27 +199,23 @@ async def process_kafka_messages() -> None:
         heartbeat_interval_ms=HEARTBEAT_INTERVAL_MS,
         session_timeout_ms=SESSION_TIMEOUT_MS,
         request_timeout_ms=REQUEST_TIMEOUT_MS,
-        auto_offset_reset="earliest",
+        auto_offset_reset=AUTO_OFFSET_RESET,
     )
     logging.info(
         f"Started consumer on kafka topics: {app.event_logs_datasources.topics}"
     )
 
     global total_records
-    logging.info(f"Starting consumer")
     await consumer.start()
-    logging.info(f"Started consumer")
+    logging.info(f"Starting consumer")
 
-    timeout_time_ms = 0
     while True:
-        logging.info(f"Waiting for messages to arrive. Max wait time: {TIMEOUT_MS} and max number of records: {MAX_RECORDS}")
         data = await consumer.getmany(
             timeout_ms=TIMEOUT_MS,
             max_records=MAX_RECORDS,
         )
         if not data:
             continue
-        timeout_time_ms += TIMEOUT_MS
         logging.info(f"Fetched {len(data)} messages")
 
         fetch_values_from_kafka_records(
@@ -273,7 +234,6 @@ async def process_kafka_messages() -> None:
 
             await consumer.commit()
             total_records = 0
-            timeout_time_ms = 0
             app.event_logs_datasources.get_event_logs_datasources()
             logging.info(
                 "Committing, setting total records to 0 and refreshing buckets"

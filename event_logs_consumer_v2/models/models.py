@@ -10,8 +10,7 @@ class ClickHouseCredentials(BaseModel):
 
 
 class EventLogsDatasourcesBucket(BaseModel):
-    data: list
+    table_data: dict[str, list]
     ch_db: str
-    ch_table: str
     ch_server_credential: Optional[ClickHouseCredentials]
     app_id: str

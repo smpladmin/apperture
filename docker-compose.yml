@@ -90,6 +90,15 @@ services:
       - ./event_logs_consumer:/code
     depends_on:
       - kafka
+  event_logs_consumer_v2:
+    restart: on-failure
+    build:
+      context: ./event_logs_consumer_v2
+      target: dev
+    volumes:
+      - ./event_logs_consumer_v2:/code
+    depends_on:
+      - kafka
   events_config_consumer:
     restart: on-failure
     build:

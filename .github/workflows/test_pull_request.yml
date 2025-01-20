@@ -26,6 +26,8 @@ jobs:
               - 'frontend/**'
             airflow:
               - 'airflow/**'
+            event_logs_consumer_v2:
+              - 'event_logs_consumer_v2/**'
       - name: Testing Backend code
         if: steps.filter.outputs.backend == 'true'
         run: |
@@ -55,4 +57,10 @@ jobs:
         if: steps.filter.outputs.airflow == 'true'
         run: |
           cd airflow
+          docker build . --target tests
+      
+      - name: Testing Event Logs Consumer v2 code
+        if: steps.filter.outputs.event_logs_consumer_v2 == 'true'
+        run: |
+          cd event_logs_consumer_v2
           docker build . --target tests

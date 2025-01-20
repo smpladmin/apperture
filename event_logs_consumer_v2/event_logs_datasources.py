@@ -11,19 +11,15 @@ class EventLogsDatasources:
         event_logs_datasources = get(
             path="/private/datasources?provider=event_logs"
         ).json()
-
+        print("event logs", event_logs_datasources)
         for datasource in event_logs_datasources:
-            topic = f"eventlogs_{datasource['_id']}_1"
+            topic = f"eventlogs_{datasource['_id']}_v2"
             if not self.datasource_with_credentials.get(topic):
-                integration = get(
-                    path=f"/private/integrations/{datasource['integrationId']}"
-                ).json()
                 app = get(path=f"/private/apps/{datasource['appId']}").json()
                 self.topics.append(topic)
                 self.datasource_with_credentials[topic] = EventLogsDatasourcesBucket(
-                    data=[],
+                    table_data={},
                     ch_db=app["clickhouseCredential"]["databasename"],
-                    ch_table=integration["credential"]["tableName"],
                     ch_server_credential=app["remoteConnection"],
                     app_id=datasource["appId"],
                 )
