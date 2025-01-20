@@ -259,5 +259,5 @@ async def startup_event() -> None:
 
 
 if __name__ == "__main__":
-    logging.info("Starting Consumer Server: EventLogs")
+    logging.info("Starting Consumer Server: EventLogs V2")
     asyncio.run(startup_event())
