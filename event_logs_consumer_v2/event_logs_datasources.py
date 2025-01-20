@@ -11,7 +11,6 @@ class EventLogsDatasources:
         event_logs_datasources = get(
             path="/private/datasources?provider=event_logs"
         ).json()
-        print("event logs", event_logs_datasources)
         for datasource in event_logs_datasources:
             topic = f"eventlogs_{datasource['_id']}_v2"
             if not self.datasource_with_credentials.get(topic):

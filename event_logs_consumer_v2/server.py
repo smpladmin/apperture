@@ -83,9 +83,7 @@ def fetch_values_from_kafka_records(data, event_logs_datasources: EventLogsDatas
     global total_records
 
     for _, records in data.items():
-        print("r", records)
         total_records += len(records)
-        print("t", total_records)
 
         for record in records:
             topic = record.topic
