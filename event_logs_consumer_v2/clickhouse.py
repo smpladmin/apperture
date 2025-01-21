@@ -1,5 +1,5 @@
 import logging
-from typing import List, Union
+from typing import List, Optional, Union
 
 from models.models import ClickHouseCredentials
 from clickhouse_client_factory import ClickHouseClientFactory
@@ -107,4 +107,35 @@ class ClickHouse:
             column_names=columns,
             settings={"insert_async": True, "wait_for_async_insert": False},
         )
+        clickhouse_client.close()
+
+    def create_table(
+        self,
+        table: str,
+        database: str,
+        clickhouse_server_credential: Union[ClickHouseCredentials, None],
+        app_id: str,
+    ):
+        clickhouse_client = ClickHouseClientFactory.get_client(
+            app_id=app_id, clickhouse_server_credentials=clickhouse_server_credential
+        )
+
+        create_table_query = f"""
+            CREATE TABLE IF NOT EXISTS {database}.{table} (
+                `event_name` String,
+                `added_time` DateTime64(6),
+                `table` String,
+                `mobile` String,
+                `task_id` String,
+                `account_id` String,
+                `key` String,
+                `data` String,
+                `datasource_id` String,
+                `source_flag` Nullable(String) DEFAULT NULL
+            ) ENGINE = MergeTree
+            ORDER BY (event_name, added_time)
+        """
+
+        logging.info(f"Executing create table query for {database}.{table}")
+        clickhouse_client.connection.query(create_table_query)
         clickhouse_client.close()
