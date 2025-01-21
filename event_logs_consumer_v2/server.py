@@ -234,7 +234,7 @@ async def process_kafka_messages() -> None:
             total_records = 0
             app.event_logs_datasources.get_event_logs_datasources()
             logging.info(
-                "Committing, setting total records to 0 and refreshing buckets"
+                "---Committing, setting total records to 0 and refreshing buckets---"
             )
 
 
