@@ -214,7 +214,6 @@ async def process_kafka_messages() -> None:
         )
         if not data:
             continue
-        logging.info(f"Fetched {len(data)} messages")
 
         fetch_values_from_kafka_records(
             data=data, event_logs_datasources=app.event_logs_datasources
