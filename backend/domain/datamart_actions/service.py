@@ -84,15 +84,19 @@ class DatamartActionService:
         query: str,
         table_name: str,
     ) -> bool:
+        # Create a temporary table first
+        temp_table_name = f"{table_name}_temp_{app_id}"
+
+        # drop temp table to avoid getting error
         await self.datamart_repo.drop_table(
-            table_name=table_name,
+            table_name=temp_table_name,
             clickhouse_credential=clickhouse_credential,
             app_id=app_id,
         )
         if database_client == DatabaseClient.MSSQL:
             update_status = await self.datamart_repo.create_mssql_table(
                 query=query,
-                table_name=table_name,
+                table_name=temp_table_name,
                 clickhouse_credential=clickhouse_credential,
                 db_creds=database_credential,
                 app_id=app_id,
@@ -100,10 +104,24 @@ class DatamartActionService:
         else:
             update_status = await self.datamart_repo.create_table(
                 query=query,
-                table_name=table_name,
+                table_name=temp_table_name,
                 clickhouse_credential=clickhouse_credential,
                 app_id=app_id,
             )
+        # drop original table
+        await self.datamart_repo.drop_table(
+            table_name=table_name,
+            clickhouse_credential=clickhouse_credential,
+            app_id=app_id,
+        )
+
+        # Rename the temporary table to the original table name
+        await self.datamart_repo.rename_table(
+            old_table_name=temp_table_name,
+            new_table_name=table_name,
+            database=clickhouse_credential.databasename,
+            app_id=app_id,
+        )
         return update_status
 
     async def get_datamart_action(self, id: str) -> DatamartAction:
@@ -123,15 +141,19 @@ class DatamartActionService:
         ).to_list()
 
     async def delete_datamart_action(self, id: str):
-        
-        primary_data_action = await DatamartAction.find_one(DatamartAction.id == PydanticObjectId(id))
-        await DatamartAction.find_one(DatamartAction.id == PydanticObjectId(id)).update({"$set": {"enabled": False}})
+
+        primary_data_action = await DatamartAction.find_one(
+            DatamartAction.id == PydanticObjectId(id)
+        )
+        await DatamartAction.find_one(DatamartAction.id == PydanticObjectId(id)).update(
+            {"$set": {"enabled": False}}
+        )
         logging.debug(f"Deleted primary_data_action: {primary_data_action}")
 
         ## Delete dependent_data_actions
         if primary_data_action and primary_data_action.type == ActionType.TABLE:
             primary_datamart_id = primary_data_action.datamart_id
-            
+
             # Check if there are other data actions for same table (then do not need to delete dependents hence exiting)
             data_actions_for_table = await DatamartAction.find(
                 And(

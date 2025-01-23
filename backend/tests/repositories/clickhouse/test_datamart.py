@@ -59,3 +59,18 @@ class TestDataMartRepo:
                 "app_id": "test-app-id",
             }
         )
+
+    @pytest.mark.asyncio
+    async def test_rename_table(self):
+        await self.repo.rename_table(
+            old_table_name="old_table",
+            new_table_name="new_table",
+            database=self.credential.databasename,
+            app_id=self.app_id,
+        )
+        self.repo.execute_query_for_app_restricted_clients.assert_called_once_with(
+            **{
+                "query": "RENAME TABLE test-database.old_table TO test-database.new_table",
+                "app_id": "test-app-id",
+            }
+        )
