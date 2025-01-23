@@ -5,6 +5,7 @@ from unittest.mock import ANY, AsyncMock, MagicMock, Mock, patch
 import pytest
 from beanie import PydanticObjectId
 
+from domain.spreadsheets.models import DatabaseClient
 from domain.apps.models import ClickHouseCredential
 from domain.datamart_actions.models import (
     APIMeta,
@@ -62,7 +63,12 @@ class TestDataMartService:
                 sheet="Sheet1",
             ),
             schedule=Schedule(
-                frequency="hourly", time=None, period=None, date=None, day=None, datamartId=None
+                frequency="hourly",
+                time=None,
+                period=None,
+                date=None,
+                day=None,
+                datamartId=None,
             ),
             enabled=True,
         )
@@ -300,3 +306,108 @@ class TestDataMartService:
             spreadsheetId="1qu87sylkjuesopp98"
         )
         assert sheet_names == ["Sheet1", "Sheet2"]
+
+    @pytest.mark.asyncio
+    async def test_refresh_table_action(self):
+        app_id = "test_app_id"
+        clickhouse_credential = ClickHouseCredential(
+            username="test-username",
+            password="test-password",
+            databasename="test-database",
+        )
+        database_client = DatabaseClient.MSSQL
+        database_credential = MagicMock()
+        query = "SELECT * FROM test_table"
+        table_name = "test_table"
+
+        self.service.datamart_repo.drop_table = AsyncMock()
+        self.service.datamart_repo.create_mssql_table = AsyncMock(return_value=True)
+        self.service.datamart_repo.rename_table = AsyncMock()
+
+        result = await self.service.refresh_table_action(
+            app_id=app_id,
+            clickhouse_credential=clickhouse_credential,
+            database_client=database_client,
+            database_credential=database_credential,
+            query=query,
+            table_name=table_name,
+        )
+
+        temp_table_name = f"{table_name}_temp_{app_id}"
+
+        self.service.datamart_repo.drop_table.assert_any_call(
+            table_name=temp_table_name,
+            clickhouse_credential=clickhouse_credential,
+            app_id=app_id,
+        )
+        self.service.datamart_repo.create_mssql_table.assert_called_once_with(
+            query=query,
+            table_name=temp_table_name,
+            clickhouse_credential=clickhouse_credential,
+            db_creds=database_credential,
+            app_id=app_id,
+        )
+        self.service.datamart_repo.drop_table.assert_any_call(
+            table_name=table_name,
+            clickhouse_credential=clickhouse_credential,
+            app_id=app_id,
+        )
+        self.service.datamart_repo.rename_table.assert_called_once_with(
+            old_table_name=temp_table_name,
+            new_table_name=table_name,
+            database=clickhouse_credential.databasename,
+            app_id=app_id,
+        )
+        assert result is True
+
+    @pytest.mark.asyncio
+    async def test_refresh_table_action_clickhouse(self):
+        app_id = "test_app_id"
+        clickhouse_credential = ClickHouseCredential(
+            username="test-username",
+            password="test-password",
+            databasename="test-database",
+        )
+        database_client = DatabaseClient.CLICKHOUSE
+        database_credential = MagicMock()
+        query = "SELECT * FROM test_table"
+        table_name = "test_table"
+
+        self.service.datamart_repo.drop_table = AsyncMock()
+        self.service.datamart_repo.create_table = AsyncMock(return_value=True)
+        self.service.datamart_repo.rename_table = AsyncMock()
+
+        result = await self.service.refresh_table_action(
+            app_id=app_id,
+            clickhouse_credential=clickhouse_credential,
+            database_client=database_client,
+            database_credential=database_credential,
+            query=query,
+            table_name=table_name,
+        )
+
+        temp_table_name = f"{table_name}_temp_{app_id}"
+
+        self.service.datamart_repo.drop_table.assert_any_call(
+            table_name=temp_table_name,
+            clickhouse_credential=clickhouse_credential,
+            app_id=app_id,
+        )
+        self.service.datamart_repo.create_table.assert_called_once_with(
+            query=query,
+            table_name=temp_table_name,
+            clickhouse_credential=clickhouse_credential,
+            app_id=app_id,
+        )
+        self.service.datamart_repo.drop_table.assert_any_call(
+            table_name=table_name,
+            clickhouse_credential=clickhouse_credential,
+            app_id=app_id,
+        )
+        self.service.datamart_repo.rename_table.assert_called_once_with(
+            old_table_name=temp_table_name,
+            new_table_name=table_name,
+            database=clickhouse_credential.databasename,
+            app_id=app_id,
+        )
+        assert result is True

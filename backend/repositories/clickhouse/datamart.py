@@ -176,3 +176,22 @@ class DataMartRepo(EventsBase):
         self.logger.info(
             f"Dropped a clickhouse table {table_name} from {clickhouse_credential.databasename} database for user {clickhouse_credential.username}"
         )
+
+    async def rename_table(
+        self,
+        old_table_name: str,
+        new_table_name: str,
+        database: str,
+        app_id: str,
+    ):
+        query = (
+            f"RENAME TABLE {database}.{old_table_name} TO {database}.{new_table_name}"
+        )
+        self.logger.info(f"Executing rename table query: {query}")
+        result = await self.execute_query_for_app_restricted_clients(
+            query=query,
+            app_id=app_id,
+        )
+        self.logger.info(
+            f"Renamed a clickhouse table from {database}.{old_table_name} to  in {database}.{new_table_name}"
+        )
