@@ -17,7 +17,6 @@ from aiokafka import AIOKafkaConsumer
 from events_config import EventTablesConfig, INT_TYPES, FLOAT_TYPES
 from settings import events_settings
 
-from concurrent.futures import ThreadPoolExecutor, as_completed
 import warnings
 
 warnings.filterwarnings("ignore", category=FutureWarning)
@@ -347,10 +346,11 @@ def enrich_sparse_dataframe(
     return df
 
 
-def get_destination_tables_for_event(event_name, config):
+def get_destination_tables_for_event(table, config):
     table_names = []
     for table_name, table_config in config.items():
-        if event_name in table_config.get("events", []):
+
+        if table in table_config.get("tables", []):
             table_names.append(table_name)
     return table_names
 
@@ -463,7 +463,7 @@ def fetch_values_from_kafka_records(
             logging.debug(f"Values for topic {topic}::{values}")
             events_config = event_tables_config.events_config
             destination_tables = get_destination_tables_for_event(
-                event_name=values["eventName"], config=events_config
+                table=values["table"], config=events_config
             )
             if not destination_tables:
                 logging.info(f"No destination tables found for {values}.")
