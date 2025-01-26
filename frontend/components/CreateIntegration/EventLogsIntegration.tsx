@@ -199,7 +199,7 @@ const EventLogsIntegration = ({
         parsedJson.hasOwnProperty('events_table_config') &&
         Object.values(parsedJson.events_table_config).every(
           (table: any) =>
-            table.hasOwnProperty('id_path') && Array.isArray(table['events'])
+            table.hasOwnProperty('id_path') && Array.isArray(table['tables'])
         )
     );
 
