@@ -92,7 +92,7 @@ class GoogleAdsFetcher:
     def fetch_ads_data(self):
         logging.info(f"query: {self.query}")
         client = GoogleAdsClient.load_from_dict(self.google_ads_credential)
-        ga_service = client.get_service("GoogleAdsService", version="v16")
+        ga_service = client.get_service("GoogleAdsService", version="v18")
         try:
             response = ga_service.search(customer_id=self.customer_id, query=self.query)
             return self.transform_ads_response(response)
