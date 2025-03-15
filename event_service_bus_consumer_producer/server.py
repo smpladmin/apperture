@@ -185,9 +185,11 @@ async def receive_servicebus_messages():
                             await receiver.complete_message(message)
 
 async def main():
-    await startup_event()
     try:
+        await startup_event()
         await receive_servicebus_messages()
+    except Exception as e:
+        logging.info(f"Error in main: {str(e)}")
     finally:
         await shutdown_event()
 
