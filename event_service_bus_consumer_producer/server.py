@@ -189,7 +189,7 @@ async def main():
         await startup_event()
         await receive_servicebus_messages()
     except Exception as e:
-        logging.error(f"Error in main: {str(e)}")
+        logging.info(f"Error in main: {str(e)}")
     finally:
         await shutdown_event()
 
