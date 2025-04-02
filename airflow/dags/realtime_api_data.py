@@ -1,6 +1,6 @@
 from typing import Dict, Union
 import pendulum
-from datetime import timedelta
+from datetime import datetime, timedelta
 from airflow.decorators import task, dag
 from utils.alerts import send_failure_alert_to_slack
 from airflow.models import Variable
@@ -16,6 +16,7 @@ from event_processors.api_data_processor import APIDataProcessor
 from utils.utils import (
     DAG_RETRIES,
     DAG_RETRY_DELAY,
+    D
 )
 from domain.datasource.models import IntegrationProvider, DataSource, Credential
 
@@ -64,10 +65,13 @@ def save_data(processed_data, credential: Credential, datasource: DataSource):
     )
 
 @dag(
-    dag_id='realtime_api_data_loader',
+    dag_id='sangeetha_realtime_api_data_loader',
     description='Sangeetha API data loader running every 15 minutes',
     schedule_interval='*/15 * * * *',
-    start_date=pendulum.datetime(2025, 4, 1, tz="UTC"),
+    start_date=pendulum.instance(
+            datetime.strptime("2025-04-01", "%Y-%m-%d"),
+            tz=pendulum.timezone("Asia/Kolkata"),
+        ),
     catchup=False,
     tags=['realtime-api-fetch'],
     default_args={
