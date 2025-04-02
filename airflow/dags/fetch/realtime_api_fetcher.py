@@ -29,6 +29,10 @@ class RealtimeAPIFetcher:
         if not last_timestamp:
             # If no entries exist, use a default start time (e.g., 1 hour ago)
             last_timestamp = datetime.now().timestamp() - 3600
+        else:
+            # Convert datetime to timestamp if needed
+            if isinstance(last_timestamp, datetime):
+                last_timestamp = last_timestamp.timestamp()
             
         return datetime.fromtimestamp(last_timestamp)
 
