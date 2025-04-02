@@ -18,7 +18,7 @@ class RealtimeAPIFetcher:
 
     def get_last_entry_timestamp(self):
         query = f"""
-        SELECT MAX(timestamp) as last_timestamp 
+        SELECT MAX(create_time) as last_timestamp 
         FROM {self.database_name}.{self.table_name}
         """
         
