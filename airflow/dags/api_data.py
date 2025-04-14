@@ -53,7 +53,13 @@ def process(api_data):
 
 @task(trigger_rule="all_done")
 def save(datasource: DataSource, credential: Credential, processed_api_data):
-    APIDataSaver(credential=credential).save(
+    APIDataSaver(
+        credential=credential,
+        app_id=datasource.appId,
+        clickhouse_server_credentials=None,
+        database_name=None,
+        use_clickhouse=False,
+    ).save(
         datasource_id=datasource.id,
         provider=IntegrationProvider.API,
         df=processed_api_data,
