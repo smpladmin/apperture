@@ -10,7 +10,6 @@ from event_processors.api_data_processor import APIDataProcessor
 from store.api_data_saver import APIDataSaver
 from domain.datasource.models import AppDatabaseResponse, ClickHouseRemoteConnectionCred, IntegrationProvider
 
-from store.api_data_saver import APIDataSaver
 from domain.datasource.service import DataSourceService
 from event_processors.api_data_processor import APIDataProcessor
 from utils.utils import (
@@ -56,8 +55,20 @@ def process_data(api_data):
     return APIDataProcessor().process(events_data=api_data)
 
 @task
-def save_data(processed_data, credential: Credential, datasource: DataSource):
-    APIDataSaver(credential=credential).save(
+def save_data(
+    processed_data, 
+    credential: Credential, 
+    datasource: DataSource,
+    clickhouse_creds: ClickHouseRemoteConnectionCred,
+    app_database_details: AppDatabaseResponse,
+):
+    APIDataSaver(
+        credential=credential,
+        app_id=datasource.appId,
+        clickhouse_server_credentials=clickhouse_creds,
+        database_name=app_database_details.database_credentials.databasename,
+        use_clickhouse=True,
+    ).save(
         datasource_id=datasource.id,
         provider=IntegrationProvider.API,
         df=processed_data
@@ -103,6 +114,8 @@ def realtime_api_data_loader():
         processed_data=processed_data,
         credential=credential,
         datasource=datasource,
+        clickhouse_creds=clickhouse_creds,
+        app_database_details=app_database_details,
     )
 
 dag = realtime_api_data_loader()
