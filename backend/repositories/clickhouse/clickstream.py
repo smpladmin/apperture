@@ -1,3 +1,4 @@
+import logging
 from typing import List
 
 import logfire
@@ -68,15 +69,17 @@ class Clickstream(EventsBase):
             select user_id,properties.$session_id session_id,min(timestamp+ interval 330 minute)  timestamp_ist
             from default.clickstream 
             where datasource_id = '{dsId}'
-                and timestamp_ist>= today() - interval {interval} day
                 and user_id in ({user_id})
                 group by 1,2
+            having timestamp_ist>= today() - interval {interval} day
             order by 3 desc
         """
+        logging.info(f"executing query for session details: {query}")
         with logfire.span(f"executing query for session details"):
             result = await self.execute_query_for_app(
                 query=query, parameters={}, app_id=app_id, read=True
             )
+        logging.info(f"result for session details: {result}")
         return result
 
     async def get_utm_data_by_id(
@@ -85,24 +88,29 @@ class Clickstream(EventsBase):
         query = f"""
             SELECT
                 toDate(timestamp+ interval 330 minute) timestamp_ist,
-                user_id,
-                extractURLParameter(properties, 'utm_source') AS utm_source,
-                extractURLParameter(properties, 'utm_medium') AS utm_medium,
-                extractURLParameter(properties, 'utm_campaign') AS utm_campaign
+                user_id, 
+                properties.utm_source utm_source,
+                properties.utm_medium utm_medium,
+                properties.utm_campaign utm_campaign,
+                properties.utm_content utm_content
             FROM default.clickstream
-            WHERE datasource_id = '{dsId}'
-            AND timestamp_ist>= today() - interval {interval} day
-            AND properties ilike '%utm%'
-            and user_id in ({user_id})
-            group by all
+                        WHERE datasource_id = '{dsId}'
+                        AND timestamp_ist>= today() - interval {interval} day  and user_id in ({user_id})
+            group by 1,2,3,4,5,6
+
         """
+
+        logging.info(f"executing query for utm details: {query}")
         with logfire.span(f"executing query for session details"):
             result = await self.execute_query_for_app(
                 query=query, parameters={}, app_id=app_id, read=True
             )
+        logging.info(f"result for utm details: {result}")
         return result
 
-    async def get_user_data_by_id(self, dsId: str, interval: int, user_id: str, app_id: str,service:str) -> List[any]:
+    async def get_user_data_by_id(
+        self, dsId: str, interval: int, user_id: str, app_id: str, service: str
+    ) -> List[any]:
         query = f"""
             SELECT 
                 splitByString('{service}',replaceAll(splitByChar('?', url)[1], '?', ''))[2] AS truncated_url, count(*) as activity_tally
@@ -114,12 +122,12 @@ class Clickstream(EventsBase):
             ORDER BY 2 desc
         """
         with logfire.span(f"executing query for {service} details"):
-            result= await self.execute_query_for_app(
-                query=query, parameters={}, app_id=app_id,read=True
+            result = await self.execute_query_for_app(
+                query=query, parameters={}, app_id=app_id, read=True
             )
         return result
 
-    async def execute_test_query(self,query:str,app_id:str):
+    async def execute_test_query(self, query: str, app_id: str):
         result = await self.execute_query_for_app(
             query=query, parameters={}, app_id=app_id, read=True
         )
