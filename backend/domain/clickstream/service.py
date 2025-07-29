@@ -213,6 +213,8 @@ class ClickstreamService:
         browse_result = {
             urllib.parse.unquote(key): value for key, value in browse_result
         }
+        logging.info(f"UTM RESULT: {utm_result}")
+        logging.info(f"SESSION RESULT: {session_result}")
         return {
             "project_id": dsId,
             "user_id": user_id,
