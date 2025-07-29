@@ -69,7 +69,7 @@ class Clickstream(EventsBase):
             select user_id,properties.$session_id session_id,min(timestamp+ interval 330 minute)  timestamp_ist
             from default.clickstream 
             where datasource_id = '{dsId}'
-                and user_id in ({user_id})
+                and user_id in ('{user_id}')
                 group by 1,2
             having timestamp_ist>= today() - interval {interval} day
             order by 3 desc
@@ -95,7 +95,7 @@ class Clickstream(EventsBase):
                 properties.utm_content utm_content
             FROM default.clickstream
                         WHERE datasource_id = '{dsId}'
-                        AND timestamp_ist>= today() - interval {interval} day  and user_id in ({user_id})
+                        AND timestamp_ist>= today() - interval {interval} day  and user_id in ('{user_id}')
             group by 1,2,3,4,5,6
 
         """
