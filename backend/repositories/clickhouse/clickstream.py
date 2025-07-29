@@ -66,12 +66,12 @@ class Clickstream(EventsBase):
         self, dsId: str, interval: int, user_id: str, app_id: str
     ):
         query = f"""
-            select user_id,properties.$session_id session_id,min(timestamp+ interval 330 minute)  timestamp_ist
-            from default.clickstream 
+            select user_id,properties.$session_id session_id,min(timestamp+ interval 330 minute) timestamp_ist
+            from default.clickstream
             where datasource_id = '{dsId}'
-                and user_id in ('{user_id}')
-                group by 1,2
-            having timestamp_ist>= today() - interval {interval} day
+            and  (timestamp+ interval 330 minute)>= today() - interval {interval} day
+            and user_id in ('{user_id}')
+            group by 1,2
             order by 3 desc
         """
         logging.info(f"executing query for session details: {query}")
