@@ -815,6 +815,27 @@ async def get_clickstream_events(
     return {"count": 0, "data": []}
 
 
+@router.get("/clickstream/v2/report")
+async def get_clickstream_events_v2(
+    project_id: str,
+    user_id: str,
+    interval: int = 7,
+    clickstream_service: ClickstreamService = Depends(),
+    ds_service: DataSourceService = Depends(),
+):
+    if interval < 1 or interval > 300:
+        return {"success": False, "count": 0, "data": []}
+    datasource = await ds_service.get_datasource(project_id)
+    if datasource:
+        return await clickstream_service.get_user_data_by_id_2(
+            dsId=project_id,
+            app_id=str(datasource.app_id),
+            interval=interval,
+            user_id=user_id,
+        )
+    return {"count": 0, "data": []}
+
+
 @router.post("/query/test")
 async def test_query(
     dto:TestQueryDto,
