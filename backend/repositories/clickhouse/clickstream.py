@@ -61,6 +61,47 @@ class Clickstream(EventsBase):
 
         return query.get_sql(), parameters
 
+    async def get_session_data_by_id(
+        self, dsId: str, interval: int, user_id: str, app_id: str
+    ):
+        query = f"""
+            select user_id,properties.$session_id session_id,min(timestamp+ interval 330 minute)  timestamp_ist
+            from default.clickstream 
+            where datasource_id = '{dsId}'
+                and timestamp_ist>= today() - interval {interval} day
+                and user_id in ({user_id})
+                group by 1,2
+            order by 3 desc
+        """
+        with logfire.span(f"executing query for session details"):
+            result = await self.execute_query_for_app(
+                query=query, parameters={}, app_id=app_id, read=True
+            )
+        return result
+
+    async def get_utm_data_by_id(
+        self, dsId: str, interval: int, user_id: str, app_id: str
+    ):
+        query = f"""
+            SELECT
+                toDate(timestamp+ interval 330 minute) timestamp_ist,
+                user_id,
+                extractURLParameter(properties, 'utm_source') AS utm_source,
+                extractURLParameter(properties, 'utm_medium') AS utm_medium,
+                extractURLParameter(properties, 'utm_campaign') AS utm_campaign
+            FROM default.clickstream
+            WHERE datasource_id = '{dsId}'
+            AND timestamp_ist>= today() - interval {interval} day
+            AND properties ilike '%utm%'
+            and user_id in ({user_id})
+            group by all
+        """
+        with logfire.span(f"executing query for session details"):
+            result = await self.execute_query_for_app(
+                query=query, parameters={}, app_id=app_id, read=True
+            )
+        return result
+
     async def get_user_data_by_id(self, dsId: str, interval: int, user_id: str, app_id: str,service:str) -> List[any]:
         query = f"""
             SELECT 

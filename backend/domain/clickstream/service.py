@@ -149,7 +149,7 @@ class ClickstreamService:
         ]
         count = await self.repository.get_stream_count_by_dsId(dsId=dsId, app_id=app_id)
         return {"count": count[0][0], "data": data_list}
-    
+
     async def test_query(
             self,
             app_id:str,
@@ -176,4 +176,49 @@ class ClickstreamService:
         )
         search_result = {urllib.parse.unquote(key): value for key, value in search_result}
         browse_result = {urllib.parse.unquote(key): value for key, value in browse_result}
-        return {"project_id":dsId,"user_id":user_id,"interval":interval,"product_searched":search_result, "product_browsed": browse_result}
+        return {
+            "project_id": dsId,
+            "user_id": user_id,
+            "interval": interval,
+            "product_searched": search_result,
+            "product_browsed": browse_result,
+        }
+
+    async def get_user_data_by_id_2(
+        self, dsId: str, interval: int, app_id: str, user_id: str
+    ):
+        search_result = await self.repository.get_user_data_by_id(
+            dsId=dsId,
+            interval=interval,
+            user_id=user_id,
+            app_id=app_id,
+            service="/search-result/",
+        )
+        browse_result = await self.repository.get_user_data_by_id(
+            dsId=dsId,
+            interval=interval,
+            user_id=user_id,
+            app_id=app_id,
+            service="/product-details/",
+        )
+        utm_result = await self.repository.get_utm_data_by_id(
+            dsId=dsId, interval=interval, user_id=user_id, app_id=app_id
+        )
+        session_result = await self.repository.get_session_data_by_id(
+            dsId=dsId, interval=interval, user_id=user_id, app_id=app_id
+        )
+        search_result = {
+            urllib.parse.unquote(key): value for key, value in search_result
+        }
+        browse_result = {
+            urllib.parse.unquote(key): value for key, value in browse_result
+        }
+        return {
+            "project_id": dsId,
+            "user_id": user_id,
+            "interval": interval,
+            "product_searched": search_result,
+            "product_browsed": browse_result,
+            "utm_data": utm_result,
+            "session_data": session_result,
+        }
