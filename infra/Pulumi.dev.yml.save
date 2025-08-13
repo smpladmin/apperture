@@ -1,0 +1,24 @@
+config:
+  aws:region: ap-south-1
+  apperture:data:
+    active: true
+    vpc_name: smpl-prod-vpc-01
+    vpc_cidr: 10.0.0.0/16
+    igw_name: apperture-production-igw
+    pub_subnet_name: apperture-production-public-subnet
+    pub_cidr: 10.0.0.0/24
+    pubrttable_name: apperture-production-pubrttable
+    pubrtasst_name: apperture-production-pub-rt-asst
+    eip_name: apperture-production-ip
+    sec_grp_name: apperture-production-sec-grp
+    key_name: apperture-production-key
+    public_key: ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABgQCmxXh8eQB3Bq2bUL3TSBkbeQOQvAc+/hGAWpPHvoy8QKPfBjg807idOwTop8caTHzOzuOLr6HDTniI//40u05vT8RHkhWlzduzTIsfY0g1xEEVpVfLT1BK6SCFKpVR9cmv6Hyb9NTMF6roh0XXq+K73WYKL0J0cPE2rGDVlkcWXEeVRqJC3jjOUnu53m4YtJ+NN3kl7wOsDy7tIaMvZsM9lvkc0ImJT5jk+YFyvRaIF5KJ+hcZgu9RlAswL4HJuBoO1BjC/sBaBJnIRq3T+FnY0btnIzDjGhisHZ6Hllk2zd7WkX2N+LB344Fy3TI4svWQ67+wwboHJz0wSFYTaOQp5P9qV2a9V2L2RejenzWPkmh/xE1Xs8TleAmAbm1bwfSvBp8BYaBDYHUXBGSFZdWPttMb2jGqX3Ji44eVlfo22ZsKKvaSGWr2Aq8pT+7/2bF9kBiMM19eVDmqFttdGdHPN92feh9VeWZOa12SmbLUExLGc70pIizbKV9UTUnLRd0= roopak@parallelhq.com
+    ec2_public_name: apperture-production-public-instance
+    ec2_public_type: m5.large
+    ec2_private_name: apperture-production-private-instance
+    ec2_private_type: m5.large
+    ec2_private_count: 4
+    ec2_clickhouse_name: apperture-production-chdb
+    ec2_clickhouse_type: m5.8xlarge
+    ec2_jupyter_name: apperture-production-jupyter
+    ec2_jupyter_type: t3.medium
