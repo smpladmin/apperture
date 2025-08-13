@@ -169,7 +169,6 @@ public_ec2_instance = aws.ec2.Instance(
 )
 
 dev_eip = aws.ec2.Eip("apperture-dev-ip", vpc=True)
-pulumi.export("manager_public_ip", dev_eip.public_ip)
 
 eip_assoc = aws.ec2.EipAssociation(
     "apperture-dev-eip-assoc",

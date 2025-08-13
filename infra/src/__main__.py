@@ -136,7 +136,7 @@ ami = aws.ec2.get_ami(
     filters=[
         aws.GetAmiFilterArgs(
             name="name",
-            values=["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"],
+            values=["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20220921.1"],
         ),
         aws.GetAmiFilterArgs(name="architecture", values=["x86_64"]),
     ],
@@ -238,4 +238,3 @@ if data.get("ec2_jupyter_name"):
         },
         iam_instance_profile="DockerSwarmManager",
     )
-pulumi.export("manager_public_ip", eip.public_ip)
