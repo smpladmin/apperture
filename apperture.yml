@@ -1,0 +1,417 @@
+version: "3.3"
+services:
+  alertmanager:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/alertmanager:latest
+    environment:
+      ALERT_MUTE_ITERATIONS: "10"
+      CPU_THRESHOLD: "90"
+      ENV: PRODUCTION
+      ITERATION_SECONDS: "60"
+      MEMORY_THRESHOLD: "90"
+      SLACK_ENDPOINT: <your-slack-webhook-url>
+      SLACK_ENDPOINT_CDC_INTERNAL_ALERTS: <your-slack-webhook-url>
+      SLACK_ENDPOINT_WIOM_CDC_ALERTS: <your-slack-webhook-url>
+      SWARMPIT_AUTH_TOKEN: <your-swarmpit-auth-token>
+      SWARMPIT_ENDPOINT: <your-swarmpit-endpoint>
+    networks:
+      - net
+      - swarmpit_net
+    secrets:
+      - source: alert_manager.env
+        target: /code/.env
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        swarmpit.service.deployment.autoredeploy: "true"
+      resources:
+        reservations:
+          cpus: "0.1"
+          memory: 50M
+        limits:
+          cpus: "0.2"
+          memory: 100M
+  backend:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/backend:latest
+    environment:
+      APPERTURE_API_KEY: 10082445f5bd07779eb2709f02fe3b5c
+      APPERTURE_SLACK_URL: https://hooks.slack.com/services/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
+      AWS_ACCESS_KEY_ID: AKIATCYOZQRYPWO7LPWG
+      AWS_SECRET_ACCESS_KEY: q7fTHzQ9o41FPYAMPo4524xRVIOZaOaI/ioxCv50
+      BASE_SAMPLE_TABLES: "[]"
+      CHDB_ADMIN_PASSWORD: fa31a6095c39bb8c182c9739117c8a20
+      CHDB_ADMIN_USERNAME: clickhouse_admin
+      CLICKHOUSE_MAX_EXECUTION_TIME_SECONDS: "3600"
+      COOKIE_DOMAIN: apperture.io
+      COOKIE_KEY: prod_auth_token
+      CORS_ORIGINS: '["<your-cors-origins>"]'
+      DB_NAME: apperture_db
+      DB_URI: mongodb+srv://<your-db-uri>
+      FRONTEND_LOGIN_REDIRECT_URL: https://app.apperture.io
+      FRONTEND_SLACK_INTEGRATION_REDIRECT_URL: https://app.apperture.io
+      GOOGLE_OAUTH_CLIENT_ID: <your-google-oauth-client-id>
+      GOOGLE_OAUTH_CLIENT_SECRET: <your-google-oauth-client-secret>
+      GOOGLE_SHEET_CLIENT_ID: <your-google-sheet-client-id>
+      GOOGLE_SHEET_CLIENT_SECRET: <your-google-sheet-client-secret>
+      JWT_EXPIRY_MINUTES: "10080"
+      JWT_SECRET: <your-jwt-secret>
+      LOGFIRE_TOKEN: <your-logfire-token>
+      MAX_REFRESH_DAYS: "16"
+      MAX_RUNLOG_DAYS: "120"
+      OPENAI_API_KEY: <your-openai-api-key>
+      RECAPTCHA_SECRET_KEY: <your-recaptcha-secret-key>
+      REDIS_HOST: redis
+      REDIS_PASSWORD: <your-redis-password>
+      S3_BUCKET_NAME: <your-s3-bucket-name>
+      S3_PATH: https://<your-s3-bucket-name>.s3.ap-south-1.amazonaws.com/
+      SESSION_SECRET: <your-session-secret>
+      SLACK_OAUTH_ACCESS_URL: https://slack.com/api/oauth.v2.access
+      SLACK_OAUTH_AUTHORIZE_URL: https://slack.com/oauth/v2/authorize
+      SLACK_OAUTH_CLIENT_ID: <your-slack-oauth-client-id>
+      SLACK_OAUTH_CLIENT_SECRET: <your-slack-oauth-client-secret>
+      TOKEN_URI: https://oauth2.googleapis.com/token
+    networks:
+      - net
+      - traefik-public
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-prod-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: backend
+    deploy:
+      replicas: 5
+      labels:
+        traefik.http.routers.backend-https.service: backend
+        traefik.http.routers.backend-docs.rule:
+          Host(`apiv1.apperture.io`) && PathPrefix(`/docs`,
+          `/openapi.json`, `/redoc`)
+        traefik.http.routers.backend-http.service: backend
+        traefik.http.routers.backend-docs.tls: "true"
+        traefik.http.routers.backend-http.rule: Host(`apiv1.apperture.io`)
+        traefik.http.middlewares.docs-auth.basicauth.users: apperture_admin:<your-basicauth-password>
+        traefik.http.routers.backend-https.tls.certresolver: le
+        traefik.http.routers.backend-http.entrypoints: http
+        traefik.http.routers.backend-https.entrypoints: https
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.backend-docs.entrypoints: https
+        traefik.http.routers.backend-docs.tls.certresolver: le
+        traefik.http.routers.backend-docs.service: backend-docs
+        traefik.http.services.backend.loadbalancer.server.port: "8001"
+        traefik.http.services.backend-docs.loadbalancer.server.port: "8001"
+        traefik.http.routers.backend-https.tls: "true"
+        traefik.docker.network: traefik-public
+        traefik.enable: "true"
+        traefik.http.routers.backend-https.rule: Host(`apiv1.apperture.io`)
+        traefik.http.routers.backend-http.middlewares: https-redirect
+        traefik.http.routers.backend-docs.middlewares: docs-auth
+      update_config:
+        delay: 5s
+        order: start-first
+      resources:
+        reservations:
+          cpus: "0.6"
+          memory: 512M
+        limits:
+          cpus: "1.0"
+          memory: 2048M
+  backend2:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/backend:latest
+    environment:
+      APPERTURE_API_KEY: <your-api-key>
+      APPERTURE_SLACK_URL: <your-slack-webhook-url>
+      AWS_ACCESS_KEY_ID: <your-aws-access-key-id>
+      AWS_SECRET_ACCESS_KEY: <your-aws-secret-access-key>
+      BASE_SAMPLE_TABLES: "[]"
+      CHDB_ADMIN_PASSWORD: <your-chdb-admin-password>
+      CHDB_ADMIN_USERNAME: clickhouse_admin
+      CLICKHOUSE_MAX_EXECUTION_TIME_SECONDS: "3600"
+      COOKIE_DOMAIN: apperture.io
+      COOKIE_KEY: prod_auth_token
+      CORS_ORIGINS: '["<your-cors-origins>"]'
+      DB_NAME: apperture_db
+      DB_URI: mongodb+srv://<your-db-uri>
+      FRONTEND_LOGIN_REDIRECT_URL: https://app.apperture.io
+      FRONTEND_SLACK_INTEGRATION_REDIRECT_URL: https://app.apperture.io
+      GOOGLE_OAUTH_CLIENT_ID: <your-google-oauth-client-id>
+      GOOGLE_OAUTH_CLIENT_SECRET: <your-google-oauth-client-secret>
+      GOOGLE_SHEET_CLIENT_ID: <your-google-sheet-client-id>
+      GOOGLE_SHEET_CLIENT_SECRET: <your-google-sheet-client-secret>
+      JWT_EXPIRY_MINUTES: "10080"
+      JWT_SECRET: <your-jwt-secret>
+      LOGFIRE_TOKEN: <your-logfire-token>
+      MAX_REFRESH_DAYS: "16"
+      MAX_RUNLOG_DAYS: "120"
+      OPENAI_API_KEY: <your-openai-api-key>
+      RECAPTCHA_SECRET_KEY: <your-recaptcha-secret-key>
+      REDIS_HOST: redis
+      REDIS_PASSWORD: <your-redis-password>
+      S3_BUCKET_NAME: <your-s3-bucket-name>
+      S3_PATH: https://<your-s3-bucket-name>.s3.ap-south-1.amazonaws.com/
+      SESSION_SECRET: <your-session-secret>
+      SLACK_OAUTH_ACCESS_URL: https://slack.com/api/oauth.v2.access
+      SLACK_OAUTH_AUTHORIZE_URL: https://slack.com/oauth/v2/authorize
+      SLACK_OAUTH_CLIENT_ID: <your-slack-oauth-client-id>
+      SLACK_OAUTH_CLIENT_SECRET: <your-slack-oauth-client-secret>
+      TOKEN_URI: https://oauth2.googleapis.com/token
+    networks:
+      - net
+      - traefik-public
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-prod-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: backend2
+    deploy:
+      replicas: 5
+      labels:
+        traefik.http.routers.backend-https2.service: backend2
+        traefik.http.routers.backend-docs2.middlewares: docs-auth2
+        traefik.http.routers.backend-https2.tls.certresolver: le
+        traefik.http.routers.backend-docs2.tls.certresolver: le
+        traefik.http.routers.backend-http2.service: backend2
+        traefik.http.routers.backend-https2.tls: "true"
+        traefik.http.routers.backend-docs2.service: backend-docs2
+        traefik.http.routers.backend-docs2.tls: "true"
+        traefik.http.routers.backend-http2.entrypoints: http
+        traefik.http.routers.backend-https2.entrypoints: https
+        traefik.http.services.backend-docs2.loadbalancer.server.port: "8001"
+        traefik.http.routers.backend-docs2.rule:
+          Host(`api2.apperture.io`) && PathPrefix(`/docs`,
+          `/openapi.json`, `/redoc`)
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.backend-http2.rule: Host(`api2.apperture.io`)
+        traefik.http.middlewares.docs-auth2.basicauth.users: apperture_admin:<your-basicauth-password>
+        traefik.docker.network: traefik-public
+        traefik.enable: "true"
+        traefik.http.routers.backend-http2.middlewares: https-redirect
+        traefik.http.services.backend2.loadbalancer.server.port: "8001"
+        traefik.http.routers.backend-docs2.entrypoints: https
+        traefik.http.routers.backend-https2.rule: Host(`api2.apperture.io`)
+      update_config:
+        delay: 5s
+        order: start-first
+      resources:
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+        limits:
+          cpus: "1.0"
+          memory: 2048M
+  clickhouse:
+    image: clickhouse/clickhouse-server:24.5
+    ports:
+      - 8123:8123
+      - 9000:9000
+    volumes:
+      - /ch/backups:/backups
+      - /ch/config.d:/etc/clickhouse-server/config.d/
+      - /ch/data:/var/lib/clickhouse/
+      - /ch/logs:/var/log/clickhouse-server/
+    networks:
+      - net
+      - traefik-public
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker3ch
+  events_consumer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/events_consumer:latest
+    environment:
+      BACKEND_API_KEY_NAME: apperture-api-key
+      BACKEND_API_KEY_SECRET: <your-backend-api-key-secret>
+      BACKEND_BASE_URL: http://backend:8001
+      GUPSHUP_CLICKHOUSE_HOST: <your-gupshup-clickhouse-host>
+      GUPSHUP_CLICKHOUSE_PASSWORD: <your-gupshup-clickhouse-password>
+      GUPSHUP_CLICKHOUSE_TABLE: default.gupshup_events
+      GUPSHUP_CLICKHOUSE_USER: default
+      GUPSHUP_MAX_RECORDS: "2000"
+      HEARTBEAT_INTERVAL_MS: "1000"
+      "KAFKA_BOOTSTRAP_SERVERS: ": kafka:9092
+      KAFKA_TOPICS: clickstream,flutter_eventstream,gupshup_delivery_report,agent_log
+      LOG_LEVEL: INFO
+      MAX_POLL_INTERVAL_MS: "600000"
+      MAX_RECORDS: "15000"
+      REQUEST_TIMEOUT_MS: "800000"
+      SESSION_TIMEOUT_MS: "600000"
+      TIMEOUT_MS: "600000"
+    networks:
+      - net
+    logging:
+      driver: awslogs
+      options:
+        awslogs-group: apperture-prod-events-log-group
+        awslogs-region: ap-south-1
+        awslogs-stream: events_consumer1
+    deploy:
+      placement:
+        constraints:
+          - node.role != manager
+      resources:
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+        limits:
+          cpus: "1.0"
+          memory: 2048M
+  events_producer:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/events_producer:latest
+    environment:
+      ALLOWED_ORIGIN: '["<your-allowed-origins>"]'
+    networks:
+      - net
+      - traefik-public
+    secrets:
+      - source: events_producer1.env
+        target: /code/.env
+    logging:
+      driver: json-file
+    deploy:
+      replicas: 2
+      labels:
+        traefik.http.routers.events_producer-https.tls.certresolver: le
+        traefik.http.services.events_producer.loadbalancer.server.port: "8002"
+        traefik.http.routers.events_producer-https.service: events_producer
+        traefik.http.routers.events_producer-http.entrypoints: http
+        traefik.http.routers.events_producer-http.service: events_producer
+        traefik.http.routers.events_producer-http.middlewares: https-redirect
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.events_producer-https.entrypoints: https
+        traefik.http.routers.events_producer-https.tls: "true"
+        traefik.docker.network: traefik-public
+        traefik.enable: "true"
+        traefik.http.routers.events_producer-http.rule: Host(`api.apperture.io`)
+        traefik.http.routers.events_producer-https.rule: Host(`api.apperture.io`)
+      update_config:
+        delay: 5s
+        order: start-first
+      placement:
+        constraints:
+          - node.hostname != worker4
+      resources:
+        reservations:
+          cpus: "0.5"
+          memory: 512M
+        limits:
+          cpus: "1.0"
+          memory: 2048M
+  frontend:
+    image: 212095042672.dkr.ecr.ap-south-1.amazonaws.com/frontend:latest
+    environment:
+      BACKEND_BASE_URL: http://backend2:8001
+      COOKIE_KEY: prod_auth_token
+      JWT_SECRET: <your-jwt-secret>
+      NEXT_APP_AMPLITUDE_API_KEY: <your-amplitude-api-key>
+      NEXT_APP_APPERTURE_EVENTS_URL: <your-app-posthog-url>
+      NEXT_APP_APPERTURE_PH_KEY: <your-app-posthog-key>
+      NEXT_APP_BACKEND_BASE_URL: https://api2.apperture.io
+      NEXT_APP_EVENT_LOGS_BASE_URL: https://events.apperture.io
+      NEXT_APP_FRONTEND_BASE_URL: https://app.apperture.io
+      NEXT_APP_SAMPLE_EVENT_CONFIG: https://cdn.apperture.io/sample_config.json
+    networks:
+      - net
+      - traefik-public
+    secrets:
+      - source: frontend.env
+        target: /code/.env
+    logging:
+      driver: json-file
+    deploy:
+      labels:
+        traefik.http.routers.frontend-https.rule: Host(`app.apperture.io`)
+        traefik.http.routers.frontend-https.entrypoints: https
+        traefik.http.routers.frontend-https.tls.certresolver: le
+        traefik.http.routers.frontend-http.middlewares: https-redirect
+        traefik.constraint-label: traefik-public
+        traefik.http.routers.frontend-http.rule: Host(`app.apperture.io`)
+        traefik.http.routers.frontend-https.tls: "true"
+        traefik.http.services.frontend.loadbalancer.server.port: "3000"
+        traefik.docker.network: traefik-public
+        traefik.enable: "true"
+        traefik.http.routers.frontend-http.entrypoints: http
+      update_config:
+        delay: 5s
+        order: start-first
+      placement:
+        constraints:
+          - node.hostname == worker1
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 256M
+        limits:
+          cpus: "0.5"
+          memory: 512M
+  kafka:
+    image: bitnami/kafka:latest
+    environment:
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+      KAFKA_BROKER_ID: "1"
+      KAFKA_CFG_ADVERTISED_LISTENERS: PLAINTEXT://kafka:9092
+      KAFKA_CFG_CONTROLLER_LISTENER_NAMES: CONTROLLER
+      KAFKA_CFG_CONTROLLER_QUORUM_VOTERS: 1@kafka:9093
+      KAFKA_CFG_LISTENERS: PLAINTEXT://:9092,CONTROLLER://:9093
+      KAFKA_CFG_LISTENER_SECURITY_PROTOCOL_MAP: CONTROLLER:PLAINTEXT,PLAINTEXT:PLAINTEXT
+      KAFKA_CFG_NODE_ID: "1"
+      KAFKA_CFG_PROCESS_ROLES: broker,controller
+      KAFKA_DELETE_TOPIC_ENABLE: "true"
+      KAFKA_ENABLE_KRAFT: "yes"
+      KAFKA_KRAFT_CLUSTER_ID: OTMwNzFhYTY1ODNiNGE5OT
+      KAFKA_LOG_RETENTION_HOURS: "12"
+    ports:
+      - 9092:9092
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+  redis:
+    image: bitnami/redis:latest
+    environment:
+      REDIS_PASSWORD: <your-redis-password>
+    ports:
+      - 6379:6379
+    volumes:
+      - apperture_redisdata:/bitnami/redis/data
+    networks:
+      - net
+    logging:
+      driver: json-file
+    deploy:
+      placement:
+        constraints:
+          - node.hostname == worker1
+      resources:
+        reservations:
+          cpus: "0.25"
+          memory: 128M
+        limits:
+          cpus: "0.5"
+          memory: 256M
+networks:
+  net:
+    driver: overlay
+  swarmpit_net:
+    external: true
+  traefik-public:
+    external: true
+volumes:
+  apperture_redisdata:
+    external: true
+  kafka_data:
+    external: true
+secrets:
+  alert_manager.env:
+    external: true
+  events_producer1.env:
+    external: true
+  frontend.env:
+    external: true
