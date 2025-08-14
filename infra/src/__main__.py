@@ -238,3 +238,4 @@ if data.get("ec2_jupyter_name"):
         },
         iam_instance_profile="DockerSwarmManager",
     )
+pulumi.export("manager_public_ip", eip.public_ip)

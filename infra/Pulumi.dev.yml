@@ -1,0 +1,24 @@
+config:
+  aws:region: ap-south-1
+  apperture:data:
+    active: true
+    vpc_name: smpl-prod-apperture-vpc
+    vpc_cidr: 10.63.0.0/16
+    igw_name: smpl-prod-apperture-igw
+    pub_subnet_name: smpl-prod-public-subnet-01
+    pub_cidr: 10.63.1.0/24
+    pubrttable_name: smpl-prod-apperture-pub-rt
+    pubrtasst_name: smpl-prod-apperture-pub-rt-asst
+    eip_name: smpl-apperture-production-ip
+    sec_grp_name: smpl-apperture-prod-sec-grp
+    key_name: smpl-apperture-prod-key
+    public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHsIuObZn3n1G/nAdwtCIs7DiBtzZjBYN7L08ZbJs63s naresh.j@sangeetha.com
+    ec2_public_name: smpl-apperture-prod-public-instance
+    ec2_public_type: t3.medium
+    ec2_private_name: smpl-apperture-prod-private-instance
+    ec2_private_type: t3.medium
+    ec2_private_count: 3
+    ec2_clickhouse_name: smpl-apperture-prod-chdb
+    ec2_clickhouse_type: t3.large
+    ec2_jupyter_name: smpl-apperture-prod-jupyter
+    ec2_jupyter_type: t3.medium
