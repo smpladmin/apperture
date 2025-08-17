@@ -17,7 +17,7 @@ config:
     ec2_public_type: t3.medium
     ec2_private_name: smpl-apperture-prod-private-instance
     ec2_private_type: t3.medium
-    ec2_private_count: 3
+    ec2_private_count: 4
     ec2_clickhouse_name: smpl-apperture-prod-chdb
     ec2_clickhouse_type: t3.large
     ec2_jupyter_name: smpl-apperture-prod-jupyter

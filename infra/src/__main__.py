@@ -136,7 +136,7 @@ ami = aws.ec2.get_ami(
     filters=[
         aws.GetAmiFilterArgs(
             name="name",
-            values=["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-20220921.1"],
+            values=["ubuntu/images/hvm-ssd/ubuntu-jammy-22.04-amd64-server-*"],
         ),
         aws.GetAmiFilterArgs(name="architecture", values=["x86_64"]),
     ],
