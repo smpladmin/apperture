@@ -20,7 +20,7 @@ import { LoginPageState } from '..';
 import { RegisterUser } from '@lib/services/userService';
 import glogo from '@assets/images/google_white_square.jpg';
 import { useRouter } from 'next/router';
-import ReCAPTCHA from 'react-google-recaptcha';
+
 import { BACKEND_BASE_URL } from 'config';
 
 const RegisterForm = ({ setPageState }: { setPageState: Function }) => {
@@ -32,7 +32,7 @@ const RegisterForm = ({ setPageState }: { setPageState: Function }) => {
   const [firstName, setFirstName] = useState('');
   const [lastName, setLastName] = useState('');
   const [registeringUser, setRegisteringUser] = useState(false);
-  const [token, setToken] = useState('');
+
   const toast = useToast();
 
   const router = useRouter();
@@ -44,7 +44,6 @@ const RegisterForm = ({ setPageState }: { setPageState: Function }) => {
         lastName,
         email,
         password,
-        token
       );
       setRegisteringUser(false);
       if (response.status !== 200) {
@@ -109,9 +108,7 @@ const RegisterForm = ({ setPageState }: { setPageState: Function }) => {
   const handleConfirmPassword = (e: any) => {
     setConfirmPassword(e.target.value);
   };
-  const onChange = (value: any) => {
-    setToken(value);
-  };
+
 
   return (
     <Flex
@@ -301,10 +298,7 @@ const RegisterForm = ({ setPageState }: { setPageState: Function }) => {
                   </InputRightElement>
                 </InputGroup>
               </Flex>
-              <ReCAPTCHA
-                sitekey="6LdE9ognAAAAAJk5OO0wZveMUtYuT6e19Ip4ucOg"
-                onChange={onChange}
-              />
+
               <Flex gap={1}>
                 <Button
                   borderWidth={'1px'}
@@ -316,7 +310,6 @@ const RegisterForm = ({ setPageState }: { setPageState: Function }) => {
                   variant={'dark'}
                   borderRadius={10}
                   w={'50%'}
-                  isDisabled={!token}
                 >
                   Sign up
                 </Button>

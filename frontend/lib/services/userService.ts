@@ -19,20 +19,15 @@ export const RegisterUser = async (
   firstName: string,
   lastName: string,
   email: string,
-  password: string,
-  token: string
+  password: string
 ) => {
   try {
-    const user = await AppertureAPI.post(
-      '/register',
-      {
-        first_name: firstName,
-        last_name: lastName,
-        email,
-        password,
-      },
-      { headers: { 'recaptcha-token': token } }
-    );
+    const user = await AppertureAPI.post('/register', {
+      first_name: firstName,
+      last_name: lastName,
+      email,
+      password,
+    });
     return user;
   } catch (err: any) {
     console.log(err);
