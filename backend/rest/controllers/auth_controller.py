@@ -123,7 +123,7 @@ async def logout(redirect_url: str = os.getenv("FRONTEND_LOGIN_REDIRECT_URL")):
     return response
 
 
-@router.post("/register", dependencies=[Depends(validate_recaptcha_token)])
+@router.post("/register")
 async def register(
     response: Response,
     dto: CreateUserDto,
